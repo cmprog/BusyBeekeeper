@@ -6,6 +6,7 @@
     /// <remarks>
     /// Shared properties are good for passing sharing fields between components, behaviors, and messages.
     /// </remarks>
+    /// <typeparam name="T">The type of the value contained by this property.</typeparam>
     public interface ISharedProperty<T>
     {
         /// <summary>

@@ -1,20 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ProjectGuid>{68D1D67E-3C37-4C07-A40F-EAD2D786841D}</ProjectGuid>
+    <ProjectGuid>{D140ED48-BA97-452E-AD48-EE4B1E7D3A1D}</ProjectGuid>
     <ProjectTypeGuids>{6D335F3A-9D43-41b4-9D22-F6F17C4BE596};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TccLib.Xna.Framework</RootNamespace>
-    <AssemblyName>TccLib.Xna.Framework</AssemblyName>
+    <RootNamespace>BusyBeekeeper.Data</RootNamespace>
+    <AssemblyName>BusyBeekeeper.Data</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <XnaFrameworkVersion>v4.0</XnaFrameworkVersion>
     <XnaPlatform>Windows</XnaPlatform>
     <XnaProfile>HiDef</XnaProfile>
-    <XnaCrossPlatformGroupID>4b3aa41b-6bbb-44f1-a40b-26afb483431d</XnaCrossPlatformGroupID>
+    <XnaCrossPlatformGroupID>a30b3c08-40d1-4afc-a1ed-5b962834ebd4</XnaCrossPlatformGroupID>
     <XnaOutputType>Library</XnaOutputType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -92,15 +92,31 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Component.cs" />
-    <Compile Include="IBehavior.cs" />
-    <Compile Include="IMessage.cs" />
-    <Compile Include="MessageDispatcher.cs" />
-    <Compile Include="NotifyingSharedProperty.cs" />
+    <Compile Include="Award.cs" />
+    <Compile Include="BeeHive.cs" />
+    <Compile Include="BeeSuit.cs" />
+    <Compile Include="BeeYard.cs" />
+    <Compile Include="Bottle.cs" />
+    <Compile Include="HoneyExtractor.cs" />
+    <Compile Include="LawnMower.cs" />
+    <Compile Include="MarketBooth.cs" />
+    <Compile Include="MarketHelper.cs" />
+    <Compile Include="MarketHelperAvatar.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="PlayerAvatar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ISharedProperty.cs" />
-    <Compile Include="PropertyChangedMessage.cs" />
-    <Compile Include="SharedProperty.cs" />
+    <Compile Include="QueenBee.cs" />
+    <Compile Include="Smoker.cs" />
+    <Compile Include="Super.cs" />
+    <Compile Include="SuperPaint.cs" />
+    <Compile Include="Truck.cs" />
+    <Compile Include="UncapingKnife.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TccLib.Xna.Framework\TccLib.Xna.Framework.csproj">
+      <Project>{68D1D67E-3C37-4C07-A40F-EAD2D786841D}</Project>
+      <Name>TccLib.Xna.Framework</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />

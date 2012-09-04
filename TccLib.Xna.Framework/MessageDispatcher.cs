@@ -8,6 +8,9 @@ namespace TccLib.Xna.Framework
     /// </summary>
     public class MessageDispatcher
     {
+        /// <summary>
+        /// Initializes a new instance of the MessageDispatcher class.
+        /// </summary>
         public MessageDispatcher()
         {
             this.ListenersByType = new Dictionary<Type, ICollection<object>>();
@@ -26,16 +29,16 @@ namespace TccLib.Xna.Framework
         /// <param name="handler">The handler for the message.</param>
         public void Register<TMessage>(Action<TMessage> handler) where TMessage : IMessage
         {
-            System.Diagnostics.Debug.Assert(handler != null);
+            System.Diagnostics.Debug.Assert(handler != null, "Must provide a non-null handler.");
 
-            ICollection<object> lListeners;
-            if (!this.ListenersByType.TryGetValue(typeof(TMessage), out lListeners))
+            ICollection<object> listeners;
+            if (!this.ListenersByType.TryGetValue(typeof(TMessage), out listeners))
             {
-                lListeners = new LinkedList<object>();
-                this.ListenersByType.Add(typeof(TMessage), lListeners);
+                listeners = new LinkedList<object>();
+                this.ListenersByType.Add(typeof(TMessage), listeners);
             }
 
-            lListeners.Add(handler);
+            listeners.Add(handler);
         }
 
         /// <summary>
@@ -45,15 +48,15 @@ namespace TccLib.Xna.Framework
         /// <param name="handler">The message handler.</param>
         public void Unregister<TMessage>(Action<TMessage> handler) where TMessage : IMessage
         {
-            System.Diagnostics.Debug.Assert(handler != null);
+            System.Diagnostics.Debug.Assert(handler != null, "Must provide a non-null handler.");
 
-            ICollection<object> lListeners;
-            if (!this.ListenersByType.TryGetValue(typeof(TMessage), out lListeners))
+            ICollection<object> listeners;
+            if (!this.ListenersByType.TryGetValue(typeof(TMessage), out listeners))
             {
                 throw new ArgumentException("No listeners registered for type [" + typeof(TMessage) + "].");
             }
 
-            lListeners.Remove(handler);
+            listeners.Remove(handler);
         }
 
         /// <summary>
@@ -63,15 +66,15 @@ namespace TccLib.Xna.Framework
         /// <param name="message">The message which should be processed.</param>
         public void Post<TMessage>(TMessage message) where TMessage : IMessage
         {
-            System.Diagnostics.Debug.Assert(handler != null);
+            System.Diagnostics.Debug.Assert(message != null, "Must provide a non-null message.");
 
-            ICollection<object> lListeners;
-            if (this.ListenersByType.TryGetValue(typeof(TMessage), out lListeners))
+            ICollection<object> listeners;
+            if (this.ListenersByType.TryGetValue(typeof(TMessage), out listeners))
             {
-                foreach (var lRawAction in lListeners)
+                foreach (var rawAction in listeners)
                 {
-                    var lAction = (Action<TMessage>)lRawAction;
-                    lAction(message);
+                    var action = (Action<TMessage>)rawAction;
+                    action(message);
                 }
             }
         }

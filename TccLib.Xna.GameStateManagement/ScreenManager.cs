@@ -37,7 +37,6 @@ namespace TccLib.Xna.GameStateManagement
         List<GameScreen> tempScreensList = new List<GameScreen>();
 
         SpriteBatch spriteBatch;
-        SpriteFont mFont;
 
         bool isInitialized;
 

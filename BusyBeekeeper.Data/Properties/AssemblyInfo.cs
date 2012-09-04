@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TccLib.Xna.Framework")]
-[assembly: AssemblyProduct("TccLib.Xna.Framework")]
+[assembly: AssemblyTitle("BusyBeekeeper.Data")]
+[assembly: AssemblyProduct("BusyBeekeeper.Data")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyCopyright("Copyright ©  2012")]
@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 // On Windows, the following GUID is for the ID of the typelib if this
 // project is exposed to COM. On other platforms, it unique identifies the
 // title storage container when deploying this assembly to the device.
-[assembly: Guid("dff05fd0-a2b7-410d-8ef8-136e49cf5cb4")]
+[assembly: Guid("9af68dec-b9c5-419a-9b19-80c11263e86b")]
 
 // Version information for an assembly consists of the following four values:
 //
