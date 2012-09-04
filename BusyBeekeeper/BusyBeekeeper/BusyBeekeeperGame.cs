@@ -26,7 +26,9 @@ namespace BusyBeekeeper
             this.TargetElapsedTime = TimeSpan.FromTicks(333333);
             this.Graphics = new GraphicsDeviceManager(this);
             this.Content.RootDirectory = "Content";
+
             this.ScreenManager = new ScreenManager(this);
+            this.Components.Add(this.ScreenManager);
         }
 
         /// <summary>

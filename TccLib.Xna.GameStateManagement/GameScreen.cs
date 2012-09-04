@@ -10,6 +10,7 @@
 using System;
 using System.IO;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 
 namespace TccLib.Xna.GameStateManagement
 {
@@ -34,6 +35,12 @@ namespace TccLib.Xna.GameStateManagement
     /// </summary>
     public abstract class GameScreen
     {
+        public GameScreen()
+        {
+            this.TransitionPosition = 1f;
+            this.ScreenState = ScreenState.TransitionOn;
+        }
+
         /// <summary>
         /// Normally when one screen is brought up over the top of another,
         /// the first screen will transition off to make room for the new
@@ -41,54 +48,27 @@ namespace TccLib.Xna.GameStateManagement
         /// popup, in which case screens underneath it do not need to bother
         /// transitioning off.
         /// </summary>
-        public bool IsPopup
-        {
-            get { return isPopup; }
-            protected set { isPopup = value; }
-        }
-
-        bool isPopup = false;
+        public bool IsPopup { get; protected set; }
 
 
         /// <summary>
         /// Indicates how long the screen takes to
         /// transition on when it is activated.
         /// </summary>
-        public TimeSpan TransitionOnTime
-        {
-            get { return transitionOnTime; }
-            protected set { transitionOnTime = value; }
-        }
-
-        TimeSpan transitionOnTime = TimeSpan.Zero;
-
+        public TimeSpan TransitionOnTime { get; protected set; }
 
         /// <summary>
         /// Indicates how long the screen takes to
         /// transition off when it is deactivated.
         /// </summary>
-        public TimeSpan TransitionOffTime
-        {
-            get { return transitionOffTime; }
-            protected set { transitionOffTime = value; }
-        }
-
-        TimeSpan transitionOffTime = TimeSpan.Zero;
-
+        public TimeSpan TransitionOffTime { get; protected set; }
 
         /// <summary>
         /// Gets the current position of the screen transition, ranging
         /// from zero (fully active, no transition) to one (transitioned
         /// fully off to nothing).
         /// </summary>
-        public float TransitionPosition
-        {
-            get { return transitionPosition; }
-            protected set { transitionPosition = value; }
-        }
-
-        float transitionPosition = 1;
-
+        public float TransitionPosition { get; protected set; }
 
         /// <summary>
         /// Gets the current alpha of the screen transition, ranging
@@ -104,13 +84,7 @@ namespace TccLib.Xna.GameStateManagement
         /// <summary>
         /// Gets the current screen transition state.
         /// </summary>
-        public ScreenState ScreenState
-        {
-            get { return screenState; }
-            protected set { screenState = value; }
-        }
-
-        ScreenState screenState = ScreenState.TransitionOn;
+        public ScreenState ScreenState { get; protected set; }
 
 
         /// <summary>
@@ -121,14 +95,7 @@ namespace TccLib.Xna.GameStateManagement
         /// if set, the screen will automatically remove itself as soon as the
         /// transition finishes.
         /// </summary>
-        public bool IsExiting
-        {
-            get { return isExiting; }
-            protected internal set { isExiting = value; }
-        }
-
-        bool isExiting = false;
-
+        public bool IsExiting { get; protected internal set; }
 
         /// <summary>
         /// Checks whether this screen is active and can respond to user input.
@@ -137,49 +104,34 @@ namespace TccLib.Xna.GameStateManagement
         {
             get
             {
-                return !otherScreenHasFocus &&
-                       (screenState == ScreenState.TransitionOn ||
-                        screenState == ScreenState.Active);
+                return !this.OtherScreenHasFocus &&
+                       (this.ScreenState == ScreenState.TransitionOn ||
+                        this.ScreenState == ScreenState.Active);
             }
         }
 
-        bool otherScreenHasFocus;
-
+        /// <summary>
+        /// Gets or sets a value indicating whether or not another screen has focus.
+        /// </summary>
+        private bool OtherScreenHasFocus { get; set; }
 
         /// <summary>
         /// Gets the manager that this screen belongs to.
         /// </summary>
-        public ScreenManager ScreenManager
-        {
-            get { return screenManager; }
-            internal set { screenManager = value; }
-        }
+        public ScreenManager ScreenManager { get; internal set; }
 
-        ScreenManager screenManager;
-
-        /// <summary>
-        /// Gets whether or not this screen is serializable. If this is true,
-        /// the screen will be recorded into the screen manager's state and
-        /// its Serialize and Deserialize methods will be called as appropriate.
-        /// If this is false, the screen will be ignored during serialization.
-        /// By default, all screens are assumed to be serializable.
-        /// </summary>
-        public bool IsSerializable
-        {
-            get { return isSerializable; }
-            protected set { isSerializable = value; }
-        }
-
-        bool isSerializable = true;
-
+        public ContentManager ContentManager { get; private set; }
 
         /// <summary>
         /// Activates the screen. Called when the screen is added to the screen manager or if the game resumes
         /// from being paused or tombstoned.
         /// </summary>
-        public virtual void Activate() { }
-
-
+        public virtual void Activate()
+        {
+            this.ContentManager = new ContentManager(this.ScreenManager.Game.Content.ServiceProvider);
+            this.ContentManager.RootDirectory = "Content";
+        }
+        
         /// <summary>
         /// Deactivates the screen. Called when the game is being deactivated due to pausing or tombstoning.
         /// </summary>
@@ -189,8 +141,10 @@ namespace TccLib.Xna.GameStateManagement
         /// <summary>
         /// Unload content for the screen. Called when the screen is removed from the screen manager.
         /// </summary>
-        public virtual void Unload() { }
-
+        public virtual void Unload() 
+        {
+            this.ContentManager.Unload();
+        }
 
         /// <summary>
         /// Allows the screen to run logic, such as updating the transition position.
@@ -199,14 +153,14 @@ namespace TccLib.Xna.GameStateManagement
         /// </summary>
         public virtual void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
-            this.otherScreenHasFocus = otherScreenHasFocus;
+            this.OtherScreenHasFocus = otherScreenHasFocus;
 
-            if (isExiting)
+            if (this.IsExiting)
             {
                 // If the screen is going away to die, it should transition off.
-                screenState = ScreenState.TransitionOff;
+                this.ScreenState = ScreenState.TransitionOff;
 
-                if (!UpdateTransition(gameTime, transitionOffTime, 1))
+                if (!UpdateTransition(gameTime, this.TransitionOffTime, 1))
                 {
                     // When the transition finishes, remove the screen.
                     ScreenManager.RemoveScreen(this);
@@ -215,29 +169,29 @@ namespace TccLib.Xna.GameStateManagement
             else if (coveredByOtherScreen)
             {
                 // If the screen is covered by another, it should transition off.
-                if (UpdateTransition(gameTime, transitionOffTime, 1))
+                if (UpdateTransition(gameTime, this.TransitionOffTime, 1))
                 {
                     // Still busy transitioning.
-                    screenState = ScreenState.TransitionOff;
+                    this.ScreenState = ScreenState.TransitionOff;
                 }
                 else
                 {
                     // Transition finished!
-                    screenState = ScreenState.Hidden;
+                    this.ScreenState = ScreenState.Hidden;
                 }
             }
             else
             {
                 // Otherwise the screen should transition on and become active.
-                if (UpdateTransition(gameTime, transitionOnTime, -1))
+                if (UpdateTransition(gameTime, this.TransitionOnTime, -1))
                 {
                     // Still busy transitioning.
-                    screenState = ScreenState.TransitionOn;
+                    this.ScreenState = ScreenState.TransitionOn;
                 }
                 else
                 {
                     // Transition finished!
-                    screenState = ScreenState.Active;
+                    this.ScreenState = ScreenState.Active;
                 }
             }
         }
@@ -257,20 +211,19 @@ namespace TccLib.Xna.GameStateManagement
                 transitionDelta = (float)(gameTime.ElapsedGameTime.TotalMilliseconds / time.TotalMilliseconds);
 
             // Update the transition position.
-            transitionPosition += transitionDelta * direction;
+            this.TransitionPosition += transitionDelta * direction;
 
             // Did we reach the end of the transition?
-            if (((direction < 0) && (transitionPosition <= 0)) ||
-                ((direction > 0) && (transitionPosition >= 1)))
+            if (((direction < 0) && (this.TransitionPosition <= 0)) ||
+                ((direction > 0) && (this.TransitionPosition >= 1)))
             {
-                transitionPosition = MathHelper.Clamp(transitionPosition, 0, 1);
+                this.TransitionPosition = MathHelper.Clamp(this.TransitionPosition, 0, 1);
                 return false;
             }
 
             // Otherwise we are still busy transitioning.
             return true;
         }
-
 
         /// <summary>
         /// Allows the screen to handle user input. Unlike Update, this method
@@ -279,12 +232,10 @@ namespace TccLib.Xna.GameStateManagement
         /// </summary>
         public virtual void HandleInput(GameTime gameTime, InputState input) { }
 
-
         /// <summary>
         /// This is called when the screen should draw itself.
         /// </summary>
         public virtual void Draw(GameTime gameTime) { }
-
 
         /// <summary>
         /// Tells the screen to go away. Unlike ScreenManager.RemoveScreen, which
@@ -301,7 +252,7 @@ namespace TccLib.Xna.GameStateManagement
             else
             {
                 // Otherwise flag that it should transition off and then exit.
-                isExiting = true;
+                this.IsExiting = true;
             }
         }
     }

@@ -73,7 +73,7 @@ namespace TccLib.Xna.Framework.Renderers
         /// </summary>
         /// <param name="spriteBatch">The sprite batch used to draw draw sprites.</param>
         /// <param name="gameTime">The current game time.</param>
-        public void Render(SpriteBatch spriteBatch, GameTime gameTime)
+        public virtual void Render(SpriteBatch spriteBatch, GameTime gameTime)
         {
             spriteBatch.DrawString(
                 this.FontProperty.Value,

@@ -50,6 +50,6 @@ namespace TccLib.Xna.Framework
         /// <summary>
         /// Gets or sets the value of the property.
         /// </summary>
-        public T Value { get; set; }
+        public virtual T Value { get; set; }
     }
 }

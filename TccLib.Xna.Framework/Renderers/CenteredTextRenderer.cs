@@ -9,7 +9,7 @@ namespace TccLib.Xna.Framework.Renderers
     /// This simple renderer renders text centered in a given bounds. The bounds
     /// is specified by a position and a size.
     /// </summary>
-    public class CenteredTextRenderer : BasicTextRenderer, IRenderer
+    public class CenteredTextRenderer : BasicTextRenderer
     {
         /// <summary>
         /// Initializes a new instance of the CenteredTextRenderer class.
@@ -59,7 +59,7 @@ namespace TccLib.Xna.Framework.Renderers
         /// </summary>
         /// <param name="spriteBatch">The sprite batch used to draw draw sprites.</param>
         /// <param name="gameTime">The current game time.</param>
-        public void Render(SpriteBatch spriteBatch, GameTime gameTime)
+        public override void Render(SpriteBatch spriteBatch, GameTime gameTime)
         {
             var textSize = this.FontProperty.Value.MeasureString(this.TextProperty.Value);
 

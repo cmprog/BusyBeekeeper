@@ -92,15 +92,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Renderers\BasicRenderer.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="IBehavior.cs" />
     <Compile Include="IMessage.cs" />
+    <Compile Include="IRenderer.cs" />
     <Compile Include="MessageDispatcher.cs" />
     <Compile Include="NotifyingSharedProperty.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ISharedProperty.cs" />
     <Compile Include="PropertyChangedMessage.cs" />
+    <Compile Include="Renderers\BasicTextRenderer.cs" />
+    <Compile Include="Renderers\AdvancedRenderer.cs" />
+    <Compile Include="Renderers\CenteredTextRenderer.cs" />
+    <Compile Include="Renderers\CompositeRenderer.cs" />
     <Compile Include="SharedProperty.cs" />
+    <Compile Include="VectorHelper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />

@@ -10,7 +10,7 @@ namespace TccLib.Xna.Framework
     /// entities and components. When the property is changed, 
     /// </summary>
     /// <typeparam name="T">The type of the value contained by this property.</typeparam>
-    public class NotifyingSharedProperty<T> : SharedProperty<T>, ISharedProperty<T>
+    public class NotifyingSharedProperty<T> : SharedProperty<T>
     {
         /// <summary>
         /// Initializes a new instance of the NotifyingSharedProperty class.
@@ -26,7 +26,7 @@ namespace TccLib.Xna.Framework
         /// <summary>
         /// Gets or sets the value of the property.
         /// </summary>
-        public T Value
+        public override T Value
         {
             get 
             { 
