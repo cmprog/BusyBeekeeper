@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace TccLib.Xna.GameStateManagement
+namespace BusyBeekeeper.GameStateManagement
 {
     /// <summary>
     /// Helper for reading input from keyboard, gamepad, and touch input. This class 

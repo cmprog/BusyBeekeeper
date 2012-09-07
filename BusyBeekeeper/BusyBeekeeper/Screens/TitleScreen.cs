@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TccLib.Xna.Framework;
 using TccLib.Xna.Framework.Renderers;
-using TccLib.Xna.GameStateManagement;
+using BusyBeekeeper.GameStateManagement;
 
 namespace BusyBeekeeper.Screens
 {
@@ -44,9 +44,9 @@ namespace BusyBeekeeper.Screens
         /// Activates the screen. Called when the screen is added to the screen manager or if the game resumes
         /// from being paused or tombstoned.
         /// </summary>
-        public override void Activate()
+        public override void Load()
         {
-            base.Activate();
+            base.Load();
 
             this.StartButton.TextProperty.Value = "Start";
             this.StartButton.PositionProperty.Value = new Vector2(50, 100);
@@ -85,8 +85,7 @@ namespace BusyBeekeeper.Screens
             this.CreditsButton.FontProperty.Value = this.ContentManager.Load<SpriteFont>("Fonts/BasicFont");
             this.CreditsButton.Renderer = new CompositeRenderer(
                 new AdvancedRenderer(
-                    SharedProperty.Create(
-                        this.ContentManager.Load<Texture2D>("Sprites/Blank")),
+                    SharedProperty.Create(this.ContentManager.Load<Texture2D>("Sprites/Blank")),
                     this.CreditsButton.PositionProperty,
                     SharedProperty.Create(Color.Gold),
                     this.CreditsButton.SizeProperty),
@@ -116,8 +115,7 @@ namespace BusyBeekeeper.Screens
             this.ExitButton.FontProperty.Value = this.ContentManager.Load<SpriteFont>("Fonts/BasicFont");
             this.ExitButton.Renderer = new CompositeRenderer(
                 new AdvancedRenderer(
-                    SharedProperty.Create(
-                        this.ContentManager.Load<Texture2D>("Sprites/Blank")),
+                    SharedProperty.Create(this.ContentManager.Load<Texture2D>("Sprites/Blank")),
                     this.ExitButton.PositionProperty,
                     SharedProperty.Create(Color.Gold),
                     this.ExitButton.SizeProperty),
@@ -142,11 +140,11 @@ namespace BusyBeekeeper.Screens
                     this.ExitButton.SizeProperty));
         }
 
-        public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
+        public override void Update(GameTime gameTime, bool isPaused)
         {
-            base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
+            base.Update(gameTime, isPaused);
 
-            var behaviors = 
+            var behaviors =
                 this.StartButton.Behaviors
                     .Concat(this.CreditsButton.Behaviors)
                     .Concat(this.ExitButton.Behaviors);
@@ -171,14 +169,20 @@ namespace BusyBeekeeper.Screens
             Console.WriteLine("OnStartButtonClick");
         }
 
+        /// <summary>
+        /// When the credits button is clicked, we go to the credits screen.
+        /// </summary>
         private void OnCreditsButtonClick()
         {
-            Console.WriteLine("OnCreditsButtonClick");
+            this.ScreenManager.TransitionToScreen(new CreditsScreen());
         }
 
+        /// <summary>
+        /// When the exit button is clicked, we must exit the game.
+        /// </summary>
         private void OnExitButtonClick()
         {
-            Console.WriteLine("OnExitButtonClick");
+            this.ScreenManager.Game.Exit();
         }
     }
 }

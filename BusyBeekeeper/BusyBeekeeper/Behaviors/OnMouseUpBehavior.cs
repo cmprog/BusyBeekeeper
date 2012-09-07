@@ -3,7 +3,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using TccLib.Xna.Framework;
-using TccLib.Xna.GameStateManagement;
+using BusyBeekeeper.GameStateManagement;
+
 namespace BusyBeekeeper.Behaviors
 {
     /// <summary>

@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-using TccLib.Xna.GameStateManagement;
+using BusyBeekeeper.GameStateManagement;
 
 namespace BusyBeekeeper
 {
@@ -27,7 +27,7 @@ namespace BusyBeekeeper
             this.Graphics = new GraphicsDeviceManager(this);
             this.Content.RootDirectory = "Content";
 
-            this.ScreenManager = new ScreenManager(this);
+            this.ScreenManager = new ScreenManager(this, new Screens.TitleScreen());
             this.Components.Add(this.ScreenManager);
         }
 
@@ -40,17 +40,5 @@ namespace BusyBeekeeper
         /// Gets or sets a the ScreenManager associated with the game.
         /// </summary>
         private ScreenManager ScreenManager { get; set; }
-
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
-        protected override void Initialize()
-        {
-            this.ScreenManager.AddScreen(new Screens.TitleScreen());
-            base.Initialize();
-        }
     }
 }
