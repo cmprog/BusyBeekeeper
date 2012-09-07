@@ -160,7 +160,7 @@ namespace BusyBeekeeper.GameStateManagement
                 // active popup screen or if the game itself is not active.
                 this.CurrentScreen.Update(
                     gameTime,
-                    !Game.IsActive || (this.CurrentScreen != null));
+                    !Game.IsActive || (this.CurrentPopupScreen != null));
             }
         }
 
@@ -175,6 +175,8 @@ namespace BusyBeekeeper.GameStateManagement
                 this.CurrentScreen != null,
                 "There should always be a GameScreen to draw.");
 
+            this.SpriteBatch.Begin();
+
             this.CurrentScreen.Draw(gameTime);
 
             if (this.CurrentPopupScreen != null)
@@ -186,6 +188,8 @@ namespace BusyBeekeeper.GameStateManagement
             {
                 this.TransitionScreen.Draw(gameTime);
             }
+
+            this.SpriteBatch.End();
         }
 
         /// <summary>

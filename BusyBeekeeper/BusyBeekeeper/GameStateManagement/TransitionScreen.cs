@@ -11,8 +11,8 @@ namespace BusyBeekeeper.GameStateManagement
     /// </summary>
     internal sealed class TransitionScreen : GameScreen
     {
-        private static readonly TimeSpan TransitionOffTime = TimeSpan.FromSeconds(0.65);
-        private static readonly TimeSpan TransitionOnTime = TimeSpan.FromSeconds(0.65);
+        private static readonly TimeSpan TransitionOffTime = TimeSpan.FromSeconds(0.5);
+        private static readonly TimeSpan TransitionOnTime = TimeSpan.FromSeconds(0.5);
 
         /// <summary>
         /// Creates a new instance of the TransitionScreen class.
@@ -116,8 +116,6 @@ namespace BusyBeekeeper.GameStateManagement
                 this.ScreenManager.GraphicsDevice.Viewport.Width,
                 this.ScreenManager.GraphicsDevice.Viewport.Height);
 
-            this.ScreenManager.SpriteBatch.Begin();
-
             this.ScreenManager.SpriteBatch.Draw(
                 this.BlankTexture,
                 Vector2.Zero,
@@ -128,8 +126,6 @@ namespace BusyBeekeeper.GameStateManagement
                 screenSize,
                 SpriteEffects.None,
                 0);
-            
-            this.ScreenManager.SpriteBatch.End();
         }
     }
 }

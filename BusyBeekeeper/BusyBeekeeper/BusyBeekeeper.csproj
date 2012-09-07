@@ -111,13 +111,18 @@
     <Compile Include="Behaviors\OnMouseUpBehavior.cs" />
     <Compile Include="Behaviors\OnFocusFontChangeBehavior.cs" />
     <Compile Include="Components\FadeComponent.cs" />
+    <Compile Include="Components\GameSlotButtonComponent.cs" />
     <Compile Include="Components\TextButtonComponent.cs" />
+    <Compile Include="Extensions\ComponentExtensions.cs" />
     <Compile Include="GameStateManagement\GameScreen.cs" />
     <Compile Include="InputAction.cs" />
-    <Compile Include="GameStateManagement\InputState.cs" />
+    <Compile Include="InputState.cs" />
     <Compile Include="GameStateManagement\PopupScreen.cs" />
     <Compile Include="GameStateManagement\ScreenManager.cs" />
     <Compile Include="GameStateManagement\TransitionScreen.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="PlayerManager.cs" />
+    <Compile Include="PlayerSummary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="BusyBeekeeperGame.cs" />
@@ -125,6 +130,7 @@
     <Compile Include="Screens\BeeHiveScreen.cs" />
     <Compile Include="Screens\BeeYardScreen.cs" />
     <Compile Include="Screens\BottlingScreen.cs" />
+    <Compile Include="Screens\CreatePlayerScreen.cs" />
     <Compile Include="Screens\CreditsScreen.cs" />
     <Compile Include="Screens\ExtractionScreen.cs" />
     <Compile Include="Screens\FarmersMarkerScreen.cs" />

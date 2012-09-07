@@ -157,16 +157,17 @@ namespace BusyBeekeeper.Screens
 
         public override void Draw(GameTime gameTime)
         {
-            this.ScreenManager.SpriteBatch.Begin();
             this.StartButton.Renderer.Render(this.ScreenManager.SpriteBatch, gameTime);
             this.CreditsButton.Renderer.Render(this.ScreenManager.SpriteBatch, gameTime);
             this.ExitButton.Renderer.Render(this.ScreenManager.SpriteBatch, gameTime);
-            this.ScreenManager.SpriteBatch.End();
         }
 
+        /// <summary>
+        /// When the start button is clicked, we'll transition to the game selection screen.
+        /// </summary>
         private void OnStartButtonClick()
         {
-            Console.WriteLine("OnStartButtonClick");
+            this.ScreenManager.TransitionToScreen(new GameSelectionScreen());
         }
 
         /// <summary>

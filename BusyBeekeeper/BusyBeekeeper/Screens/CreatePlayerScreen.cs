@@ -6,39 +6,47 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TccLib.Xna.Framework;
 using TccLib.Xna.Framework.Renderers;
+using BusyBeekeeper.Extensions;
 using BusyBeekeeper.GameStateManagement;
 
 namespace BusyBeekeeper.Screens
 {
     /// <summary>
-    /// Displays the credits of the game.
+    /// The create player screen allows the player to, well, create their player.
     /// </summary>
-    public class CreditsScreen : GameScreen
+    public class CreatePlayerScreen : GameScreen
     {
         /// <summary>
-        /// Initializes a new instance of the CreditsScreen class.
+        /// Creates a new instance of the CreatePlayerScreen class.
         /// </summary>
-        public CreditsScreen()
+        /// <param name="playerManager"></param>
+        public CreatePlayerScreen(PlayerManager playerManager)
         {
+            this.PlayerManager = playerManager;
+
             this.BackButton = new TextButtonComponent();
         }
 
         /// <summary>
-        /// Gets or sets the back button.
+        /// Gets or sets the PlayerManager used to manage the player.
+        /// </summary>
+        private PlayerManager PlayerManager { get; set; }
+
+        /// <summary>
+        /// Gets or sets the button to go back to the GameSelectionScreen.
         /// </summary>
         private TextButtonComponent BackButton { get; set; }
 
         /// <summary>
-        /// Activates the screen. Called when the screen is added to the screen manager or if the game resumes
-        /// from being paused or tombstoned.
+        /// Loads the screen content.
         /// </summary>
         public override void Load()
         {
             base.Load();
 
             this.BackButton.TextProperty.Value = "Back";
-            this.BackButton.PositionProperty.Value = new Vector2(50, 350);
-            this.BackButton.SizeProperty.Value = new Vector2(200, 75);
+            this.BackButton.PositionProperty.Value = new Vector2(10, 420);
+            this.BackButton.SizeProperty.Value = new Vector2(100, 50);
             this.BackButton.FontProperty.Value = this.ContentManager.Load<SpriteFont>("Fonts/BasicFont");
             this.BackButton.Renderer = new CompositeRenderer(
                 new AdvancedRenderer(
@@ -69,40 +77,34 @@ namespace BusyBeekeeper.Screens
         }
 
         /// <summary>
-        /// When the user clicks the back button, we'll exit this screen
-        /// which should return us to the previous screen.
+        /// When the user clicks the back button, we'll transition back to the
+        /// GameSelectionScreen.
         /// </summary>
         private void OnBackButtonClick()
         {
-            this.ScreenManager.TransitionToScreen(new TitleScreen());
+            this.ScreenManager.TransitionToScreen(new GameSelectionScreen());
         }
 
         /// <summary>
-        /// Updates the screen. We simply need to iterate through all the behaviors and
-        /// call update on them respectively.
+        /// Updates the screen, this is as simple as updating the components.
         /// </summary>
         /// <param name="gameTime">The current GameTime.</param>
-        /// <param name="isPaused">Indicates that the game is paused, or at least that the GameScreenManager wants us paused.</param>
+        /// <param name="isPaused">Flag indicating whether the game is paused or not.</param>
         public override void Update(GameTime gameTime, bool isPaused)
         {
             base.Update(gameTime, isPaused);
 
-            var behaviors = this.BackButton.Behaviors;
-
-            foreach (var behavior in behaviors)
-            {
-                behavior.Update(gameTime);
-            }
+            if (isPaused) return;
+            this.BackButton.Update(gameTime);
         }
 
         /// <summary>
-        /// Draws the screen by calling the renders for all our components.
+        /// Draws all the components on the screen by calling their renderers.
         /// </summary>
         /// <param name="gameTime">The current GameTime.</param>
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
-
             this.BackButton.Renderer.Render(this.ScreenManager.SpriteBatch, gameTime);
         }
     }
