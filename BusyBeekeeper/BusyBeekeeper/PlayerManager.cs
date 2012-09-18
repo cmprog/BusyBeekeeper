@@ -1,4 +1,8 @@
 ﻿using System;
+using System.IO;
+using System.Xml;
+using System.Xml.Serialization;
+using BusyBeekeeper.Data;
 
 namespace BusyBeekeeper
 {
@@ -45,7 +49,12 @@ namespace BusyBeekeeper
         /// </summary>
         public void SavePlayer()
         {
-            throw new NotImplementedException();
+            var lFilePath = GetSaveFilePath(this.Player.Id);
+            using (var lTextWriter = new StreamWriter(lFilePath))
+            {
+                var lSerializer = new XmlSerializer(typeof(Player));
+                lSerializer.Serialize(lTextWriter, this.Player);
+            }
         }
 
         /// <summary>
@@ -54,13 +63,39 @@ namespace BusyBeekeeper
         /// </summary>
         /// <param name="slotKey"></param>
         /// <returns>The created Player</returns>
-        public Player CreatePlayer(int slotKey)
+        public Player CreatePlayer(int slotKey, string playerName, PlayerAvatar avatar)
         {
             this.ValidateKey(slotKey, "slotKey");
-
-            // TODO: this.Player = new Player { };
-
+            this.Player = new Player(slotKey, playerName, avatar);
+            this.SavePlayer();
             return this.Player;
+        }
+
+        public PlayerSummary LoadSummary(int slotKey)
+        {
+            this.ValidateKey(slotKey, "slotKey");
+            
+            Player player;
+            if (this.TryLoadPlayer(slotKey, out player))
+            {
+                return new PlayerSummary
+                {
+                    PlayerExists = true,
+                    AwardCount = player.Awards.Count,
+                    BeeKeeperName = player.Name,
+                    SlotKey = slotKey,
+                    TotalTimePlayed = player.TotalRealTimePlayed.Value,
+                    AvatarTexturePath = "Sprites/Blank",
+                };
+            }
+            else
+            {
+                return new PlayerSummary
+                { 
+                    PlayerExists = false,
+                    SlotKey = slotKey,
+                };
+            }
         }
 
         /// <summary>
@@ -72,17 +107,50 @@ namespace BusyBeekeeper
         {
             this.ValidateKey(slotKey, "slotKey");
 
-            // TODO: this.Player = ... something
+            Player player;
+            if (!this.TryLoadPlayer(slotKey, out player))
+            {
+                System.Diagnostics.Debug.WriteLine("Attempting to load a player which does not exist.");
+            }
 
             return this.Player;
         }
 
-        public PlayerSummary LoadSummary(int slotKey)
+        /// <summary>
+        /// Tries to load the given player.
+        /// </summary>
+        /// <param name="slotKey">The slot to load.</param>
+        /// <param name="player">The player which will be loaded.</param>
+        /// <returns>True if the player was loaded, false otherwise.</returns>
+        private bool TryLoadPlayer(int slotKey, out Player player)
         {
             this.ValidateKey(slotKey, "slotKey");
+            player = null;
 
-            // TODO: This is the simplest return we can do for now.
-            return new PlayerSummary { PlayerExists = false };
+            var lFilePath = GetSaveFilePath(slotKey);
+
+            if (File.Exists(lFilePath))
+            {
+                try
+                {
+                    using (var lTextReader = new StreamReader(lFilePath))
+                    {
+                        var lSerializer = new XmlSerializer(typeof(Player));
+                        player = (Player)lSerializer.Deserialize(lTextReader);
+                        return true;
+                    }
+                }
+                catch (Exception lPokemonException)
+                {
+                    System.Diagnostics.Debug.WriteLine("Failed to load player file: " + lFilePath);
+                    System.Diagnostics.Debug.WriteLine("===== Exception Message ==============================================");
+                    System.Diagnostics.Debug.WriteLine(lPokemonException);
+                    System.Diagnostics.Debug.WriteLine("======================================================================");
+
+                    return false;
+                }
+            }
+            else return false;
         }
 
         /// <summary>
@@ -99,6 +167,24 @@ namespace BusyBeekeeper
             {
                 throw new ArgumentException(paramName);
             }
+        }
+
+        /// <summary>
+        /// Gets the absolute file path for the given filename.
+        /// </summary>
+        /// <param name="slotId">The slot ID to get the save file for.</param>
+        /// <returns>The absolute file path for the save file in the given slot id.</returns>
+        private static string GetSaveFilePath(int slotId)
+        {
+            var lApplicationDataDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var lBeeFreeDirectoryPath = Path.Combine(lApplicationDataDirectoryPath, "BusyBeekeeper");
+            if (!Directory.Exists(lBeeFreeDirectoryPath))
+            {
+                Directory.CreateDirectory(lBeeFreeDirectoryPath);
+            }
+
+            var lFilePath = Path.Combine(lBeeFreeDirectoryPath, "beekeeper_" + slotId + ".bkpr");
+            return lFilePath;
         }
     }
 }

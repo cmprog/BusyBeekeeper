@@ -18,28 +18,30 @@ namespace TccLib.Xna.Framework
         /// <param name="property">The property that changed.</param>
         /// <param name="oldValue">The old value of the property.</param>
         /// <returns>The newly created PropertyChangedMessage.</returns>
-        public static PropertyChangedMessage<TProperty, TValue> Create<TProperty, TValue>(TProperty property, TValue oldValue) where TProperty : ISharedProperty<TValue>
+        public static PropertyChangedMessage<TValue> Create<TValue>(
+            string propertyName, ISharedProperty<TValue> property, TValue oldValue)
         {
-            return new PropertyChangedMessage<TProperty, TValue>(property, oldValue);
+            return new PropertyChangedMessage<TValue>(propertyName, property, oldValue);
         }
     }
 
     /// <summary>
     /// Defines a simple message for notifying when a property changed.
     /// </summary>
-    /// <typeparam name="TProperty">The type of the property.</typeparam>
     /// <typeparam name="TValue">The type of value the property held.</typeparam>
-    public class PropertyChangedMessage<TProperty, TValue> : IMessage where TProperty : ISharedProperty<TValue>
+    public class PropertyChangedMessage<TValue> : IMessage
     {
         /// <summary>
         /// Initializes a new instance of the PropertyChangedMessage class.
         /// </summary>
         /// <param name="property">The property that changed.</param>
         /// <param name="oldValue">The old value of the property.</param>
-        public PropertyChangedMessage(TProperty property, TValue oldValue)
+        public PropertyChangedMessage(string propertyName, ISharedProperty<TValue> property, TValue oldValue)
         {
             System.Diagnostics.Debug.Assert(property != null, "Must provide a non-null property.");
+            System.Diagnostics.Debug.Assert(!string.IsNullOrWhiteSpace(propertyName), "Property name must not be null or whitespace.");
 
+            this.PropertyName = propertyName;
             this.Property = property;
             this.OldValue = oldValue;
         }
@@ -60,6 +62,11 @@ namespace TccLib.Xna.Framework
         /// <summary>
         /// Gets the property.
         /// </summary>
-        public TProperty Property { get; private set; }
+        public ISharedProperty<TValue> Property { get; private set; }
+
+        /// <summary>
+        /// Gets the name of the property which changed.
+        /// </summary>
+        public string PropertyName { get; private set; }
     }
 }

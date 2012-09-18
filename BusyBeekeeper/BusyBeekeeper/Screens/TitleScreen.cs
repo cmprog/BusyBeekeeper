@@ -20,25 +20,25 @@ namespace BusyBeekeeper.Screens
         /// </summary>
         public TitleScreen()
         {
-            this.StartButton = new TextButtonComponent();
-            this.CreditsButton = new TextButtonComponent();
-            this.ExitButton = new TextButtonComponent();
+            this.StartButton = new TextBoxComponent();
+            this.CreditsButton = new TextBoxComponent();
+            this.ExitButton = new TextBoxComponent();
         }
 
         /// <summary>
         /// Gets or sets the start button.
         /// </summary>
-        private TextButtonComponent StartButton { get; set; }
+        private TextBoxComponent StartButton { get; set; }
 
         /// <summary>
         /// Gets or sets the credits button.
         /// </summary>
-        private TextButtonComponent CreditsButton { get; set; }
+        private TextBoxComponent CreditsButton { get; set; }
 
         /// <summary>
         /// Gets or sets the exit button.
         /// </summary>
-        private TextButtonComponent ExitButton { get; set; }
+        private TextBoxComponent ExitButton { get; set; }
 
         /// <summary>
         /// Activates the screen. Called when the screen is added to the screen manager or if the game resumes

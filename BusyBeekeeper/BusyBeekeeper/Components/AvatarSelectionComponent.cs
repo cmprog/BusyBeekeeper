@@ -9,25 +9,27 @@ using TccLib.Xna.Framework;
 namespace BusyBeekeeper.Components
 {
     /// <summary>
-    /// Defines a simple menu button. Displays text on a background really.
+    /// The avatar selection component is basically just a bordered texture. It
+    /// does have extra state which keeps track of whether it is selected or not.
     /// </summary>
-    public class TextButtonComponent : Component
+    public class AvatarSelectionComponent : Component
     {
         /// <summary>
         /// Initializes a new instance of the TextButtonComponent class.
         /// </summary>
-        public TextButtonComponent()
+        public AvatarSelectionComponent()
         {
-            this.TextProperty = SharedProperty.Create(string.Empty);
+            this.TextureProperty = SharedProperty.Create(default(Texture2D));
             this.SizeProperty = SharedProperty.Create(new Vector2(50, 100));
             this.PositionProperty = SharedProperty.Create(Vector2.Zero);
-            this.FontProperty = SharedProperty.Create(default(SpriteFont));
+            this.IsSelectedProperty = NotifyingSharedProperty.Create(this.MessageDispatcher, "IsSelectedProperty", false);
+            this.BorderColorProperty = SharedProperty.Create(Color.Black);
         }
 
         /// <summary>
         /// Gets the property containing the text displayed in the button.
         /// </summary>
-        public SharedProperty<string> TextProperty { get; private set; }
+        public SharedProperty<Texture2D> TextureProperty { get; private set; }
 
         /// <summary>
         /// Gets the property containing the size of the button.
@@ -40,9 +42,15 @@ namespace BusyBeekeeper.Components
         public SharedProperty<Vector2> PositionProperty { get; private set; }
 
         /// <summary>
-        /// Gets the property containing the font for the button.
+        /// Gets the property containing the flag indicating whether this avatar is
+        /// selected or not.
         /// </summary>
-        public SharedProperty<SpriteFont> FontProperty { get; private set; }
+        public SharedProperty<bool> IsSelectedProperty { get; private set; }
+
+        /// <summary>
+        /// Gets the property containing the color for the border of the avatar image.
+        /// </summary>
+        public SharedProperty<Color> BorderColorProperty { get; private set; }
 
         /// <summary>
         /// Gets or sets the renderer responsible for rendering the menu button.

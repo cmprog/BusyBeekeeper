@@ -20,13 +20,13 @@ namespace BusyBeekeeper.Screens
         /// </summary>
         public CreditsScreen()
         {
-            this.BackButton = new TextButtonComponent();
+            this.BackButton = new TextBoxComponent();
         }
 
         /// <summary>
         /// Gets or sets the back button.
         /// </summary>
-        private TextButtonComponent BackButton { get; set; }
+        private TextBoxComponent BackButton { get; set; }
 
         /// <summary>
         /// Activates the screen. Called when the screen is added to the screen manager or if the game resumes

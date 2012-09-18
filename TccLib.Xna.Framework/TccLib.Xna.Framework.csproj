@@ -92,6 +92,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IRenderable.cs" />
+    <Compile Include="IMessageHandler.cs" />
     <Compile Include="Renderers\BasicRenderer.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="IBehavior.cs" />
@@ -106,6 +108,8 @@
     <Compile Include="Renderers\AdvancedRenderer.cs" />
     <Compile Include="Renderers\CenteredTextRenderer.cs" />
     <Compile Include="Renderers\CompositeRenderer.cs" />
+    <Compile Include="Renderers\MiddleLeftTextRenderer.cs" />
+    <Compile Include="Renderers\SquareBorderRenderer.cs" />
     <Compile Include="SharedProperty.cs" />
     <Compile Include="VectorHelper.cs" />
   </ItemGroup>

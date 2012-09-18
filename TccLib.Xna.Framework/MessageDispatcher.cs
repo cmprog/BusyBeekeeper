@@ -27,7 +27,7 @@ namespace TccLib.Xna.Framework
         /// </summary>
         /// <typeparam name="TMessage">The type of message the handler handles.</typeparam>
         /// <param name="handler">The handler for the message.</param>
-        public void Register<TMessage>(Action<TMessage> handler) where TMessage : IMessage
+        public void Register<TMessage>(IMessageHandler<TMessage> handler) where TMessage : IMessage
         {
             System.Diagnostics.Debug.Assert(handler != null, "Must provide a non-null handler.");
 
@@ -46,7 +46,7 @@ namespace TccLib.Xna.Framework
         /// </summary>
         /// <typeparam name="TMessage">The type of message this handler handles.</typeparam>
         /// <param name="handler">The message handler.</param>
-        public void Unregister<TMessage>(Action<TMessage> handler) where TMessage : IMessage
+        public void Unregister<TMessage>(IMessageHandler<TMessage> handler) where TMessage : IMessage
         {
             System.Diagnostics.Debug.Assert(handler != null, "Must provide a non-null handler.");
 
@@ -73,8 +73,8 @@ namespace TccLib.Xna.Framework
             {
                 foreach (var rawAction in listeners)
                 {
-                    var action = (Action<TMessage>)rawAction;
-                    action(message);
+                    var handler = (IMessageHandler<TMessage>)rawAction;
+                    handler.Process(message);
                 }
             }
         }

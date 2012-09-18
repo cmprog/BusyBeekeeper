@@ -25,7 +25,7 @@ namespace BusyBeekeeper.Screens
             this.GameSlotTop = new GameSlotButtonComponent();
             this.GameSlotMiddle = new GameSlotButtonComponent();
             this.GameSlotBottom = new GameSlotButtonComponent();
-            this.TitleButton = new TextButtonComponent();
+            this.TitleButton = new TextBoxComponent();
             this.PlayerManager = new PlayerManager();
         }
 
@@ -47,7 +47,7 @@ namespace BusyBeekeeper.Screens
         /// <summary>
         /// Gets or sets the button for returning to the title screen.
         /// </summary>
-        private TextButtonComponent TitleButton { get; set; }
+        private TextBoxComponent TitleButton { get; set; }
 
         /// <summary>
         /// Gets or sets the PlayerManager used to gather player information.
@@ -172,7 +172,7 @@ namespace BusyBeekeeper.Screens
             }
             else
             {
-                this.ScreenManager.TransitionToScreen(new CreatePlayerScreen(this.PlayerManager));
+                this.ScreenManager.TransitionToScreen(new CreatePlayerScreen(this.PlayerManager, playerSummary.SlotKey));
             }
         }
 

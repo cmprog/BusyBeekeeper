@@ -97,6 +97,8 @@
     <Compile Include="BeeSuit.cs" />
     <Compile Include="BeeYard.cs" />
     <Compile Include="Bottle.cs" />
+    <Compile Include="ComponentCollection.cs" />
+    <Compile Include="ComponentCollectionCountChangedMessage.cs" />
     <Compile Include="HoneyExtractor.cs" />
     <Compile Include="LawnMower.cs" />
     <Compile Include="MarketBooth.cs" />
