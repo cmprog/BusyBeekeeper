@@ -11,5 +11,16 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class MarketHelperAvatar : Component
     {
+        /// <summary>
+        /// Initializes a new instance of the MarketHelperAvatar class.
+        /// </summary>
+        public MarketHelperAvatar()
+        {
+        }
+
+        /// <summary>
+        /// Gets the resource ID of this avatar - used in serialization.
+        /// </summary>
+        public int ResourceId { get; set; }
     }
 }

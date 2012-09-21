@@ -12,5 +12,16 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class Truck : Component
     {
+        /// <summary>
+        /// Initializes a new instance of the Truck class.
+        /// </summary>
+        public Truck()
+        {
+        }
+
+        /// <summary>
+        /// Gets the resource ID of this truck - used in serialization.
+        /// </summary>
+        public int ResourceId { get; set; }
     }
 }

@@ -12,5 +12,16 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class Super : Component
     {
+        /// <summary>
+        /// Initializes a new instance of the Super class.
+        /// </summary>
+        public Super()
+        {
+        }
+
+        /// <summary>
+        /// Gets the resource ID of this super - used in serialization.
+        /// </summary>
+        public int ResourceId { get; set; }
     }
 }

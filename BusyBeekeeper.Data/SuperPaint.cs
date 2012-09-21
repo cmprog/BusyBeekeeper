@@ -11,5 +11,16 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class SuperPaint : Component
     {
+        /// <summary>
+        /// Initializes a new instance of the SuperPaint class.
+        /// </summary>
+        public SuperPaint()
+        {
+        }
+
+        /// <summary>
+        /// Gets the resource ID of this paint - used in serialization.
+        /// </summary>
+        public int ResourceId { get; set; }
     }
 }

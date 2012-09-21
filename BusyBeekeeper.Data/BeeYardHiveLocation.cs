@@ -7,20 +7,19 @@ using TccLib.Xna.Framework;
 namespace BusyBeekeeper.Data
 {
     /// <summary>
-    /// Defines the properties of a booth used at the farmer's market. Better booths provide better
-    /// discoverability and greater inventory.
+    /// Defines a screen location within a BeeYard at which a BeeHive can be located.
     /// </summary>
-    public class MarketBooth : Component
+    public class BeeYardHiveLocation : Component
     {
         /// <summary>
-        /// Initializes a new instance of the MarketBooth class.
+        /// Initializes a new instance of the BeeYardHiveLocation class.
         /// </summary>
-        public MarketBooth()
+        public BeeYardHiveLocation()
         {
         }
 
         /// <summary>
-        /// Gets the resource ID of this booth - used in serialization.
+        /// Gets or sets the id of the resource for this location - used for serialization.
         /// </summary>
         public int ResourceId { get; set; }
     }

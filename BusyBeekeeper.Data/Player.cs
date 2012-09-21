@@ -14,8 +14,9 @@ namespace BusyBeekeeper.Data
         /// Initializes a new instance of the Player class.
         /// </summary>
         /// <param name="name">The name of the new player.</param>
-        public Player(int id, string name, PlayerAvatar avatar)
+        public Player(int slotKey, string name, PlayerAvatar avatar)
         {
+            this.SlotKey = slotKey;
             this.Name = string.IsNullOrWhiteSpace(name) ? "Bob" : name;
             this.Avatar = avatar;
             this.AvailableCoins = NotifyingSharedProperty.Create(this.MessageDispatcher, "AvailableCoins", 0);
@@ -31,10 +32,9 @@ namespace BusyBeekeeper.Data
         }
 
         /// <summary>
-        /// Gets the ID of the player, this cooresponds to which save slot the player
-        /// belongs to.
+        /// Gets the slot key which indentifies which slot this player saves to.
         /// </summary>
-        public int Id { get; private set; }
+        public int SlotKey { get; private set; }
 
         /// <summary>
         /// Gets the name of the BeeKeeper.
@@ -106,7 +106,7 @@ namespace BusyBeekeeper.Data
         /// <summary>
         /// Gets or sets the PlayerAvatar which represents the player.
         /// </summary>
-        public PlayerAvatar Avatar { get; set; }
+        public PlayerAvatar Avatar { get; private set; }
 
         /// <summary>
         /// Gets or sets the Smoker owned by the player.

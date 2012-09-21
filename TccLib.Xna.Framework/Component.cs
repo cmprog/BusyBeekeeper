@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Serialization;
 using System.Collections.Generic;
 
 namespace TccLib.Xna.Framework
@@ -26,17 +27,20 @@ namespace TccLib.Xna.Framework
         /// <summary>
         /// Gets an identification value associated with the component. This is globally unique.
         /// </summary>
+        [XmlIgnore]
         public long Id { get; private set; }
 
         /// <summary>
         /// Gets the message dispatcher associated with the component. Used for dispatching
         /// local Component-scoped messages.
         /// </summary>
+        [XmlIgnore]
         public MessageDispatcher MessageDispatcher { get; private set; }
 
         /// <summary>
         /// Gets a collection of behaviors associated with the component.
         /// </summary>
+        [XmlIgnore]
         public ICollection<IBehavior> Behaviors { get; private set; }
 
         /// <summary>

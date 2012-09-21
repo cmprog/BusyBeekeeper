@@ -12,5 +12,16 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class Smoker : Component
     {
+        /// <summary>
+        /// Initializes a new instance of the Smoker class.
+        /// </summary>
+        public Smoker()
+        {
+        }
+
+        /// <summary>
+        /// Gets the resource ID of this smoker - used in serialization.
+        /// </summary>
+        public int ResourceId { get; set; }
     }
 }

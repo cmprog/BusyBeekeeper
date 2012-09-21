@@ -11,5 +11,16 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class Bottle : Component
     {
+        /// <summary>
+        /// Initializes a new instance of the Bottle class.
+        /// </summary>
+        public Bottle()
+        {
+        }
+
+        /// <summary>
+        /// Gets the resource ID of this bottle - used in serialization.
+        /// </summary>
+        public int ResourceId { get; set; }
     }
 }

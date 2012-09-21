@@ -11,5 +11,16 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class HoneyExtractor : Component
     {
+        /// <summary>
+        /// Initializes a new instance of the HoneyExtractor class.
+        /// </summary>
+        public HoneyExtractor()
+        {
+        }
+
+        /// <summary>
+        /// Gets the resource ID of this extractor - used in serialization.
+        /// </summary>
+        public int ResourceId { get; set; }
     }
 }

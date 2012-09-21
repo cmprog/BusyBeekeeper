@@ -3,6 +3,7 @@ using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 using BusyBeekeeper.Data;
+using BusyBeekeeper.Data.Serialization;
 
 namespace BusyBeekeeper
 {
@@ -49,11 +50,11 @@ namespace BusyBeekeeper
         /// </summary>
         public void SavePlayer()
         {
-            var lFilePath = GetSaveFilePath(this.Player.Id);
+            var lFilePath = GetSaveFilePath(this.Player.SlotKey);
             using (var lTextWriter = new StreamWriter(lFilePath))
             {
-                var lSerializer = new XmlSerializer(typeof(Player));
-                lSerializer.Serialize(lTextWriter, this.Player);
+                var lSerializer = new XmlSerializer(typeof(SerializablePlayer));
+                lSerializer.Serialize(lTextWriter, SerializablePlayer.FromPlayer(this.Player));
             }
         }
 

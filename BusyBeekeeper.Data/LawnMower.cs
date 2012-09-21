@@ -11,5 +11,16 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class LawnMower : Component
     {
+        /// <summary>
+        /// Initializes a new instance of the LawnMower class.
+        /// </summary>
+        public LawnMower()
+        {
+        }
+
+        /// <summary>
+        /// Gets the resource ID of this lawn mower - used in serialization.
+        /// </summary>
+        public int ResourceId { get; set; }
     }
 }

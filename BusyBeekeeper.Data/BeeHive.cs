@@ -12,5 +12,16 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class BeeHive : Component
     {
+        /// <summary>
+        /// Initializes a new instance of the BeeHive class.
+        /// </summary>
+        public BeeHive()
+        {
+        }
+
+        /// <summary>
+        /// Gets the id of the location within the yard where this hive is located.
+        /// </summary>
+        public int YardLocationId { get; set; }
     }
 }

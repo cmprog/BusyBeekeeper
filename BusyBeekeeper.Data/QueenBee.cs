@@ -12,5 +12,16 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class QueenBee : Component
     {
+        /// <summary>
+        /// Initializes a new instance of the QueenBee class.
+        /// </summary>
+        public QueenBee()
+        {
+        }
+
+        /// <summary>
+        /// Gets the resource ID of this queen bee - used in serialization.
+        /// </summary>
+        public int ResourceId { get; set; }
     }
 }

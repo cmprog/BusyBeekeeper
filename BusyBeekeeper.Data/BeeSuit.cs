@@ -11,5 +11,16 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class BeeSuit : Component
     {
+        /// <summary>
+        /// Initializes a new instance of the BeeSuit class.
+        /// </summary>
+        public BeeSuit()
+        {
+        }
+
+        /// <summary>
+        /// Gets the resource ID of this suit - used in serialization.
+        /// </summary>
+        public int ResourceId { get; set; }
     }
 }

@@ -11,5 +11,16 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class UncapingKnife : Component
     {
+        /// <summary>
+        /// Initializes a new instance of the UncapingKnife class.
+        /// </summary>
+        public UncapingKnife()
+        {
+        }
+
+        /// <summary>
+        /// Gets the resource ID of this knife - used in serialization.
+        /// </summary>
+        public int ResourceId { get; set; }
     }
 }

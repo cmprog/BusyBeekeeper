@@ -11,5 +11,16 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class Award : Component
     {
+        /// <summary>
+        /// Initializes a new instance of the Award class.
+        /// </summary>
+        public Award()
+        {
+        }
+
+        /// <summary>
+        /// Gets the resource ID of this award - used in serialization.
+        /// </summary>
+        public int ResourceId { get; set; }
     }
 }

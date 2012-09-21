@@ -96,6 +96,7 @@
     <Compile Include="BeeHive.cs" />
     <Compile Include="BeeSuit.cs" />
     <Compile Include="BeeYard.cs" />
+    <Compile Include="BeeYardHiveLocation.cs" />
     <Compile Include="Bottle.cs" />
     <Compile Include="ComponentCollection.cs" />
     <Compile Include="ComponentCollectionCountChangedMessage.cs" />
@@ -108,6 +109,10 @@
     <Compile Include="PlayerAvatar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueenBee.cs" />
+    <Compile Include="Serialization\SerializableBeeHive.cs" />
+    <Compile Include="Serialization\SerializableBeeYard.cs" />
+    <Compile Include="Serialization\SerializablePlayer.cs" />
+    <Compile Include="Serialization\SerializableSuper.cs" />
     <Compile Include="Smoker.cs" />
     <Compile Include="Super.cs" />
     <Compile Include="SuperPaint.cs" />
