@@ -3,7 +3,6 @@ using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 using BusyBeekeeper.Data;
-using BusyBeekeeper.Data.Serialization;
 
 namespace BusyBeekeeper
 {
@@ -50,12 +49,6 @@ namespace BusyBeekeeper
         /// </summary>
         public void SavePlayer()
         {
-            var lFilePath = GetSaveFilePath(this.Player.SlotKey);
-            using (var lTextWriter = new StreamWriter(lFilePath))
-            {
-                var lSerializer = new XmlSerializer(typeof(SerializablePlayer));
-                lSerializer.Serialize(lTextWriter, SerializablePlayer.FromPlayer(this.Player));
-            }
         }
 
         /// <summary>
@@ -75,28 +68,7 @@ namespace BusyBeekeeper
         public PlayerSummary LoadSummary(int slotKey)
         {
             this.ValidateKey(slotKey, "slotKey");
-            
-            Player player;
-            if (this.TryLoadPlayer(slotKey, out player))
-            {
-                return new PlayerSummary
-                {
-                    PlayerExists = true,
-                    AwardCount = player.Awards.Count,
-                    BeeKeeperName = player.Name,
-                    SlotKey = slotKey,
-                    TotalTimePlayed = player.TotalRealTimePlayed.Value,
-                    AvatarTexturePath = "Sprites/Blank",
-                };
-            }
-            else
-            {
-                return new PlayerSummary
-                { 
-                    PlayerExists = false,
-                    SlotKey = slotKey,
-                };
-            }
+            return null;
         }
 
         /// <summary>

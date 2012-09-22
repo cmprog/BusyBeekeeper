@@ -8,7 +8,7 @@ namespace BusyBeekeeper.Data.Serialization
     /// <summary>
     /// Represents a BeeYard which can be easily serialized and deserialized.
     /// </summary>
-    internal class SerializableBeeYard
+    public class SerializableBeeYard
     {
         /// <summary>
         /// Creates a new SerializableBeeYard from the given BeeYard.
