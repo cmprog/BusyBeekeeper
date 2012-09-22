@@ -47,5 +47,10 @@ namespace BusyBeekeeper.Data.Meta
         /// at which the player can uncap frames.
         /// </summary>
         public float UncapingSpeedFactor { get; set; }
+
+        public UncapingKnife ToUncapingKnife()
+        {
+            return null;
+        }
     }
 }

@@ -41,5 +41,10 @@ namespace BusyBeekeeper.Data.Meta
         /// the player can travel from one bee yard to another.
         /// </summary>
         public float TravelSpeedFactor { get; set; }
+
+        public Truck ToTruck()
+        {
+            return null;
+        }
     }
 }

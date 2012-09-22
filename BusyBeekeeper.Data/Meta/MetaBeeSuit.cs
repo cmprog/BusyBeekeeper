@@ -44,5 +44,10 @@ namespace BusyBeekeeper.Data.Meta
         /// Gets or sets the strength of this bee suit.
         /// </summary>
         public int Strength { get; set; }
+
+        public BeeSuit ToBeeSuit()
+        {
+            return null;
+        }
     }
 }

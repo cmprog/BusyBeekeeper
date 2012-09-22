@@ -11,11 +11,11 @@ using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 namespace BusyBeekeeper.Data.Meta.Pipeline.Processors
 {
     [ContentProcessor(DisplayName = "BB - MetaBottle Processor")]
-    public class MetaBottleProcessor : ContentProcessor<XDocument, IList<MetaBottle>>
+    public class MetaBottleProcessor : ContentProcessor<XDocument, MetaBottle>
     {
-        public override IList<MetaBottle> Process(XDocument document, ContentProcessorContext context)
+        public override MetaBottle Process(XDocument document, ContentProcessorContext context)
         {
-            return new MetaBottle[0];
+            return new MetaBottle();
         }
     }
 }

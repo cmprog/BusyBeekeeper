@@ -46,5 +46,10 @@ namespace BusyBeekeeper.Data.Meta
         /// Gets or sets a factor which influences the speed at which extraction occurs.
         /// </summary>
         public float ExtractionSpeedFactor { get; set; }
+
+        public HoneyExtractor ToHoneyExtractor()
+        {
+            return null;
+        }
     }
 }

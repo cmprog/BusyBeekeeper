@@ -11,11 +11,11 @@ using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 namespace BusyBeekeeper.Data.Meta.Pipeline.Processors
 {
     [ContentProcessor(DisplayName = "BB - MetaUncapingKnife Processor")]
-    public class MetaUncapingKnifeProcessor : ContentProcessor<XDocument, IList<MetaUncapingKnife>>
+    public class MetaUncapingKnifeProcessor : ContentProcessor<XDocument, MetaUncapingKnife>
     {
-        public override IList<MetaUncapingKnife> Process(XDocument document, ContentProcessorContext context)
+        public override MetaUncapingKnife Process(XDocument document, ContentProcessorContext context)
         {
-            return new MetaUncapingKnife[0];
+            return new MetaUncapingKnife();
         }
     }
 }

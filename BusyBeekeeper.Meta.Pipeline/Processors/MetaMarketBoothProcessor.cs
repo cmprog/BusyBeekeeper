@@ -22,11 +22,11 @@ namespace BusyBeekeeper.Data.Meta.Pipeline.Processors
     /// display name for this processor.
     /// </summary>
     [ContentProcessor(DisplayName = "BB - MetaMarketBooth Processor")]
-    public class MetaMarketBoothProcessor : ContentProcessor<XDocument, IList<MetaMarketBooth>>
+    public class MetaMarketBoothProcessor : ContentProcessor<XDocument, MetaMarketBooth>
     {
-        public override IList<MetaMarketBooth> Process(XDocument document, ContentProcessorContext context)
+        public override MetaMarketBooth Process(XDocument document, ContentProcessorContext context)
         {
-            return new MetaMarketBooth[0];
+            return new MetaMarketBooth();
         }
     }
 }

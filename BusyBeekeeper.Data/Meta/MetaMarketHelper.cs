@@ -64,5 +64,10 @@ namespace BusyBeekeeper.Data.Meta
         /// to buy something more expensive.
         /// </summary>
         public float CustomerWillingnessToSpendMore { get; set; }
+
+        public MarketHelper ToMarkerHelper()
+        {
+            return null;
+        }
     }
 }

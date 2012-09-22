@@ -41,5 +41,10 @@ namespace BusyBeekeeper.Data.Meta
         /// bees will become after smoking them.
         /// </summary>
         public float BeeAgressionFactor { get; set; }
+
+        public Smoker ToSmoker()
+        {
+            return null;
+        }
     }
 }

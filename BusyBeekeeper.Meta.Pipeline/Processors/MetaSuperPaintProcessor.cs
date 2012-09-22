@@ -11,11 +11,11 @@ using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 namespace BusyBeekeeper.Data.Meta.Pipeline.Processors
 {
     [ContentProcessor(DisplayName = "BB - MetaSuperPaint Processor")]
-    public class MetaSuperPaintProcessor : ContentProcessor<XDocument, IList<MetaSuperPaint>>
+    public class MetaSuperPaintProcessor : ContentProcessor<XDocument, MetaSuperPaint>
     {
-        public override IList<MetaSuperPaint> Process(XDocument document, ContentProcessorContext context)
+        public override MetaSuperPaint Process(XDocument document, ContentProcessorContext context)
         {
-            return new MetaSuperPaint[0];
+            return new MetaSuperPaint();
         }
     }
 }

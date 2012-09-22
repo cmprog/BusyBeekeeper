@@ -11,11 +11,11 @@ using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 namespace BusyBeekeeper.Data.Meta.Pipeline.Processors
 {
     [ContentProcessor(DisplayName = "BB - MetaTruck Processor")]
-    public class MetaTruckProcessor : ContentProcessor<XDocument, IList<MetaTruck>>
+    public class MetaTruckProcessor : ContentProcessor<XDocument, MetaTruck>
     {
-        public override IList<MetaTruck> Process(XDocument document, ContentProcessorContext context)
+        public override MetaTruck Process(XDocument document, ContentProcessorContext context)
         {
-            return new MetaTruck[0];
+            return new MetaTruck();
         }
     }
 }

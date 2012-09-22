@@ -11,11 +11,11 @@ using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 namespace BusyBeekeeper.Data.Meta.Pipeline.Processors
 {
     [ContentProcessor(DisplayName = "BB - MetaLawnMower Processor")]
-    public class MetaLawnMowerProcessor : ContentProcessor<XDocument, IList<MetaLawnMower>>
+    public class MetaLawnMowerProcessor : ContentProcessor<XDocument, MetaLawnMower>
     {
-        public override IList<MetaLawnMower> Process(XDocument document, ContentProcessorContext context)
+        public override MetaLawnMower Process(XDocument document, ContentProcessorContext context)
         {
-            return new MetaLawnMower[0];
+            return new MetaLawnMower();
         }
     }
 }

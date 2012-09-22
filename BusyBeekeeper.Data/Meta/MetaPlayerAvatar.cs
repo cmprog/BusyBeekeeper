@@ -19,5 +19,10 @@ namespace BusyBeekeeper.Data.Meta
         /// Gets or sets the path of the texture used for this avatar.
         /// </summary>
         public string PortraitTexturePath { get; set; }
+
+        public PlayerAvatar ToPlayerAvatar()
+        {
+            return new PlayerAvatar { ResourceId = this.Id };
+        }
     }
 }

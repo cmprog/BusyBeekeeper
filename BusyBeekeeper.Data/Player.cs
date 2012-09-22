@@ -19,6 +19,7 @@ namespace BusyBeekeeper.Data
             this.SlotKey = slotKey;
             this.Name = string.IsNullOrWhiteSpace(name) ? "Bob" : name;
             this.Avatar = avatar;
+            this.TotalRealTimePlayed = NotifyingSharedProperty.Create(this.MessageDispatcher, "TotalRealTimePlayed", TimeSpan.Zero);
             this.AvailableCoins = NotifyingSharedProperty.Create(this.MessageDispatcher, "AvailableCoins", 0);
             this.TotalCoinsEarned = NotifyingSharedProperty.Create(this.MessageDispatcher, "TotalCoinsEarned", 0);
             this.TotalCoinsSpent = NotifyingSharedProperty.Create(this.MessageDispatcher, "TotalCoinsSpent", 0);

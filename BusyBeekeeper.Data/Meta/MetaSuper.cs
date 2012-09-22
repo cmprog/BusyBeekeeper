@@ -42,5 +42,10 @@ namespace BusyBeekeeper.Data.Meta
         /// yard they are part of.
         /// </summary>
         public float Depth { get; set; }
+        
+        public Super ToSuper()
+        {
+            return null;
+        }
     }
 }

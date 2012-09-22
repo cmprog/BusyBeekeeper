@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using Microsoft.Xna.Framework.Content;
+using BusyBeekeeper.Data.Meta;
 
 namespace BusyBeekeeper.Data.Serialization
 {
@@ -32,6 +34,67 @@ namespace BusyBeekeeper.Data.Serialization
         public List<int> QueenBeeIds { get; set; }
         public List<int> SuperIds { get; set; }
         public List<int> SuperPaintIds { get; set; }
+
+        public Player ToPlayer(ContentManager contentManager)
+        {
+            var metaPlayerAvatar = contentManager.Load<MetaPlayerAvatar>("MetaPlayerAvatar" + this.AvatarId);
+            var metaBeeSuit = contentManager.Load<MetaBeeSuit>("MetaBeeSuit" + this.BeeSuitId);
+            var metaHoneyExtractor = contentManager.Load<MetaHoneyExtractor>("MetaHoneyExtractor" + this.HoneyExtractorId);
+            var metaLawnMower = contentManager.Load<MetaLawnMower>("MetaLawnMower" + this.LawnMowerId);
+            var metaMarketBooth = contentManager.Load<MetaMarketBooth>("MetaMarketBooth" + this.MarketBoothId);
+            var primaryMetaMarketHelper = contentManager.Load<MetaMarketHelper>("MetaMarketHelper" + this.PrimaryMarketHelperId);
+            var secondaryMetaMarketHelper = contentManager.Load<MetaMarketHelper>("MetaMarketHelper" + this.SecondaryMarketHelperId);
+            var metaSmoker = contentManager.Load<MetaSmoker>("MetaSmoker" + this.SmokerId);
+            var metaTruck = contentManager.Load<MetaTruck>("MetaTruck" + this.TruckId);
+            var metaUncapingKnife = contentManager.Load<MetaUncapingKnife>("MetaUncapingKnife" + this.UncapingKnifeId);
+
+            var player = new Player(this.SlotKey, this.Name, metaPlayerAvatar.ToPlayerAvatar());
+            player.TotalRealTimePlayed.Value = this.TotalRealTimePlayed;
+            player.AvailableCoins.Value = this.AvailableCoins;
+            player.TotalCoinsEarned.Value = this.TotalCoinsEarned;
+            player.TotalCoinsSpent.Value = this.TotalCoinsSpent;
+            player.BeeSuit = metaBeeSuit.ToBeeSuit();
+            player.HoneyExtractor = metaHoneyExtractor.ToHoneyExtractor();
+            player.LawnMower = metaLawnMower.ToLawnMower();
+            player.MarketBooth = metaMarketBooth.ToMarketBooth();
+            player.PrimaryMarketHelper = primaryMetaMarketHelper.ToMarkerHelper();
+            player.SecondaryMarketHelper = secondaryMetaMarketHelper.ToMarkerHelper();
+            player.Smoker = metaSmoker.ToSmoker();
+            player.Truck = metaTruck.ToTruck();
+            player.UncapingKnife = metaUncapingKnife.ToUncapingKnife();
+
+            foreach (var id in this.FilledBottleIds)
+            {
+                var metaBottle = contentManager.Load<MetaBottle>("MetaBottle" + id);
+                player.FilledBottles.Add(metaBottle.ToBottle());
+            }
+            
+            foreach (var id in this.EmptyBottleIds)
+            {
+                var metaBottle = contentManager.Load<MetaBottle>("MetaBottle" + id);
+                player.EmptyBottles.Add(metaBottle.ToBottle());
+            }
+
+            foreach (var id in this.QueenBeeIds)
+            {
+                var metaQueenBee = contentManager.Load<MetaQueenBee>("MetaQueenBee" + id);
+                player.QueenBees.Add(metaQueenBee.ToQueenBee());
+            }
+
+            foreach (var id in this.SuperIds)
+            {
+                var metaSuper = contentManager.Load<MetaSuper>("MetaSuper" + id);
+                player.Supers.Add(metaSuper.ToSuper());
+            }
+
+            foreach (var id in this.SuperPaintIds)
+            {
+                var metaSuperPaint = contentManager.Load<MetaSuperPaint>("MetaSuperPaint" + id);
+                player.SuperPaints.Add(metaSuperPaint.ToSuperPaint());
+            }
+
+            return player;
+        }
 
         /// <summary>
         /// Creates a new SerializablePlayer from the given Player.

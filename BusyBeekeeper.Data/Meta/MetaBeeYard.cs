@@ -67,5 +67,10 @@ namespace BusyBeekeeper.Data.Meta
         /// Gets or sets the maximum height each bee hive can achieve.
         /// </summary>
         public int BeeHiveCeiling { get; set; }
+
+        public BeeYard ToBeeYard()
+        {
+            return null;
+        }
     }
 }

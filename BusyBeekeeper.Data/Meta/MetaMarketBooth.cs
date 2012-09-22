@@ -47,5 +47,10 @@ namespace BusyBeekeeper.Data.Meta
         /// to actually try to buy honey.
         /// </summary>
         public float CustomerWillingnessToBuyFactor { get; set; }
+
+        public MarketBooth ToMarketBooth()
+        {
+            return null;
+        }
     }
 }

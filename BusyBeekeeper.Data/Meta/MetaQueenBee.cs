@@ -65,5 +65,10 @@ namespace BusyBeekeeper.Data.Meta
         /// to swarm over time.
         /// </summary>
         public float SwarmLikelinessFactor { get; set; }
+
+        public QueenBee ToQueenBee()
+        {
+            return null;
+        }
     }
 }

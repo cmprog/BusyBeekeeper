@@ -22,11 +22,11 @@ namespace BusyBeekeeper.Data.Meta.Pipeline.Processors
     /// display name for this processor.
     /// </summary>
     [ContentProcessor(DisplayName = "BB - MetaBeeSuit Processor")]
-    public class MetaBeeSuitProcessor : ContentProcessor<XDocument, IList<MetaBeeSuit>>
+    public class MetaBeeSuitProcessor : ContentProcessor<XDocument, MetaBeeSuit>
     {
-        public override IList<MetaBeeSuit> Process(XDocument document, ContentProcessorContext context)
+        public override MetaBeeSuit Process(XDocument document, ContentProcessorContext context)
         {
-            return new MetaBeeSuit[0];
+            return new MetaBeeSuit();
         }
     }
 }

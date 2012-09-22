@@ -53,5 +53,10 @@ namespace BusyBeekeeper.Data.Meta
         /// Gets or sets the ID of the MetaSuper this paint will work on.
         /// </summary>
         public int MetaSuperId { get; set; }
+
+        public SuperPaint ToSuperPaint()
+        {
+            return null;
+        }
     }
 }

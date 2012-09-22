@@ -48,5 +48,10 @@ namespace BusyBeekeeper.Data.Meta
         /// can mow the lawn.
         /// </summary>
         public float MowingSpeedFactor { get; set; }
+
+        public LawnMower ToLawnMower()
+        {
+            return null;
+        }
     }
 }

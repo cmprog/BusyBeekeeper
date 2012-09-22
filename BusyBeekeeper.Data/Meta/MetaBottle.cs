@@ -40,5 +40,10 @@ namespace BusyBeekeeper.Data.Meta
         /// Gets or sets how much honey this bottle can hold.
         /// </summary>
         public int HoneyCapacity { get; set; }
+
+        public Bottle ToBottle()
+        {
+            return null;
+        }
     }
 }
