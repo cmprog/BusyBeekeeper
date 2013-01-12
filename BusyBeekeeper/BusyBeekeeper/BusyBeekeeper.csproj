@@ -107,58 +107,44 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Behaviors\FadeBehavior.cs" />
-    <Compile Include="Behaviors\InputTextBoxBehavior.cs" />
-    <Compile Include="Behaviors\OnMouseUpBehavior.cs" />
-    <Compile Include="Behaviors\OnFocusFontChangeBehavior.cs" />
-    <Compile Include="Behaviors\RadioButtonBehavior.cs" />
-    <Compile Include="Components\FadeComponent.cs" />
-    <Compile Include="Components\GameSlotButtonComponent.cs" />
-    <Compile Include="Components\AvatarSelectionComponent.cs" />
-    <Compile Include="Components\TextBoxComponent.cs" />
-    <Compile Include="Extensions\ComponentExtensions.cs" />
-    <Compile Include="GameStateManagement\GameScreen.cs" />
-    <Compile Include="InputAction.cs" />
+    <Compile Include="BeeWorldManagerComponent.cs" />
+    <Compile Include="BusyBeekeeperGame.cs" />
+    <Compile Include="DataRepositories\BeeYardRepository.cs" />
+    <Compile Include="DataRepositories\PlayerAvatarRepository.cs" />
+    <Compile Include="DebugConsoleTickDumper.cs" />
+    <Compile Include="IGameScreen.cs" />
+    <Compile Include="IGameScreenManager.cs" />
     <Compile Include="InputState.cs" />
-    <Compile Include="GameStateManagement\PopupScreen.cs" />
-    <Compile Include="GameStateManagement\ScreenManager.cs" />
-    <Compile Include="GameStateManagement\TransitionScreen.cs" />
-    <Compile Include="MessageHandlers\SwitchableColorMessageHandler.cs" />
-    <Compile Include="PlayerManager.cs" />
-    <Compile Include="PlayerSummary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="BusyBeekeeperGame.cs" />
-    <Compile Include="Screens\BackgroundScreen.cs" />
-    <Compile Include="Screens\BeeHiveScreen.cs" />
+    <Compile Include="ScreenManagerComponent.cs" />
+    <Compile Include="Screens\BeeWorldScreen.cs" />
     <Compile Include="Screens\BeeYardScreen.cs" />
-    <Compile Include="Screens\BottlingScreen.cs" />
-    <Compile Include="Screens\CreatePlayerScreen.cs" />
-    <Compile Include="Screens\CreditsScreen.cs" />
-    <Compile Include="Screens\ExtractionScreen.cs" />
-    <Compile Include="Screens\FarmersMarkerScreen.cs" />
-    <Compile Include="Screens\GameSelectionScreen.cs" />
-    <Compile Include="Screens\HoneyHouseScreen.cs" />
-    <Compile Include="Screens\InventoryScreen.cs" />
-    <Compile Include="Screens\MarketPricesScreen.cs" />
-    <Compile Include="Screens\MarketSummaryScreen.cs" />
-    <Compile Include="Screens\ShopScreen.cs" />
-    <Compile Include="Screens\TitleScreen.cs" />
-    <Compile Include="Screens\UncappingScreen.cs" />
-    <Compile Include="Screens\WorldScreen.cs" />
+    <Compile Include="Screens\Components\Button.cs" />
+    <Compile Include="Screens\Components\EmptyBackgroundRenderer.cs" />
+    <Compile Include="Screens\Components\IBackgroundRenderer.cs" />
+    <Compile Include="Screens\Components\Label.cs" />
+    <Compile Include="Screens\Components\RectangleScreenComponent.cs" />
+    <Compile Include="Screens\Components\ScreenComponent.cs" />
+    <Compile Include="Screens\Components\SolidBackgroundRenderer.cs" />
+    <Compile Include="Screens\GameScreenBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
     <Content Include="GameThumbnail.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\BusyBeekeeper.Core\BusyBeekeeper.Core.csproj">
+      <Project>{48F7F5CF-F3B3-4448-925A-8F375EDE62A1}</Project>
+      <Name>BusyBeekeeper.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\BusyBeekeeper.Data.Graphics\BusyBeekeeper.Data.Graphics.csproj">
+      <Project>{3C7BE0A3-0CB8-4472-9685-28F45BBD330B}</Project>
+      <Name>BusyBeekeeper.Data.Graphics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\BusyBeekeeper.Data\BusyBeekeeper.Data.csproj">
       <Project>{D140ED48-BA97-452E-AD48-EE4B1E7D3A1D}</Project>
       <Name>BusyBeekeeper.Data</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\TccLib.Xna.Framework\TccLib.Xna.Framework.csproj">
-      <Project>{68D1D67E-3C37-4C07-A40F-EAD2D786841D}</Project>
-      <Name>TccLib.Xna.Framework</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\TccLib\TccLib.csproj">
       <Project>{A3EF9DBE-14A6-4EAF-8238-513903387DD7}</Project>
@@ -196,9 +182,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Renderers\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--

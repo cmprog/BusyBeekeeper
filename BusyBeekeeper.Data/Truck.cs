@@ -2,26 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using TccLib.Xna.Framework;
 
 namespace BusyBeekeeper.Data
 {
-    /// <summary>
-    /// Moving from one bee yard to another is a slow task, especially when transporting
-    /// harvested supers. Trucks help out with that.
-    /// </summary>
-    public class Truck : Component
+    public sealed class Truck
     {
-        /// <summary>
-        /// Initializes a new instance of the Truck class.
-        /// </summary>
-        public Truck()
-        {
-        }
+        public int Id { get; set; }
 
-        /// <summary>
-        /// Gets the resource ID of this truck - used in serialization.
-        /// </summary>
-        public int ResourceId { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int Level { get; set; }
+
+        public int PurchasePrice { get; set; }
+        public bool IsUnlocked { get; set; }
+
+        public int TravelSpeedFactor { get; set; }
     }
 }

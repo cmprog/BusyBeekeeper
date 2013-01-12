@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-using BusyBeekeeper.GameStateManagement;
 
 namespace BusyBeekeeper
 {
@@ -17,6 +16,10 @@ namespace BusyBeekeeper
     /// </summary>
     public class BusyBeekeeperGame : Microsoft.Xna.Framework.Game
     {
+        private DebugConsoleTickDumper mTickDumper = new DebugConsoleTickDumper();
+        private BeeWorldManagerComponent mBeeWorldManagerComponent;
+        private ScreenManagerComponent mScreenManagerComponent;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BusyBeekeeperGame"/> class.
         /// </summary>
@@ -24,21 +27,32 @@ namespace BusyBeekeeper
         {
             this.IsMouseVisible = true;
             this.TargetElapsedTime = TimeSpan.FromTicks(333333);
-            this.Graphics = new GraphicsDeviceManager(this);
             this.Content.RootDirectory = "Content";
 
-            this.ScreenManager = new ScreenManager(this, new Screens.TitleScreen());
-            this.Components.Add(this.ScreenManager);
+            this.Graphics = new GraphicsDeviceManager(this);
+            this.Graphics.IsFullScreen = false;
+            this.Graphics.PreferredBackBufferWidth = 1136;
+            this.Graphics.PreferredBackBufferHeight = 640;
+        }
+
+        protected override void LoadContent()
+        {
+            base.LoadContent();
+            
+            this.mBeeWorldManagerComponent = new BeeWorldManagerComponent(this);
+            this.mBeeWorldManagerComponent.BeeWorldManager.Tick += x => this.mTickDumper.Dump(x);
+            this.mBeeWorldManagerComponent.Initialize();
+            this.Components.Add(this.mBeeWorldManagerComponent);
+
+            var lInitialGameScreen = new Screens.BeeWorldScreen();
+            this.mScreenManagerComponent = new ScreenManagerComponent(this, lInitialGameScreen, this.mBeeWorldManagerComponent.BeeWorldManager);
+            this.mScreenManagerComponent.Initialize();
+            this.Components.Add(this.mScreenManagerComponent);
         }
 
         /// <summary>
         /// Gets or sets the GraphicsDeviceManager responsible for this game.
         /// </summary>
         private GraphicsDeviceManager Graphics { get; set; }
-
-        /// <summary>
-        /// Gets or sets a the ScreenManager associated with the game.
-        /// </summary>
-        private ScreenManager ScreenManager { get; set; }
     }
 }

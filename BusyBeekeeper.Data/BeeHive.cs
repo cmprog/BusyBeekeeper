@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using TccLib.Xna.Framework;
 
 namespace BusyBeekeeper.Data
 {
@@ -10,18 +9,23 @@ namespace BusyBeekeeper.Data
     /// The basic hosing unit of a bee colony. A bee hive lives at a yard and is made up
     /// of various supers.
     /// </summary>
-    public class BeeHive : Component
+    public class BeeHive
     {
-        /// <summary>
-        /// Initializes a new instance of the BeeHive class.
-        /// </summary>
-        public BeeHive()
-        {
-        }
+        private readonly ICollection<Super> mSupers = new List<Super>();
 
-        /// <summary>
-        /// Gets the id of the location within the yard where this hive is located.
-        /// </summary>
-        public int YardLocationId { get; set; }
+        public int Id { get; set; }
+        
+        public QueenBee QueenBee { get; set; }
+
+        public int Population { get; set; }
+        public int HoneyCollected { get; set; }
+        public int ColonyStrength { get; set; }
+        public int ColonyAgressiveness { get; set; }
+        public int ColonySwarmLikeliness { get; set; }
+
+        public ICollection<Super> Supers
+        {
+            get { return this.mSupers; }
+        }
     }
 }

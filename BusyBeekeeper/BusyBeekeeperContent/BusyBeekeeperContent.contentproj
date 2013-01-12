@@ -42,13 +42,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Fonts\BasicFont.spritefont">
-      <Name>BasicFont</Name>
-      <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Originals\" />
   </ItemGroup>
   <ItemGroup>
@@ -59,8 +52,53 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Fonts\BasicFontBold.spritefont">
-      <Name>BasicFontBold</Name>
+    <Compile Include="GraphicsData\BeeWorld\YardLocations.bywi">
+      <Name>YardLocations</Name>
+      <Importer>BeeYardWorldInfoImporter</Importer>
+      <Processor>BeeYardWorldInfoProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\BusyBeekeeper.Data.Graphics.PipelineExtensions\BusyBeekeeper.Data.Graphics.PipelineExtensions.csproj">
+      <Project>{83F16CC6-73E3-46D6-9A0C-0F669C9754B1}</Project>
+      <Name>BusyBeekeeper.Data.Graphics.PipelineExtensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\BusyBeekeeper.Data.PipelineExtensions\BusyBeekeeper.Data.PipelineExtensions.csproj">
+      <Project>{DE985B31-FFFB-4C2B-BBF9-1E29DDE036C3}</Project>
+      <Name>BusyBeekeeper.Data.PipelineExtensions</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Fonts\DefaultBig.spritefont">
+      <Name>DefaultBig</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Data\BeeYards.byd">
+      <Name>BeeYards</Name>
+      <Importer>BeeYardDataImporter</Importer>
+      <Processor>BeeYardDataProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Fonts\DefaultNormal.spritefont">
+      <Name>DefaultNormal</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Fonts\DefaultSmall.spritefont">
+      <Name>DefaultSmall</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Fonts\DefaultTiny.spritefont">
+      <Name>DefaultTiny</Name>
       <Importer>FontDescriptionImporter</Importer>
       <Processor>FontDescriptionProcessor</Processor>
     </Compile>

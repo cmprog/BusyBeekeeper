@@ -2,26 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using TccLib.Xna.Framework;
 
 namespace BusyBeekeeper.Data
 {
-    /// <summary>
-    /// Smokers are used to help ease the aggression of a hive. They also help urge bees to return to the
-    /// hive when transporting them.
-    /// </summary>
-    public class Smoker : Component
+    public sealed class Smoker
     {
-        /// <summary>
-        /// Initializes a new instance of the Smoker class.
-        /// </summary>
-        public Smoker()
-        {
-        }
+        public int Id { get; set; }
 
-        /// <summary>
-        /// Gets the resource ID of this smoker - used in serialization.
-        /// </summary>
-        public int ResourceId { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+
+        public int PurcahsePrice { get; set; }
+        public bool IsUnlocked { get; set; }
+        public int Level { get; set; }
+
+        public int BeeAggressionFactor {get;set;}
     }
 }

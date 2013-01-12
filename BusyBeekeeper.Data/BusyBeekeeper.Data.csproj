@@ -95,48 +95,26 @@
     <Compile Include="Award.cs" />
     <Compile Include="BeeHive.cs" />
     <Compile Include="BeeSuit.cs" />
+    <Compile Include="BeeTime.cs" />
+    <Compile Include="BeeTimeSpan.cs" />
     <Compile Include="BeeYard.cs" />
-    <Compile Include="BeeYardHiveLocation.cs" />
     <Compile Include="Bottle.cs" />
-    <Compile Include="ComponentCollection.cs" />
-    <Compile Include="ComponentCollectionCountChangedMessage.cs" />
     <Compile Include="HoneyExtractor.cs" />
-    <Compile Include="LawnMower.cs" />
-    <Compile Include="MarketBooth.cs" />
-    <Compile Include="MarketHelper.cs" />
-    <Compile Include="Meta\MetaBottle.cs" />
-    <Compile Include="Meta\MetaPlayerAvatar.cs" />
-    <Compile Include="Meta\MetaBeeSuit.cs" />
-    <Compile Include="Meta\MetaBeeYard.cs" />
-    <Compile Include="Meta\MetaHoneyExtractor.cs" />
-    <Compile Include="Meta\MetaLawnMower.cs" />
-    <Compile Include="Meta\MetaMarketBooth.cs" />
-    <Compile Include="Meta\MetaMarketHelper.cs" />
-    <Compile Include="Meta\MetaQueenBee.cs" />
-    <Compile Include="Meta\MetaSmoker.cs" />
-    <Compile Include="Meta\MetaSuper.cs" />
-    <Compile Include="Meta\MetaSuperPaint.cs" />
-    <Compile Include="Meta\MetaTruck.cs" />
-    <Compile Include="Meta\MetaUncapingKnife.cs" />
+    <Compile Include="MetaBottle.cs" />
+    <Compile Include="MetaPlayerAvatar.cs" />
+    <Compile Include="MetaQueenBee.cs" />
+    <Compile Include="MetaSuper.cs" />
+    <Compile Include="MetaSuperPaint.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PlayerAvatar.cs" />
+    <Compile Include="PlayerLocation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueenBee.cs" />
-    <Compile Include="Serialization\SerializableBeeHive.cs" />
-    <Compile Include="Serialization\SerializableBeeYard.cs" />
-    <Compile Include="Serialization\SerializablePlayer.cs" />
-    <Compile Include="Serialization\SerializableSuper.cs" />
     <Compile Include="Smoker.cs" />
     <Compile Include="Super.cs" />
     <Compile Include="SuperPaint.cs" />
     <Compile Include="Truck.cs" />
     <Compile Include="UncapingKnife.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TccLib.Xna.Framework\TccLib.Xna.Framework.csproj">
-      <Project>{68D1D67E-3C37-4C07-A40F-EAD2D786841D}</Project>
-      <Name>TccLib.Xna.Framework</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
