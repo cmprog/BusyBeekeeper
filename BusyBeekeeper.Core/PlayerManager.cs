@@ -11,10 +11,13 @@ namespace BusyBeekeeper.Core
         private Player mPlayer;
 
         private readonly List<IUpdatable> mUpdatables = new List<IUpdatable>();
-
+        private readonly List<BeeYardManager> mBeeYardManagers = new List<BeeYardManager>();
+        
         public void CreateNew(
             int id, string name, PlayerAvatar avatar, BeeWorldManager beeWorldManager,
-            IObjectRepository<BeeYard> beeYardRepository)
+            IObjectRepository<BeeYard> beeYardRepository,
+            IMetaObjectRepository<MetaSuper, Super> superRepository,
+            IObjectRepository<LawnMower> lawnMowerRepository)
         {
             this.mPlayer = new Player();
             this.mPlayer.Id = id;
@@ -24,6 +27,7 @@ namespace BusyBeekeeper.Core
             this.mPlayer.LastPlayed = DateTime.Now;
             this.mPlayer.TotalRealTimePlayed = TimeSpan.Zero;
             this.mPlayer.BeeTime = new BeeTime();
+            this.mPlayer.LawnMower = lawnMowerRepository.CreateObject(0);
 
             for (int lBeeYardId = 0; lBeeYardId < beeYardRepository.Count; lBeeYardId++)
             {
@@ -38,10 +42,18 @@ namespace BusyBeekeeper.Core
                 }
             }
 
+            var lFirstBeeYard = this.mPlayer.BeeYards[0];
+            lFirstBeeYard.IsUnlocked = true;
+            var lInitialSuper = superRepository.CreateObject(0);
+            lFirstBeeYard.BeeHives[0].Supers.Add(lInitialSuper);
+
             beeWorldManager.Time.Reset(this.mPlayer.BeeTime);
 
+            this.mBeeYardManagers.Clear();
+            this.mBeeYardManagers.AddRange(this.mPlayer.BeeYards.Select(x => new BeeYardManager(x)));
+
             this.mUpdatables.Clear();
-            this.mUpdatables.AddRange(this.mPlayer.BeeYards.Select(x => new BeeYardManager(x)));
+            this.mUpdatables.AddRange(this.mBeeYardManagers);
         }
 
         public void Load(int id, BeeWorldManager beeWorldManager)
@@ -54,9 +66,15 @@ namespace BusyBeekeeper.Core
             get { return this.mPlayer; }
         }
 
+        public IList<BeeYardManager> BeeYardManagers
+        {
+            get { return this.mBeeYardManagers; }
+        }
+
         public void Save()
         {
-            throw new NotImplementedException();
+            if (this.mPlayer == null) return;
+            // TODO:
         }
 
         internal void Update(TimeSpan elapsedRealTime)

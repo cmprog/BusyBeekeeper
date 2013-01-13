@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace BusyBeekeeper.Screens.Components
+namespace BusyBeekeeper.Screens.CommonComponents
 {
     internal sealed class EmptyBackgroundRenderer : IBackgroundRenderer
     {

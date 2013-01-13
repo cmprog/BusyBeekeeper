@@ -1,0 +1,7 @@
+﻿3
+0||Scissors||Seriously? I guess grandpa was pretty old school.||1||1||1
+1||Weed Whacker||Cheap, light and portable.||1||2||2
+2||Lawn Master 9001||It uses magnets - somehow - to quickly clip the grass.||1||3||3
+
+LEGEND:
+MowerID||Name||Description||PurchasePrice||Level||SpeedFactor

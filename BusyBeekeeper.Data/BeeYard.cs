@@ -17,6 +17,13 @@ namespace BusyBeekeeper.Data
         public string Name { get; set; }
         public string Description { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating the amount of grass (and general foliage) growth
+        /// in the area of the yard. Too much grass makes it harder to work and the bee's don't
+        /// like it.
+        /// </summary>
+        public int GrassGrowth { get; set; }
+
         public int PurchasePrice { get; set; }
         public bool IsUnlocked { get; set; }
 

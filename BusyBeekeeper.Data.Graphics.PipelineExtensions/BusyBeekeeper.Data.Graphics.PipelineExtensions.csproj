@@ -52,6 +52,8 @@
   <ItemGroup>
     <Compile Include="BeeWorld\BeeYardWorldInfoImporter.cs" />
     <Compile Include="BeeWorld\BeeYardWorldInfoProcessor.cs" />
+    <Compile Include="BeeYard\BeeYardHiveInformationImporter.cs" />
+    <Compile Include="BeeYard\BeeYardWorldInfoProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

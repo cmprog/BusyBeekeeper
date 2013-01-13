@@ -103,6 +103,41 @@
       <Processor>FontDescriptionProcessor</Processor>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GraphicsData\BeeYard\HiveInformation_0.byhi">
+      <Name>HiveInformation_0</Name>
+      <Importer>BeeYardHiveInfoImporter</Importer>
+      <Processor>BeeYardHiveInfoProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GraphicsData\BeeYard\HiveInformation_1.byhi">
+      <Name>HiveInformation_1</Name>
+      <Importer>BeeYardHiveInfoImporter</Importer>
+      <Processor>BeeYardHiveInfoProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GraphicsData\BeeYard\HiveInformation_3.byhi">
+      <Name>HiveInformation_3</Name>
+      <Importer>BeeYardHiveInfoImporter</Importer>
+      <Processor>BeeYardHiveInfoProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GraphicsData\BeeYard\HiveInformation_2.byhi">
+      <Name>HiveInformation_2</Name>
+      <Importer>BeeYardHiveInfoImporter</Importer>
+      <Processor>BeeYardHiveInfoProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Data\LawnMowers.lmd">
+      <Name>LawnMowers</Name>
+      <Importer>LawnMowerDataImporter</Importer>
+      <Processor>LawnMowerDataProcessor</Processor>
+    </Compile>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--  To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using BusyBeekeeper.Screens.Components;
+using BusyBeekeeper.Screens.CommonComponents;
 using BusyBeekeeper.Data;
 using BusyBeekeeper.Data.Graphics.BeeWorld;
 
@@ -14,74 +14,73 @@ namespace BusyBeekeeper.Screens
     {
         private Texture2D mBlankTexture;
 
-        private Button[] mBeeYardNameButtons;
-
-        private Color mYardColor = Color.Blue;
-        private BeeYardWorldInfo[] mYardInfos;
+        private BeeWorldYardComponent[] mYardComponents;
+        private BeeWorldHudComponent mHudComponent;
 
         public override void LoadContent()
         {
             base.LoadContent();
             this.mBlankTexture = this.ContentManager.Load<Texture2D>("Sprites/Blank");
-            this.mYardInfos = this.ContentManager.Load<BeeYardWorldInfo[]>("GraphicsData/BeeWorld/YardLocations");
+
+            var lYardInfos = this.ContentManager.Load<BeeYardWorldInfo[]>("GraphicsData/BeeWorld/YardLocations");
             var lBeeYards = this.ScreenManager.Player.BeeYards;
 
             var lBlueBackgroundRenderer = new SolidBackgroundRenderer(this.mBlankTexture, Color.Blue);
-            
-            this.mBeeYardNameButtons = new Button[this.mYardInfos.Length];
-            for (int lIndex = 0; lIndex < this.mYardInfos.Length; lIndex++)
+
+            this.mYardComponents = new BeeWorldYardComponent[lYardInfos.Length];
+            for (int lIndex = 0; lIndex < lYardInfos.Length; lIndex++)
             {
-                var lYardInfo = this.mYardInfos[lIndex];
+                var lYardInfo = lYardInfos[lIndex];
                 var lBeeYard = lBeeYards[lYardInfo.Id];
 
-                var lButton = new Button();
-                lButton.Font = this.ContentManager.Load<SpriteFont>("Fonts/DefaultSmall");
-                lButton.TextColor = Color.White;
-                lButton.BackgroundRenderer = lBlueBackgroundRenderer;
-                lButton.Tag = lYardInfo.Id;
-                lButton.Size = lYardInfo.NameSize;
-                lButton.Position = lYardInfo.NamePosition;
-                lButton.Text = lBeeYard.Name;
+                var lYardComponent = new BeeWorldYardComponent(lBeeYard, lYardInfo);
+                lYardComponent.LoadContent(this.ContentManager);
+                lYardComponent.TravelToYard += this.YardComponent_TravelToYard;
 
-                this.mBeeYardNameButtons[lIndex] = lButton;
+                this.mYardComponents[lIndex] = lYardComponent;
             }
+
+            this.mHudComponent = new BeeWorldHudComponent(this.ScreenManager.BeeWorldManager, this.ScreenSize);
+            this.mHudComponent.LoadContent(this.ContentManager);
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            foreach (var lButton in this.mBeeYardNameButtons) lButton.Update(gameTime);
+
+            foreach (var lYardComponent in this.mYardComponents) lYardComponent.Update(gameTime);
+            this.mHudComponent.Update(gameTime);
         }
 
         public override void HandleInput(InputState inputState)
         {
             base.HandleInput(inputState);
 
-            if (inputState.MouseLeftClickUp())
+            foreach (var lYardComponent in this.mYardComponents)
             {
-                var lCurrentMouseState = inputState.CurrentMouseState;
-                var lClickedButton = this.mBeeYardNameButtons
-                    .FirstOrDefault(x => x.HitTest(lCurrentMouseState.X, lCurrentMouseState.Y));
-
-                if (lClickedButton != null)
-                {
-                    var lYardId = (int)lClickedButton.Tag;
-                    var lPlayer = this.ScreenManager.Player;
-                    var lBeeYard = lPlayer.BeeYards[lYardId];
-                    lPlayer.TravelTo(lBeeYard);
-
-                    var lBeeYardScreen = new BeeYardScreen();
-                    this.ScreenManager.TransitionTo(lBeeYardScreen);
-                    return;
-                }
+                if (lYardComponent.HandleInput(inputState)) return;
             }
+
+            if (this.mHudComponent.HandleInput(inputState)) return;
         }
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            base.Draw(spriteBatch, gameTime);            
+            base.Draw(spriteBatch, gameTime);
+            
             spriteBatch.Draw(this.mBlankTexture, Vector2.Zero, null, Color.Black, 0, Vector2.Zero, this.ScreenSize, SpriteEffects.None, 0);
-            foreach (var lButton in this.mBeeYardNameButtons) lButton.Draw(spriteBatch, gameTime);
+            foreach (var lYardComponent in this.mYardComponents) lYardComponent.Draw(spriteBatch, gameTime);
+            this.mHudComponent.Draw(spriteBatch, gameTime);
+        }
+
+        private void YardComponent_TravelToYard(BeeWorldYardComponent yardComponent)
+        {
+            var lBeeYard = yardComponent.BeeYard;
+            var lPlayer = this.ScreenManager.Player;
+            lPlayer.TravelTo(lBeeYard);
+
+            var lBeeYardScreen = new BeeYardScreen();
+            this.ScreenManager.TransitionTo(lBeeYardScreen);
         }
     }
 }

@@ -16,7 +16,6 @@ namespace BusyBeekeeper
     /// </summary>
     public class BusyBeekeeperGame : Microsoft.Xna.Framework.Game
     {
-        private DebugConsoleTickDumper mTickDumper = new DebugConsoleTickDumper();
         private BeeWorldManagerComponent mBeeWorldManagerComponent;
         private ScreenManagerComponent mScreenManagerComponent;
 
@@ -40,7 +39,6 @@ namespace BusyBeekeeper
             base.LoadContent();
             
             this.mBeeWorldManagerComponent = new BeeWorldManagerComponent(this);
-            this.mBeeWorldManagerComponent.BeeWorldManager.Tick += x => this.mTickDumper.Dump(x);
             this.mBeeWorldManagerComponent.Initialize();
             this.Components.Add(this.mBeeWorldManagerComponent);
 
@@ -48,6 +46,12 @@ namespace BusyBeekeeper
             this.mScreenManagerComponent = new ScreenManagerComponent(this, lInitialGameScreen, this.mBeeWorldManagerComponent.BeeWorldManager);
             this.mScreenManagerComponent.Initialize();
             this.Components.Add(this.mScreenManagerComponent);
+        }
+
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            base.OnExiting(sender, args);
+            this.mBeeWorldManagerComponent.BeeWorldManager.PlayerManager.Save();
         }
 
         /// <summary>

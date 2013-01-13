@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BusyBeekeeper.Data
 {
-    public sealed class Smoker
+    public sealed class LawnMower
     {
         public int Id { get; set; }
 
@@ -16,6 +16,6 @@ namespace BusyBeekeeper.Data
         public bool IsUnlocked { get; set; }
         public int Level { get; set; }
 
-        public int BeeAggressionFactor {get;set;}
+        public int SpeedFactor { get; set; }
     }
 }

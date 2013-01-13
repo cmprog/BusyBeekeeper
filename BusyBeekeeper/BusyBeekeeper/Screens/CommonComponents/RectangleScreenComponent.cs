@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 
-namespace BusyBeekeeper.Screens.Components
+namespace BusyBeekeeper.Screens.CommonComponents
 {
     internal abstract class RectangleScreenComponent : ScreenComponent
     {

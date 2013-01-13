@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
-namespace BusyBeekeeper.Screens.Components
+namespace BusyBeekeeper.Screens.CommonComponents
 {
     internal class Label : RectangleScreenComponent
     {

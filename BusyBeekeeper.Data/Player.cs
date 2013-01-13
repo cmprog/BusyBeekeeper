@@ -33,7 +33,7 @@ namespace BusyBeekeeper.Data
         public BeeSuit BeeSuit { get; set; }
         public Smoker Smoker { get; set; }
         public UncapingKnife UncapingKnife { get; set; }
-
+        public LawnMower LawnMower { get; set; }
         public Truck Truck { get; set; }
         public HoneyExtractor HoneyExtractor { get; set; }
 

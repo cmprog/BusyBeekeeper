@@ -8,9 +8,12 @@ namespace BusyBeekeeper.Core
 {
     public sealed class BeeWorldManager
     {
-        private readonly PlayerManager mPlayerManager;
         private readonly BeeTime mTime;
         private readonly BeeTimeSpan mElapsedTimeSpan;
+
+        private readonly PlayerManager mPlayerManager;
+        private readonly List<IUpdatable> mUpdatables = new List<IUpdatable>();
+        private readonly List<BeeYardManager> mBeeYardManagers = new List<BeeYardManager>();
 
         private TimeSpan mLastTick;
 
@@ -19,9 +22,8 @@ namespace BusyBeekeeper.Core
             this.mTime = new BeeTime();
             this.mElapsedTimeSpan = new BeeTimeSpan();
             this.mPlayerManager = new PlayerManager();
+            this.ResetTimeRates();
         }
-
-        public event Action<BeeWorldManager> Tick;
 
         public PlayerManager PlayerManager
         {
@@ -38,7 +40,30 @@ namespace BusyBeekeeper.Core
             get { return this.mElapsedTimeSpan; }
         }
 
+        /// <summary>
+        /// Gets the number of real-world seconds between ticks.
+        /// </summary>
+        public int SecondsPerTick { get; set; }
+
+        /// <summary>
+        /// Gets the number of minutes (in the bee world) to move forward 
+        /// every tick.
+        /// </summary>
+        public int BeeMinutesPerTick { get; set; }
+
         public bool IsPaused { get; set; }
+
+        /// <summary>
+        /// Resets the SecondsPerTick / BeeMinutesPerTick to default values.
+        /// </summary>
+        public void ResetTimeRates()
+        {
+            const int lcDefaultSecondsPerTick = 2;
+            const int lcDefaultBeeMinutesPerTick = 10;
+
+            this.SecondsPerTick = lcDefaultSecondsPerTick;
+            this.BeeMinutesPerTick = lcDefaultBeeMinutesPerTick;
+        }
                 
         public void Update(TimeSpan totalGameTime)
         {
@@ -48,18 +73,15 @@ namespace BusyBeekeeper.Core
                 return;
             }
 
-            const int lcSecondPerTick = 6;
-            const int lcGameMinutesPerTick = 10;
-
             var lElapsedGameTime = totalGameTime - this.mLastTick;
-            if (lElapsedGameTime.TotalSeconds > lcSecondPerTick)
+            if (lElapsedGameTime.TotalSeconds > this.SecondsPerTick)
             {
                 this.mLastTick = totalGameTime;
                 if (this.IsPaused) return;
 
-                this.PlayerManager.Update(TimeSpan.FromSeconds(lcSecondPerTick));
+                this.PlayerManager.Update(TimeSpan.FromSeconds(this.SecondsPerTick));
 
-                var lMinutes = this.Time.Minute + lcGameMinutesPerTick;
+                var lMinutes = this.Time.Minute + this.BeeMinutesPerTick;
                 var lHours = this.Time.Hour;
                 var lDays = this.Time.Day;
 
@@ -80,7 +102,7 @@ namespace BusyBeekeeper.Core
                     lDays++;
                 }
 
-                this.ElapsedTime.TotalMinutes = lcGameMinutesPerTick;
+                this.ElapsedTime.TotalMinutes = this.BeeMinutesPerTick;
                 this.ElapsedTime.HasDayChanged = lHasDayChanged;
                 this.ElapsedTime.HasHourChanged = lHasHourChanged;
 
@@ -89,12 +111,6 @@ namespace BusyBeekeeper.Core
                 this.Time.Minute = lMinutes;
 
                 this.PlayerManager.UpdateTick(this);
-
-                var lTickHandler = this.Tick;
-                if (lTickHandler != null)
-                {
-                    lTickHandler(this);
-                }
             }
         }
     }
