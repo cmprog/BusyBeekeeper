@@ -9,6 +9,11 @@ namespace BusyBeekeeper.Data
     {
         public int MetaId { get; set; }
 
+        public string Name { get; set; }
+        public string Description { get; set; }
+
+        public int Depth { get; set; }
+
         public SuperPaint SuperPaint { get; set; }
     }
 }

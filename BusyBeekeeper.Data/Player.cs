@@ -37,7 +37,6 @@ namespace BusyBeekeeper.Data
         public Truck Truck { get; set; }
         public HoneyExtractor HoneyExtractor { get; set; }
 
-        public bool IsTraveling { get; set; }
         public PlayerLocation Location { get; set; }
         public BeeYard CurrentBeeYard { get; set; }
         public BeeHive CurrentBeeHive { get; set; }
@@ -71,47 +70,5 @@ namespace BusyBeekeeper.Data
         {
             get { return this.mSuperPaints; }
         }
-
-        #region Instance Methods
-
-
-        public void TravelTo(BeeYard beeYard)
-        {
-            if (beeYard == this.CurrentBeeYard)
-            {
-                return;
-            }
-
-            this.IsTraveling = true;
-            this.CurrentBeeYard = beeYard;
-            this.CurrentBeeHive = null;
-            this.Location = PlayerLocation.BeeYard;
-        }
-
-        public void TravelTo(BeeHive beeHive)
-        {
-            if (this.CurrentBeeYard.BeeHives.Contains(beeHive))
-            {
-                this.CurrentBeeHive = beeHive;
-                this.Location = PlayerLocation.BeeHive;
-            }
-            else
-            {
-                this.IsTraveling = true;
-                this.CurrentBeeYard = this.BeeYards.First(x => x.BeeHives.Contains(beeHive));
-                this.CurrentBeeHive = beeHive;
-                this.Location = PlayerLocation.BeeHive;
-            }
-        }
-
-        public void TravelToHoneyHouse()
-        {
-            this.IsTraveling = true;
-            this.CurrentBeeHive = null;
-            this.CurrentBeeYard = null;
-            this.Location = PlayerLocation.HoneyHouse;
-        }
-
-        #endregion -- Instance Methods
     }
 }

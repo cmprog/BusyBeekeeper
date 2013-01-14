@@ -51,6 +51,10 @@
   <ItemGroup>
     <Compile Include="BeeYardDataImporter.cs" />
     <Compile Include="BeeYardDataProcessor.cs" />
+    <Compile Include="SmokerDataImporter.cs" />
+    <Compile Include="SmokerDataProcessor.cs" />
+    <Compile Include="QueenBeeDataImporter.cs" />
+    <Compile Include="QueenBeeDataProcessor.cs" />
     <Compile Include="LawnMowerDataImporter.cs" />
     <Compile Include="LawnMowerDataProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

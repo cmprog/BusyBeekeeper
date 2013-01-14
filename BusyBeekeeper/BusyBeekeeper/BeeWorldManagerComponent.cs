@@ -33,10 +33,14 @@ namespace BusyBeekeeper
             var lBeeYardRepository = new DataRepositories.BeeYardRepository(lContentManager);
             var lSuperRepository = new DataRepositories.SuperRepository(lContentManager);
             var lLawnMowerRepository = new DataRepositories.LawnMowerRepository(lContentManager);
+            var lQueenBeeRepository = new DataRepositories.QueenBeeRepository(lContentManager);
+            var lSmokerRepository = new DataRepositories.SmokerRepository(lContentManager);
 
             this.BeeWorldManager.PlayerManager.CreateNew(
-                0, "Caleb", lPlayerRepository.CreateObject(0), this.mBeeWorldManager,
-                lBeeYardRepository, lSuperRepository, lLawnMowerRepository);
+                0, "Caleb", lPlayerRepository.CreateObject(0),
+                lBeeYardRepository, lSuperRepository,
+                lLawnMowerRepository, lQueenBeeRepository,
+                lSmokerRepository);
         }
 
         public override void Update(GameTime gameTime)

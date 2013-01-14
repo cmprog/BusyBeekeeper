@@ -15,14 +15,32 @@ namespace BusyBeekeeper.Core
         private Action mLawnMowingCompleteCallback;
 
         private readonly List<IUpdatable> mUpdatables = new List<IUpdatable>();
+        private readonly BeeHiveManager[] mBeeHiveManagers;
 
-        public BeeYardManager(BeeYard beeYard)
+        public BeeYardManager(BeeWorldManager beeWorldManager, BeeYard beeYard)
         {
+            if (beeWorldManager == null) throw new ArgumentNullException("beeWorldManager");
             if (beeYard == null) throw new ArgumentNullException("beeYard");
+
+            this.mBeeWorldManager = beeWorldManager;
             this.mBeeYard = beeYard;
+
+            this.mBeeHiveManagers = new BeeHiveManager[this.mBeeYard.MaxHiveCount];
+            for (int lIndex = 0; lIndex < this.mBeeHiveManagers.Length; lIndex++)
+            {
+                var lHiveManager = new BeeHiveManager(this.mBeeWorldManager, this.mBeeYard, this.mBeeYard.BeeHives[lIndex]);
+                this.mBeeHiveManagers[lIndex] = lHiveManager;
+            }
+
+            this.mUpdatables.AddRange(this.mBeeHiveManagers);
         }
 
-        public bool IsMowingLawn { get;private set; }
+        public bool IsMowingLawn { get; private set; }
+
+        public IList<BeeHiveManager> BeeHiveManagers
+        {
+            get { return this.mBeeHiveManagers; }
+        }
 
         public void UpdateTick(BeeWorldManager worldManager)
         {
@@ -66,8 +84,7 @@ namespace BusyBeekeeper.Core
         {
             System.Diagnostics.Debug.Assert(!this.IsMowingLawn);
 
-            this.mBeeWorldManager = beeWorldManager;
-            this.mBeeWorldManager.SecondsPerTick = 1;
+            this.mBeeWorldManager.RealTimePerTick = TimeSpan.FromMilliseconds(300);
             this.mBeeWorldManager.BeeMinutesPerTick *= 2;
             this.mLawnMower = lawnMower;
             this.mLawnMowingCompleteCallback = callback;

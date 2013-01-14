@@ -7,7 +7,6 @@ namespace BusyBeekeeper.Data
 {
     public enum PlayerLocation
     {
-        BeeWorld,
         BeeYard,
         BeeHive,
         HoneyHouse,

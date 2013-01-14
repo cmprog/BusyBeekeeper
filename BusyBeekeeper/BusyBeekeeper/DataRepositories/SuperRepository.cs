@@ -27,12 +27,23 @@ namespace BusyBeekeeper.DataRepositories
 
         public Super CreateObject(int metaId)
         {
-            return new Super { MetaId = metaId, SuperPaint = null };
+            return this.CreateObject(this.GetMetaObject(metaId));
         }
 
         public Super CreateObject(MetaSuper metaObject)
         {
-            return this.CreateObject(metaObject.Id);
+            var lSuper = new Super();
+
+            lSuper.MetaId = metaObject.Id;
+
+            lSuper.Name = metaObject.Name;
+            lSuper.Description = metaObject.Description;
+
+            lSuper.Depth = metaObject.Depth;
+
+            lSuper.SuperPaint = null;
+
+            return lSuper;
         }
     }
 }

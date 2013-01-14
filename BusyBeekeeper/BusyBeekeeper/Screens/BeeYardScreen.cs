@@ -39,7 +39,7 @@ namespace BusyBeekeeper.Screens
 
             this.mButtonBeeWorld.Click += this.ButtonBeeWorld_Click;
             this.mButtonBeeWorld.Font = this.ContentManager.Load<SpriteFont>("Fonts/DefaultSmall");
-            this.mButtonBeeWorld.Text = "Travel";
+            this.mButtonBeeWorld.Text = "World";
             this.mButtonBeeWorld.TextColor = Color.White;
             this.mButtonBeeWorld.BackgroundRenderer = new SolidBackgroundRenderer(this.mBlankTexture, Color.Blue);
             this.mButtonBeeWorld.Size = new Vector2(75, 30);
@@ -72,6 +72,7 @@ namespace BusyBeekeeper.Screens
                     this.mBeeYard.BeeHives[lIndex], 
                     lHiveInfos[lIndex], 
                     this.mSuperRepository);
+                lHiveComponent.TravelToHive += this.HiveComponent_TravelToHive;
 
                 this.mHiveComponents[lIndex] = lHiveComponent;
             }
@@ -89,6 +90,11 @@ namespace BusyBeekeeper.Screens
         public override void HandleInput(InputState inputState)
         {
             base.HandleInput(inputState);
+
+            foreach (var lHiveComponent in this.mHiveComponents)
+            {
+                if (lHiveComponent.HandleInput(inputState)) return;
+            }
 
             if (this.mButtonMowGrass.HandleInput(inputState)) return;
             if (this.mButtonBeeWorld.HandleInput(inputState)) return;
@@ -135,6 +141,16 @@ namespace BusyBeekeeper.Screens
             this.mButtonMowGrass.Text = "Mow Lawn";
             this.mButtonMowGrass.IsEnabled = true;
             this.mButtonBeeWorld.IsEnabled = true;
+        }
+
+        private void HiveComponent_TravelToHive(BeeYardHiveComponent hiveComponent)
+        {
+            var lBeeHive = hiveComponent.BeeHive;
+            var lPlayerManager = this.ScreenManager.BeeWorldManager.PlayerManager;
+            lPlayerManager.TravelTo(lBeeHive);
+
+            var lHiveScreen = new BeeHiveScreen();
+            this.ScreenManager.TransitionTo(lHiveScreen);
         }
     }
 }

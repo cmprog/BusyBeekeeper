@@ -76,11 +76,21 @@ namespace BusyBeekeeper.Screens
         private void YardComponent_TravelToYard(BeeWorldYardComponent yardComponent)
         {
             var lBeeYard = yardComponent.BeeYard;
-            var lPlayer = this.ScreenManager.Player;
-            lPlayer.TravelTo(lBeeYard);
+            var lPlayerManager = this.ScreenManager.BeeWorldManager.PlayerManager;
 
             var lBeeYardScreen = new BeeYardScreen();
-            this.ScreenManager.TransitionTo(lBeeYardScreen);
+
+            if (lBeeYard == lPlayerManager.Player.CurrentBeeYard)
+            {
+                this.ScreenManager.TransitionTo(lBeeYardScreen);
+            }
+            else
+            {
+                var lTravelingScreen = new TravelingScreen(lBeeYardScreen);
+                this.ScreenManager.TransitionTo(lTravelingScreen);
+
+                lPlayerManager.TravelTo(lBeeYard, lTravelingScreen.TravelingComplete);
+            }
         }
     }
 }

@@ -46,6 +46,7 @@
     <Compile Include="IMetaObjectRepository.cs" />
     <Compile Include="IObjectRepository.cs" />
     <Compile Include="IUpdatable.cs" />
+    <Compile Include="MathHelper.cs" />
     <Compile Include="PlayerManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

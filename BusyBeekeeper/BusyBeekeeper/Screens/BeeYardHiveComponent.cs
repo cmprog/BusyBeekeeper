@@ -20,12 +20,37 @@ namespace BusyBeekeeper.Screens
         private readonly BeeYardHiveInfo mHiveInfo;
         private readonly SuperRepository mSuperRepository;
 
+        private Vector2 mHivePosition;
+        private Vector2 mHiveSize;
+
         public BeeYardHiveComponent(Texture2D blankTexture, BeeHive beeHive, BeeYardHiveInfo hiveInfo, SuperRepository superRepository)
         {
             this.mBlankTexture = blankTexture;
             this.mBeeHive = beeHive;
             this.mHiveInfo = hiveInfo;
             this.mSuperRepository = superRepository;
+        }
+
+        public BeeHive BeeHive
+        {
+            get { return this.mBeeHive; }
+        }
+
+        public event Action<BeeYardHiveComponent> TravelToHive;
+
+        public override bool HandleInput(InputState inputState)
+        {
+            if (inputState.MouseLeftClickUp())
+            {
+                var lCurrentMouseState = inputState.CurrentMouseState;
+                if (VectorUtilities.HitTest(this.mHivePosition, this.mHiveSize, lCurrentMouseState.X, lCurrentMouseState.Y))
+                {
+                    this.TravelToHive(this);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
@@ -42,10 +67,10 @@ namespace BusyBeekeeper.Screens
             const float lWidth = 75f;
 
             float lHeight = lcDepthToHeightFactor * lTotalDepth;
-            var lTopLeftPosition = new Vector2(lBasePosition.X, lBasePosition.Y - lHeight);
-            var lSize = new Vector2(lWidth, lHeight);
+            this.mHivePosition = new Vector2(lBasePosition.X, lBasePosition.Y - lHeight);
+            this.mHiveSize = new Vector2(lWidth, lHeight);
 
-            spriteBatch.Draw(this.mBlankTexture, lTopLeftPosition, null, Color.White, 0, Vector2.Zero, lSize, SpriteEffects.None, 0);
+            spriteBatch.Draw(this.mBlankTexture, this.mHivePosition, null, Color.White, 0, Vector2.Zero, this.mHiveSize, SpriteEffects.None, 0);
         }
     }
 }

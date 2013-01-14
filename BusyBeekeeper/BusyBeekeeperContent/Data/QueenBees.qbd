@@ -1,0 +1,5 @@
+﻿1
+0||Old Queen||This is an old queen.||50||5||5||0||5||5
+
+Legend:
+QueenID||Name||Description||PurchasePrice||BeePopulationGrowthFactor||HoneyCollectionFactor||ColonyStrengthFactor||NaturalBeeAgressionFactor||SwarmLiklinessFactor
