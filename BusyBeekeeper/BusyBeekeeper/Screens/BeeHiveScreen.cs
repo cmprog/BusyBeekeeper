@@ -14,7 +14,11 @@ namespace BusyBeekeeper.Screens
 {
     internal sealed class BeeHiveScreen : GameScreenBase
     {
+        #region Instance Fields --------------------------------------------------------
+        
         private Texture2D mBlankTexture;
+
+        private Texture2D mSuperTexture;
 
         private readonly Button mButtonBeeYard = new Button();
         private readonly Button mButtonBeeWorld = new Button();
@@ -24,6 +28,7 @@ namespace BusyBeekeeper.Screens
         private readonly Button mButtonExtractHoney = new Button();
         private readonly BeeHiveSuperComponent[] mSuperComponents;
         private BeeHiveHudComponent mHudComponent;
+        private InventoryItemSelectorComponent mInventorySelectorComponent;
         private readonly IList<ScreenComponent> mComponents = new List<ScreenComponent>();
 
         private Player mPlayer;
@@ -32,6 +37,18 @@ namespace BusyBeekeeper.Screens
 
         private SpriteFont mMetaInfoFont;
         private SuperRepository mSuperRepository;
+
+        #endregion
+
+        #region Constructors -----------------------------------------------------------
+
+        #endregion
+
+        #region Instance Properties ----------------------------------------------------
+        
+        #endregion
+
+        #region Instance Methods -------------------------------------------------------
 
         public override void LoadContent()
         {
@@ -63,7 +80,7 @@ namespace BusyBeekeeper.Screens
             this.mButtonBeeYard.BackgroundRenderer = new SolidBackgroundRenderer(this.mBlankTexture, Color.Blue);
             this.mButtonBeeYard.Size = this.mButtonBeeWorld.Size;
             this.mButtonBeeYard.Position = new Vector2(
-                this.mButtonBeeWorld.Position.X, 
+                this.mButtonBeeWorld.Position.X,
                 this.mButtonBeeWorld.Position.Y - this.mButtonBeeWorld.Size.Y - 10);
 
             var lGoldBackgroundRenderer = new SolidBackgroundRenderer(this.mBlankTexture, Color.Gold);
@@ -109,6 +126,12 @@ namespace BusyBeekeeper.Screens
             this.mHudComponent = new BeeHiveHudComponent(this.ScreenManager.BeeWorldManager, this.ScreenSize);
             this.mHudComponent.LoadContent(this.ContentManager);
 
+            this.mInventorySelectorComponent = new InventoryItemSelectorComponent(this.ScreenSize);
+            this.mInventorySelectorComponent.LoadContent(this.ContentManager);
+
+            this.mSuperTexture = new Texture2D(this.ScreenManager.Game.GraphicsDevice, 128, 128);
+            this.mSuperTexture.SetData(Enumerable.Repeat(Color.Pink, 128 * 128).ToArray());
+
             this.mComponents.Add(this.mButtonBeeWorld);
             this.mComponents.Add(this.mButtonBeeYard);
             this.mComponents.Add(this.mButtonAddSuper);
@@ -116,19 +139,24 @@ namespace BusyBeekeeper.Screens
             this.mComponents.Add(this.mButtonSmokeHive);
             this.mComponents.Add(this.mButtonExtractHoney);
             this.mComponents.Add(this.mHudComponent);
+            this.mComponents.Add(this.mInventorySelectorComponent);
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+            this.mInventorySelectorComponent.Update(gameTime);
         }
 
         public override void HandleInput(InputState inputState)
         {
             base.HandleInput(inputState);
 
-            foreach (var lComponent in this.mComponents)
+            // Must handle input backwards to make the topmost component
+            // the first to have a change to handle the input.
+            for (int lIndex = this.mComponents.Count - 1; lIndex >= 0; lIndex--)
             {
+                var lComponent = this.mComponents[lIndex];
                 if (lComponent.HandleInput(inputState)) return;
             }
         }
@@ -138,6 +166,24 @@ namespace BusyBeekeeper.Screens
             base.Draw(spriteBatch, gameTime);
 
             spriteBatch.Draw(this.mBlankTexture, Vector2.Zero, null, Color.Black, 0, Vector2.Zero, this.ScreenSize, SpriteEffects.None, 0);
+            
+            const float lcSuperWidth = 500;
+            const float lcSuperHeightPerDepth = 50;
+            var lSuperBottomLeftLocation = new Vector2(
+                (this.ScreenSize.X - lcSuperWidth) / 2,
+                this.mHudComponent.Position.Y - 10f);
+
+            foreach (var lSuper in this.mBeeHive.Supers)
+            {
+                var lSuperSize = new Vector2(lcSuperWidth, lcSuperHeightPerDepth * lSuper.Depth);
+                var lSuperPosition = new Vector2(
+                    lSuperBottomLeftLocation.X,
+                    lSuperBottomLeftLocation.Y - lSuperSize.Y);
+
+                spriteBatch.Draw(this.mBlankTexture, lSuperPosition, null, Color.White, 0, Vector2.Zero, lSuperSize, SpriteEffects.None, 0);
+
+                lSuperBottomLeftLocation = new Vector2(lSuperPosition.X, lSuperPosition.Y - 1);
+            }
 
             foreach (var lComponent in this.mComponents) lComponent.Draw(spriteBatch, gameTime);
 
@@ -146,11 +192,11 @@ namespace BusyBeekeeper.Screens
             var lPopulationText = string.Concat("Population : ", this.mBeeHive.Population);
             var lPopulationTextSize = this.mMetaInfoFont.MeasureString(lPopulationText);
             var lPopulationTextPosition = new Vector2(10, 10);
-            
+
             var lHoneyCollectedText = string.Concat("Honey Collected : ", this.mBeeHive.HoneyCollected);
             var lHoneyCollectedTextSize = this.mMetaInfoFont.MeasureString(lHoneyCollectedText);
             var lHoneyCollectedTextPosition = new Vector2(
-                lPopulationTextPosition.X, 
+                lPopulationTextPosition.X,
                 lPopulationTextPosition.Y + lPopulationTextSize.Y + lcTextMarginBottom);
 
             var lColonyStrengthText = string.Concat("Colony Strength : ", this.mBeeHive.ColonyStrength);
@@ -162,13 +208,13 @@ namespace BusyBeekeeper.Screens
             var lColonyAggressivenessText = string.Concat("Colony Agressiveness : ", this.mBeeHive.ColonyAgressiveness);
             var lColonyAggressivenessTextSize = this.mMetaInfoFont.MeasureString(lColonyAggressivenessText);
             var lColonyAggressivenessTextPosition = new Vector2(
-                lColonyStrengthTextPosition.X, 
+                lColonyStrengthTextPosition.X,
                 lColonyStrengthTextPosition.Y + lColonyAggressivenessTextSize.Y + lcTextMarginBottom);
 
             var lColonySwarmLiklinessText = string.Concat("Colony Swarm Likliness : ", this.mBeeHive.ColonySwarmLikeliness);
             var lColonySwarmLiklinessTextSize = this.mMetaInfoFont.MeasureString(lColonySwarmLiklinessText);
             var lColonySwarmLiklinessTextPosition = new Vector2(
-                lColonyAggressivenessTextPosition.X, 
+                lColonyAggressivenessTextPosition.X,
                 lColonyAggressivenessTextPosition.Y + lColonyAggressivenessTextSize.Y + lcTextMarginBottom);
 
             spriteBatch.DrawString(this.mMetaInfoFont, lPopulationText, lPopulationTextPosition, Color.Green);
@@ -192,10 +238,31 @@ namespace BusyBeekeeper.Screens
             this.ScreenManager.TransitionTo(lYardScreen);
         }
 
+        private void AddSuper(InventoryItem item)
+        {
+            var lSuper = (Super)item.Tag;
+
+            this.mBeeHive.Supers.Add(lSuper);
+            this.mPlayer.Supers.Remove(lSuper);
+        }
+
         private void ButtonAddSuper_Click(Button button)
         {
+            this.ScreenManager.BeeWorldManager.IsPaused = true;
+
+            this.mInventorySelectorComponent.Items.Clear();
+            this.mInventorySelectorComponent.Items.AddRange(
+                this.mPlayer.Supers.Select(x => this.ToInventoryItem(x, 1)));
+            //this.mInventorySelectorComponent.Items.AddRange(
+            //    this.mPlayer.Supers
+            //    .GroupBy(x => x.MetaId)
+            //    .Select(x => this.ToInventoryItem(x.First(), x.Count())));
+
+            this.mInventorySelectorComponent.SelectActionText = "Add Super";
+            this.mInventorySelectorComponent.Show(
+                this.AddSuper, () => this.ScreenManager.BeeWorldManager.IsPaused = false);
         }
-        
+
         private void ButtonRemoveSuper_Click(Button button)
         {
         }
@@ -225,5 +292,22 @@ namespace BusyBeekeeper.Screens
             this.mButtonRemoveSuper.IsEnabled = enable;
             this.mButtonSmokeHive.IsEnabled = enable;
         }
+        
+        private InventoryItem ToInventoryItem(Super super, int count)
+        {
+            var lInventoryItem = new InventoryItem();
+            lInventoryItem.Tag = super;
+            lInventoryItem.Name = super.Name;
+            lInventoryItem.Description = super.Description;
+            lInventoryItem.Quantity = count;
+            lInventoryItem.Texture = this.mSuperTexture;
+            return lInventoryItem;
+        }
+
+        #endregion
+
+        #region Static Methods ---------------------------------------------------------
+        
+        #endregion
     }
 }

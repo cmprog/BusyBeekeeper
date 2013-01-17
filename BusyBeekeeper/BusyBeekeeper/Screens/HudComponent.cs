@@ -31,8 +31,8 @@ namespace BusyBeekeeper.Screens
 
         protected Texture2D BlankTexture { get { return this.mBlankTexture; } }
         protected Vector2 ScreenSize { get { return this.mScreenSize; } }
-        protected Vector2 Size { get { return this.mSize; } }
-        protected Vector2 Position { get { return this.mPosition; } }
+        public Vector2 Size { get { return this.mSize; } }
+        public Vector2 Position { get { return this.mPosition; } }
 
         public override void LoadContent(ContentManager contentManager)
         {

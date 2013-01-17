@@ -138,7 +138,7 @@ namespace BusyBeekeeper.Core
             int population,
             int queenFactor)
         {
-            const int lcMaxAgression = 100;
+            const int lcMaxAgression = 1000;
             const int lcMinAgression = 0;
 
             if (this.mIsSmokingHive)
@@ -163,8 +163,6 @@ namespace BusyBeekeeper.Core
                 var lDelta = this.mWorldManager.Random.Next(-1, 2) * elapsedMinutes;
                 return Math.Max(Math.Min(initialAgression + lDelta, lcMaxAgression), lcMinAgression);
             }
-
-            return initialAgression;
         }
 
         private int CalculateNewColonySwarmLikliness(

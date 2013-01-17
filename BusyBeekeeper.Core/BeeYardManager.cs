@@ -17,6 +17,9 @@ namespace BusyBeekeeper.Core
         private readonly List<IUpdatable> mUpdatables = new List<IUpdatable>();
         private readonly BeeHiveManager[] mBeeHiveManagers;
 
+        const int sMaxGrassGrowth = 1000;
+        const int sMinGrassGrowth = 0;
+
         public BeeYardManager(BeeWorldManager beeWorldManager, BeeYard beeYard)
         {
             if (beeWorldManager == null) throw new ArgumentNullException("beeWorldManager");
@@ -51,9 +54,9 @@ namespace BusyBeekeeper.Core
                 if (this.IsMowingLawn)
                 {
                     this.mBeeYard.GrassGrowth =
-                        Math.Max(0, this.mBeeYard.GrassGrowth - (lElapsedMinutes * this.mLawnMower.SpeedFactor));
+                        Math.Max(sMinGrassGrowth, this.mBeeYard.GrassGrowth - (lElapsedMinutes * this.mLawnMower.SpeedFactor));
 
-                    if (this.mBeeYard.GrassGrowth == 0)
+                    if (this.mBeeYard.GrassGrowth == sMinGrassGrowth)
                     {
                         this.IsMowingLawn = false;
                         this.mLawnMower = null;
@@ -64,7 +67,8 @@ namespace BusyBeekeeper.Core
                 }
                 else
                 {
-                    this.mBeeYard.GrassGrowth += lElapsedMinutes * this.mBeeYard.RegrowthFactor;
+                    this.mBeeYard.GrassGrowth =
+                        Math.Min(sMaxGrassGrowth, this.mBeeYard.GrassGrowth + (lElapsedMinutes * this.mBeeYard.RegrowthFactor));
                 }
             }
 

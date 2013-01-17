@@ -133,6 +133,10 @@
     <Compile Include="Screens\CommonComponents\Button.cs" />
     <Compile Include="Screens\CommonComponents\EmptyBackgroundRenderer.cs" />
     <Compile Include="Screens\CommonComponents\IBackgroundRenderer.cs" />
+    <Compile Include="Screens\CommonComponents\InventoryItem.cs" />
+    <Compile Include="Screens\CommonComponents\InventoryItemListComponent.cs" />
+    <Compile Include="Screens\CommonComponents\InventoryItemListComponent.ItemCollection.cs" />
+    <Compile Include="Screens\CommonComponents\InventoryItemSelectorComponent.cs" />
     <Compile Include="Screens\CommonComponents\Label.cs" />
     <Compile Include="Screens\CommonComponents\RectangleScreenComponent.cs" />
     <Compile Include="Screens\HudComponent.cs" />

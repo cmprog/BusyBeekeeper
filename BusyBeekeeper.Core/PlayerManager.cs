@@ -60,6 +60,8 @@ namespace BusyBeekeeper.Core
             
             // TEST:
             this.mPlayer.BeeYards[1].IsUnlocked = true;
+            foreach (var lSuper in Enumerable.Repeat(superRepository.CreateObject(0), 20)) this.mPlayer.Supers.Add(lSuper);
+            // -- End TEST
 
             var lFirstBeeHive = lFirstBeeYard.BeeHives[0];
             lFirstBeeHive.Supers.Add(superRepository.CreateObject(0));
