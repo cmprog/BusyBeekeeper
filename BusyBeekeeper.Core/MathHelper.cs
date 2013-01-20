@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BusyBeekeeper.Core
 {
-    public static class MathHelper
+    internal static class MathHelper
     {
         public static float Lerp(float value1, float value2, float amount)
         {

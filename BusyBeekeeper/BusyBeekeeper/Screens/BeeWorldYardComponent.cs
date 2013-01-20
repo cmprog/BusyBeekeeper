@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using BusyBeekeeper.DataRepositories;
 using BusyBeekeeper.Data;
 using BusyBeekeeper.Data.Graphics.BeeWorld;
 using Microsoft.Xna.Framework;
@@ -14,21 +10,21 @@ namespace BusyBeekeeper.Screens
     internal sealed class BeeWorldYardComponent : ScreenComponent
     {
         private readonly BeeYard mBeeYard;
-        private readonly BeeYardWorldInfo mYardInfo;
+        private readonly BeeWorldYardInfo mWorldYardInfo;
 
         private Texture2D mBlankTexture;
         private SpriteFont mFont;
 
-        public BeeWorldYardComponent(BeeYard beeYard, BeeYardWorldInfo yardInfo)
+        public BeeWorldYardComponent(BeeYard beeYard, BeeWorldYardInfo worldYardInfo)
         {
             this.mBeeYard = beeYard;
-            this.mYardInfo = yardInfo;
+            this.mWorldYardInfo = worldYardInfo;
         }
 
         public event Action<BeeWorldYardComponent> TravelToYard;
 
         public BeeYard BeeYard { get { return this.mBeeYard; } }
-        public BeeYardWorldInfo YardInfo { get { return this.mYardInfo; } }
+        public BeeWorldYardInfo WorldYardInfo { get { return this.mWorldYardInfo; } }
 
         public override void LoadContent(ContentManager contentManager)
         {
@@ -47,8 +43,8 @@ namespace BusyBeekeeper.Screens
                 var lCurrentMouseState = inputState.CurrentMouseState;
 
                 var lNameIsClicked = VectorUtilities.HitTest(
-                    this.mYardInfo.NamePosition, 
-                    this.mYardInfo.NameSize, 
+                    this.mWorldYardInfo.NamePosition, 
+                    this.mWorldYardInfo.NameSize, 
                     lCurrentMouseState.X, lCurrentMouseState.Y);
 
                 if (lNameIsClicked)
@@ -66,8 +62,8 @@ namespace BusyBeekeeper.Screens
         {
             base.Draw(spriteBatch, gameTime);
 
-            var lNamePosition = this.mYardInfo.NamePosition;
-            var lNameSize = this.mYardInfo.NameSize;
+            var lNamePosition = this.mWorldYardInfo.NamePosition;
+            var lNameSize = this.mWorldYardInfo.NameSize;
 
             var lBackColor = this.mBeeYard.IsUnlocked ? Color.Goldenrod : Color.LightGoldenrodYellow;
             spriteBatch.Draw(this.mBlankTexture, lNamePosition, null, lBackColor, 0, Vector2.Zero, lNameSize, SpriteEffects.None, 0);

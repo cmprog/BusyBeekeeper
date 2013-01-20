@@ -11,7 +11,7 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class BeeHive
     {
-        private readonly ICollection<Super> mSupers = new List<Super>();
+        private readonly IList<Super> mSupers = new List<Super>();
 
         public int Id { get; set; }
         
@@ -23,7 +23,7 @@ namespace BusyBeekeeper.Data
         public int ColonyAgressiveness { get; set; }
         public int ColonySwarmLikeliness { get; set; }
 
-        public ICollection<Super> Supers
+        public IList<Super> Supers
         {
             get { return this.mSupers; }
         }

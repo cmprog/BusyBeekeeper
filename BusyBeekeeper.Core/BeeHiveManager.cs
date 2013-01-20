@@ -1,22 +1,46 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using BusyBeekeeper.Data;
 
 namespace BusyBeekeeper.Core
 {
     public sealed class BeeHiveManager : IUpdatable
     {
+        #region Instance Fields --------------------------------------------------------
         private readonly BeeWorldManager mWorldManager;
         private readonly Player mPlayer;
         private readonly BeeHive mBeeHive;
         private readonly BeeYard mBeeYard;
+        #endregion
 
+        #region Smoking Fields ---------------------------------------------------------
         private bool mIsSmokingHive;
         private Smoker mSmoker;
         private int mSmokingTicksRemaining;
         private Action mSmokingCompleteCallback;
+        #endregion
+
+        #region Super Removal Fields ---------------------------------------------------
+        private bool mIsRemovingSuper;
+        private Super mSuperBeingRemoved;
+        private int mSuperRemovalTickRemaining;
+        private Action mSuperRemovalCompleteCallback;
+        #endregion
+
+        #region Queen Removal Fields ---------------------------------------------------
+        private bool mIsRemovingQueen;
+        private int mQueenRemovalTicksRemaining;
+        private Action mQueenRemovalCompleteCallback;
+        #endregion
+
+        #region Queen Add Fields ---------------------------------------------------
+        private bool mIsAddingQueen;
+        private QueenBee mQueenBeeToAdd;
+        private int mQueenAddTicksRemaining;
+        private Action mQueenAddCompleteCallback;
+        #endregion
+
+        #region Constructors -----------------------------------------------------------
 
         public BeeHiveManager(BeeWorldManager worldManager, BeeYard beeYard, BeeHive beeHive)
         {
@@ -29,6 +53,14 @@ namespace BusyBeekeeper.Core
             this.mBeeYard = beeYard;
             this.mBeeHive = beeHive;
         }
+
+        #endregion
+
+        #region Instance Properties ----------------------------------------------------
+
+        #endregion
+
+        #region Instance Methods -------------------------------------------------------
 
         public void UpdateTick(BeeWorldManager worldManager)
         {
@@ -47,6 +79,38 @@ namespace BusyBeekeeper.Core
                 this.mSmoker = null;
                 this.mIsSmokingHive = false;
                 this.mSmokingCompleteCallback();
+                this.mSmokingCompleteCallback = null;
+            }
+
+            if (this.mIsRemovingSuper && (--this.mSuperRemovalTickRemaining == 0))
+            {
+                this.mBeeHive.Supers.Remove(this.mSuperBeingRemoved);
+                this.mSuperBeingRemoved = null;
+                this.mIsRemovingSuper = false;
+                this.mSuperRemovalCompleteCallback();
+                this.mSuperRemovalCompleteCallback = null;
+            }
+
+            if (this.mIsRemovingQueen && (--this.mQueenRemovalTicksRemaining == 0))
+            {
+                var lQueenBee = this.mBeeHive.QueenBee;
+                this.mPlayer.QueenBees.Add(lQueenBee);
+                this.mBeeHive.QueenBee = null;
+
+                this.mIsRemovingQueen = false;
+                this.mQueenRemovalCompleteCallback();
+                this.mQueenRemovalCompleteCallback = null;
+            }
+
+            if (this.mIsAddingQueen && (--this.mQueenAddTicksRemaining == 0))
+            {
+                this.mBeeHive.QueenBee = this.mQueenBeeToAdd;
+                this.mPlayer.QueenBees.Remove(this.mQueenBeeToAdd);
+
+                this.mIsAddingQueen = false;
+                this.mQueenBeeToAdd = null;
+                this.mQueenAddCompleteCallback();
+                this.mQueenAddCompleteCallback = null;
             }
 
             if (this.mBeeHive.QueenBee != null)
@@ -75,6 +139,51 @@ namespace BusyBeekeeper.Core
             this.mBeeHive.ColonySwarmLikeliness = this.CalculateNewColonySwarmLikliness(
                 this.mBeeHive.ColonySwarmLikeliness, lNewPopulation, lQueenSwarmFactor, this.mBeeYard.GrassGrowth);
         }
+
+        public void RemoveSuper(Super super, Action superRemovalCompleteCallback)
+        {
+            this.mSuperBeingRemoved = super;
+            this.mSuperRemovalCompleteCallback = superRemovalCompleteCallback;
+            this.mSuperRemovalTickRemaining = 5;
+            this.mIsRemovingSuper = true;
+        }
+
+        public void RemoveQueen(Action queenRemovalFinishedCallback)
+        {
+            if (queenRemovalFinishedCallback == null) throw new ArgumentNullException("queenRemovalFinishedCallback");
+
+            if (this.mBeeHive.QueenBee != null)
+            {
+                this.mQueenRemovalCompleteCallback = queenRemovalFinishedCallback;
+                this.mIsRemovingQueen = true;
+                this.mQueenRemovalTicksRemaining = 5;
+            }
+            else
+            {
+                queenRemovalFinishedCallback();
+            }
+        }
+
+        public void AddQueen(QueenBee queenBee, Action queenAddCompleteCallback)
+        {
+            if (queenBee == null) throw new ArgumentNullException("queenBee");
+            if (queenAddCompleteCallback == null) throw new ArgumentNullException("queenAddCompleteCallback");
+
+            this.mQueenBeeToAdd = queenBee;
+            this.mQueenAddCompleteCallback = queenAddCompleteCallback;
+            this.mQueenAddTicksRemaining = 5;
+            this.mIsAddingQueen = true;
+        }
+
+        public void SmokeHive(Smoker smoker, Action callback)
+        {
+            this.mSmoker = smoker;
+            this.mSmokingCompleteCallback = callback;
+            this.mSmokingTicksRemaining = 5;
+            this.mIsSmokingHive = true;
+        }
+
+        #region Update Calculation Methods
 
         private int CalculateNewPopulation(
             int elapsedMinutes,
@@ -175,12 +284,8 @@ namespace BusyBeekeeper.Core
             return initialLikliness;
         }
 
-        public void SmokeHive(Smoker smoker, Action callback)
-        {
-            this.mSmoker = smoker;
-            this.mSmokingCompleteCallback = callback;
-            this.mSmokingTicksRemaining = 5;
-            this.mIsSmokingHive = true;
-        }
+        #endregion
+
+        #endregion
     }
 }

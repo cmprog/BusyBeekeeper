@@ -1,31 +1,34 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
 
 namespace BusyBeekeeper.Screens.CommonComponents
 {
     internal class Button : Label
     {
+        #region Instance Fields --------------------------------------------------------
+
+        #endregion
+
+        #region Constructors -----------------------------------------------------------
+
         public Button()
         {
             this.IsEnabled = true;
         }
 
-        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
-        {
-            base.Draw(spriteBatch, gameTime);
-        }
+        #endregion
+
+        #region Instance Properties ----------------------------------------------------
 
         public event Action<Button> Click;
-
         public bool IsEnabled { get; set; }
+
+        #endregion
+
+        #region Instance Methods -------------------------------------------------------
 
         public override bool HandleInput(InputState inputState)
         {
-            if (!this.IsEnabled) return false;
+            if (!this.IsVisible || !this.IsEnabled) return false;
 
             if (inputState.MouseLeftClickUp())
             {
@@ -43,5 +46,7 @@ namespace BusyBeekeeper.Screens.CommonComponents
 
             return false;
         }
+
+        #endregion
     }
 }

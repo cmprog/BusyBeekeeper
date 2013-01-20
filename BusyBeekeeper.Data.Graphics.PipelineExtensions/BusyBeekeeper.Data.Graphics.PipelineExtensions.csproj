@@ -50,8 +50,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BeeWorld\BeeYardWorldInfoImporter.cs" />
-    <Compile Include="BeeWorld\BeeYardWorldInfoProcessor.cs" />
+    <Compile Include="BeeWorld\BeeWorldInfoImporter.cs" />
+    <Compile Include="BeeWorld\BeeWorldInfoProcessor.cs" />
     <Compile Include="BeeYard\BeeYardHiveInformationImporter.cs" />
     <Compile Include="BeeYard\BeeYardWorldInfoProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

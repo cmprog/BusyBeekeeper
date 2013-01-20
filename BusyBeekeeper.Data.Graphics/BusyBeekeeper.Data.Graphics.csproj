@@ -41,8 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BeeWorld\BeeWorldHoneyHouseInfo.cs" />
+    <Compile Include="BeeWorld\BeeWorldInfo.cs" />
+    <Compile Include="BeeWorld\BeeWorldMarketInfo.cs" />
+    <Compile Include="BeeWorld\BeeWorldShopInfo.cs" />
     <Compile Include="BeeYard\BeeYardHiveInfo.cs" />
-    <Compile Include="BeeWorld\BeeYardWorldInfo.cs" />
+    <Compile Include="BeeWorld\BeeWorldYardInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

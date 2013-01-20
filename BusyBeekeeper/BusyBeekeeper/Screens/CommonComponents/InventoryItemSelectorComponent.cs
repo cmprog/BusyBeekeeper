@@ -46,10 +46,12 @@ namespace BusyBeekeeper.Screens.CommonComponents
         /// which will be called when an item is selected.
         /// </summary>
         /// <param name="inventoryItemSelected">The callback function.</param>
+        /// <param name="closedCallback"></param>
         public void Show(Action<InventoryItem> inventoryItemSelected, Action closedCallback)
         {
             this.mClosedCallback = closedCallback;
             this.mSelectedCallback = inventoryItemSelected;
+            this.ClearSelection();
             this.Visible = true;
         }
 

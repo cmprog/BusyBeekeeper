@@ -1,5 +1,4 @@
 Content\Sprites\Blank.xnb
-Content\GraphicsData\BeeWorld\YardLocations.xnb
 Content\Fonts\DefaultBig.xnb
 Content\Fonts\DefaultNormal.xnb
 Content\Fonts\DefaultSmall.xnb
@@ -12,3 +11,4 @@ Content\GraphicsData\BeeYard\HiveInformation_2.xnb
 Content\Data\LawnMowers.xnb
 Content\Data\QueenBees.xnb
 Content\Data\Smokers.xnb
+Content\GraphicsData\BeeWorld\Info.xnb

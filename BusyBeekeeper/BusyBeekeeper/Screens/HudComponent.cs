@@ -9,10 +9,18 @@ namespace BusyBeekeeper.Screens
 {
     internal class HudComponent : ScreenComponent
     {
+        private readonly int mItemMargin = 10;
+
         private readonly BeeWorldManager mWorldManager;
         private readonly Vector2 mScreenSize;
         private readonly Vector2 mPosition;
         private readonly Vector2 mSize;
+
+        private readonly float mDayCountWidth = 50;
+        private readonly Vector2 mDayCountPosition;
+        private readonly Vector2 mDayProgressPosition;
+        private readonly Vector2 mDayProgressSize;
+        private Vector2 mDayProgressIndicatorSize;
 
         private Texture2D mBlankTexture;
         private SpriteFont mFont;
@@ -27,6 +35,16 @@ namespace BusyBeekeeper.Screens
 
             this.mSize = new Vector2(lcHudWidth, lcHudHeight);
             this.mPosition = screenSize - this.mSize;
+
+            const int lcProgressHeight = 10;
+            this.mDayCountPosition = this.mPosition + new Vector2(this.mItemMargin);
+            this.mDayProgressPosition = new Vector2(
+                this.mDayCountPosition.X + this.mDayCountWidth + this.mItemMargin,
+                this.mDayCountPosition.Y);
+            this.mDayProgressSize = new Vector2(
+                this.mSize.X - (3 * this.mItemMargin) - this.mDayCountWidth,
+                lcProgressHeight);
+            this.mDayProgressIndicatorSize = new Vector2(0, this.mDayProgressSize.Y);
         }
 
         protected Texture2D BlankTexture { get { return this.mBlankTexture; } }
@@ -34,12 +52,22 @@ namespace BusyBeekeeper.Screens
         public Vector2 Size { get { return this.mSize; } }
         public Vector2 Position { get { return this.mPosition; } }
 
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            var lCurrentTime = this.mWorldManager.Time;
+            var lCurrentMinutesIntoDay = lCurrentTime.Minute + (BeeTime.MinutesInHour * lCurrentTime.Hour);
+            this.mDayProgressIndicatorSize.X = MathHelper.Lerp(
+                0, this.mDayProgressSize.X, (float)lCurrentMinutesIntoDay / BeeTime.MinutesInDay);
+        }
+
         public override void LoadContent(ContentManager contentManager)
         {
             base.LoadContent(contentManager);
 
             this.mBlankTexture = contentManager.Load<Texture2D>("Sprites/Blank");
-            this.mFont = contentManager.Load<SpriteFont>("Fonts/DefaultSmall");
+            this.mFont = contentManager.Load<SpriteFont>("Fonts/DefaultTiny");
         }
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
@@ -47,12 +75,12 @@ namespace BusyBeekeeper.Screens
             base.Draw(spriteBatch, gameTime);
             
             spriteBatch.Draw(this.BlankTexture, this.mPosition, null, Color.DarkGreen, 0, Vector2.Zero, this.mSize, SpriteEffects.None, 0);
+            spriteBatch.Draw(this.mBlankTexture, this.mDayProgressPosition, null, Color.White, 0, Vector2.Zero, this.mDayProgressSize, SpriteEffects.None, 0);
+            spriteBatch.Draw(this.mBlankTexture, this.mDayProgressPosition, null, Color.Blue, 0, Vector2.Zero, this.mDayProgressIndicatorSize, SpriteEffects.None, 0);
 
-            var lBeeTime = this.mWorldManager.Time;
-            var lBeeTimeText = string.Concat(lBeeTime.Day, ":", lBeeTime.Hour, ":", lBeeTime.Minute);
-            var lBeeTimePosition = this.Position + new Vector2(5, 5);
+            var lDayText = this.mWorldManager.Time.Day.ToString();
 
-            spriteBatch.DrawString(this.mFont, lBeeTimeText, lBeeTimePosition, Color.Black);
+            spriteBatch.DrawString(this.mFont, lDayText, this.mDayCountPosition, Color.Black);
         }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using BusyBeekeeper.DataRepositories;
 using BusyBeekeeper.Data;
 using BusyBeekeeper.Data.Graphics.BeeYard;
@@ -15,6 +13,8 @@ namespace BusyBeekeeper.Screens
     /// </summary>
     internal sealed class BeeYardHiveComponent : ScreenComponent
     {
+        #region Instance Fields --------------------------------------------------------
+
         private readonly Texture2D mBlankTexture;
         private readonly BeeHive mBeeHive;
         private readonly BeeYardHiveInfo mHiveInfo;
@@ -31,12 +31,24 @@ namespace BusyBeekeeper.Screens
             this.mSuperRepository = superRepository;
         }
 
+        #endregion
+
+        #region Constructors -----------------------------------------------------------
+
+        public event Action<BeeYardHiveComponent> TravelToHive;
+
+        #endregion
+
+        #region Instance Properties ----------------------------------------------------
+
         public BeeHive BeeHive
         {
             get { return this.mBeeHive; }
         }
 
-        public event Action<BeeYardHiveComponent> TravelToHive;
+        #endregion
+
+        #region Instance Methods -------------------------------------------------------
 
         public override bool HandleInput(InputState inputState)
         {
@@ -56,21 +68,31 @@ namespace BusyBeekeeper.Screens
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             base.Draw(spriteBatch, gameTime);
-            if (this.mBeeHive.Supers.Count == 0) return;
 
-            var lBasePosition = this.mHiveInfo.Position;
-            var lTotalDepth = this.mBeeHive.Supers
-                .Select(x => this.mSuperRepository.GetMetaObject(x.MetaId))
-                .Sum(x => x.Depth);
+            const float lcDepthToHeightFactor = 15f;
+            const float lcSuperWidth = 75f;
 
-            const float lcDepthToHeightFactor = 20f;
-            const float lWidth = 75f;
+            var lSuperPosition = new Vector2(this.mHiveInfo.Position.X, this.mHiveInfo.Position.Y - 1);
+            var lSuperSize = new Vector2(lcSuperWidth, 0);
+            for (int lIndex = 0; lIndex < this.mBeeHive.Supers.Count; lIndex++)
+            {
+                var lSuper = this.mBeeHive.Supers[lIndex];
+                lSuperSize.Y = lSuper.Depth * lcDepthToHeightFactor;
+                lSuperPosition.Y -= lSuperSize.Y + 1;
 
-            float lHeight = lcDepthToHeightFactor * lTotalDepth;
-            this.mHivePosition = new Vector2(lBasePosition.X, lBasePosition.Y - lHeight);
-            this.mHiveSize = new Vector2(lWidth, lHeight);
+                spriteBatch.Draw(this.mBlankTexture, lSuperPosition, null, Color.White, 0, Vector2.Zero, lSuperSize, SpriteEffects.None, 0);
+            }
+            
+            const float lcStandHeight = 8f;
+            const float lcStandWidth = lcSuperWidth;
+            var lStandSize = new Vector2(lcStandWidth, lcStandHeight);
 
-            spriteBatch.Draw(this.mBlankTexture, this.mHivePosition, null, Color.White, 0, Vector2.Zero, this.mHiveSize, SpriteEffects.None, 0);
+            spriteBatch.Draw(this.mBlankTexture, this.mHiveInfo.Position, null, Color.SandyBrown, 0, Vector2.Zero, lStandSize, SpriteEffects.None, 0);
+
+            this.mHivePosition = lSuperPosition;
+            this.mHiveSize = new Vector2(lcStandWidth, this.mHiveInfo.Position.Y + lcStandHeight - lSuperPosition.Y);
         }
+
+        #endregion
     }
 }

@@ -10,6 +10,7 @@ namespace BusyBeekeeper.Screens.CommonComponents
 
         public Label()
         {
+            this.IsVisible = true;
             this.mBackgroundRenderer = new EmptyBackgroundRenderer();
         }
 
@@ -44,8 +45,12 @@ namespace BusyBeekeeper.Screens.CommonComponents
             set;
         }
 
+        public bool IsVisible { get; set; }
+
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
+            if (!this.IsVisible) return;
+
             base.Draw(spriteBatch, gameTime);
             this.BackgroundRenderer.Draw(spriteBatch, gameTime, this.Position, this.Size);
 

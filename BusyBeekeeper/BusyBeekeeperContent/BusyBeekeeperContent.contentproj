@@ -52,13 +52,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GraphicsData\BeeWorld\YardLocations.bywi">
-      <Name>YardLocations</Name>
-      <Importer>BeeYardWorldInfoImporter</Importer>
-      <Processor>BeeYardWorldInfoProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\BusyBeekeeper.Data.Graphics.PipelineExtensions\BusyBeekeeper.Data.Graphics.PipelineExtensions.csproj">
       <Project>{83F16CC6-73E3-46D6-9A0C-0F669C9754B1}</Project>
       <Name>BusyBeekeeper.Data.Graphics.PipelineExtensions</Name>
@@ -150,6 +143,13 @@
       <Name>Smokers</Name>
       <Importer>SmokerDataImporter</Importer>
       <Processor>SmokerDataProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GraphicsData\BeeWorld\Info.bwi">
+      <Name>Info</Name>
+      <Importer>BeeWorldInfoImporter</Importer>
+      <Processor>BeeWorldInfoProcessor</Processor>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />

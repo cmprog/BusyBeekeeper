@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BusyBeekeeper.Data;
 using BusyBeekeeper.Core;
 using BusyBeekeeper.Screens.CommonComponents;
 using BusyBeekeeper.DataRepositories;
-using BusyBeekeeper.Data.Graphics.BeeYard;
 
 namespace BusyBeekeeper.Screens
 {
@@ -20,13 +18,29 @@ namespace BusyBeekeeper.Screens
 
         private Texture2D mSuperTexture;
 
-        private readonly Button mButtonBeeYard = new Button();
-        private readonly Button mButtonBeeWorld = new Button();
-        private readonly Button mButtonSmokeHive = new Button();
-        private readonly Button mButtonAddSuper = new Button();
-        private readonly Button mButtonRemoveSuper = new Button();
-        private readonly Button mButtonExtractHoney = new Button();
-        private readonly BeeHiveSuperComponent[] mSuperComponents;
+        // Selection Mode
+        private bool mIsSelectionModeActive;
+        private BeeHiveSuperComponent mSelectedSuper;
+        private Action<BeeHiveSuperComponent> mSuperSelectedCallback;
+        // -- Selection Mode
+
+        // MenuButtons
+        private readonly MenuButton mMenuButtonSupers = new MenuButton();
+        private readonly MenuButton mMenuButtonSupersAdd = new MenuButton();
+        private readonly MenuButton mMenuButtonSupersRemove = new MenuButton();
+        private readonly MenuButton mMenuButtonQueen = new MenuButton();
+        private readonly MenuButton mMenuButtonQueenChange = new MenuButton();
+        private readonly MenuButton mMenuButtonQueenRemove = new MenuButton();
+        private readonly MenuButton mMenuButtonUseSmoker = new MenuButton();
+        private readonly MenuButton mMenuButtonToYard = new MenuButton();
+        private readonly MenuButton mMenuButtonToWorld = new MenuButton();
+        private readonly MenuButton mMenuButtonSelectionCommit = new MenuButton();
+        private readonly MenuButton mMenuButtonSelectionCancel = new MenuButton();
+        // -- MenuButtons
+
+        private ButtonMenuComponent mButtonMenuComponent;
+
+        private readonly List<BeeHiveSuperComponent> mSuperComponents = new List<BeeHiveSuperComponent>();
         private BeeHiveHudComponent mHudComponent;
         private InventoryItemSelectorComponent mInventorySelectorComponent;
         private readonly IList<ScreenComponent> mComponents = new List<ScreenComponent>();
@@ -38,9 +52,90 @@ namespace BusyBeekeeper.Screens
         private SpriteFont mMetaInfoFont;
         private SuperRepository mSuperRepository;
 
+        private readonly int mScrollBoundsHeight = 50;
+        private Rectangle mVerticalScrollUpBounds;
+        private Rectangle mVerticalScrollDownBounds;
+
+        private readonly float mVerticalScrollAmount = 10;
+        private float mVerticalScrollHeight;
+        private float mVerticalScrollPosition;
+
+        private readonly int mSuperWidth = 500;
+        private readonly int mSuperHeightPerDepth = 150;
+
+        private BeeHiveSuperComponent mSuperComponentBeingRemoved;
+
         #endregion
 
         #region Constructors -----------------------------------------------------------
+
+        public BeeHiveScreen()
+        {
+            //
+            // mMenuButtonSupers
+            //
+            this.mMenuButtonSupers.Text = "Supers";
+            this.mMenuButtonSupers.ChildMenuButtons.Add(this.mMenuButtonSupersAdd);
+            this.mMenuButtonSupers.ChildMenuButtons.Add(this.mMenuButtonSupersRemove);
+            //
+            // mMenuButtonSupersAdd
+            //
+            this.mMenuButtonSupersAdd.Text = "Add";
+            this.mMenuButtonSupersAdd.Click += this.MenuButtonSupersAdd_Click;
+            //
+            // mMenuButtonSupersAdd
+            //
+            this.mMenuButtonSupersRemove.Text = "Remove";
+            this.mMenuButtonSupersRemove.Click += this.MenuButtonSupersRemove_Click;
+            //
+            // mMenuButtonSupersAdd
+            //
+            this.mMenuButtonQueen.Text = "Queen";
+            this.mMenuButtonQueen.ChildMenuButtons.Add(this.mMenuButtonQueenChange);
+            this.mMenuButtonQueen.ChildMenuButtons.Add(this.mMenuButtonQueenRemove);
+            //
+            // mMenuButtonQueenChange
+            //
+            this.mMenuButtonQueenChange.Text = "Change";
+            this.mMenuButtonQueenChange.Click += this.MenuButtonQueenChange_Click;
+            //
+            // mMenuButtonQueenRemove
+            //
+            this.mMenuButtonQueenRemove.Text = "Remove";
+            this.mMenuButtonQueenRemove.Click += this.MenuButtonQueenRemove_Click;
+            //
+            // mMenuButtonUserSmoker
+            //
+            this.mMenuButtonUseSmoker.Text = "Use Smoker";
+            this.mMenuButtonUseSmoker.Click += this.MenuButtonUseSmoker_Click;
+            //
+            // mMenuButtonSelectionCommit
+            //
+            this.mMenuButtonSelectionCommit.Text = "Select";
+            this.mMenuButtonSelectionCommit.Click += this.MenuButtonSelectionCommit_Click;
+            this.mMenuButtonSelectionCommit.IsVisible = false;
+            //
+            // mMenuButtonSelectionCancel
+            //
+            this.mMenuButtonSelectionCancel.Text = "Cancel";
+            this.mMenuButtonSelectionCancel.Click += this.MenuButtonSelectionCancel_Click;
+            this.mMenuButtonSelectionCancel.IsVisible = false;
+            //
+            // mMenuButtonSelectionCancel
+            //
+            this.mMenuButtonSelectionCancel.Text = "Cancel";
+            this.mMenuButtonSelectionCancel.Click += this.MenuButtonSelectionCancel_Click;
+            //
+            // mMenuButtonToYard
+            //
+            this.mMenuButtonToYard.Text = "To Yard";
+            this.mMenuButtonToYard.Click += this.MenuButtonToYard_Click;
+            //
+            // mMenuButtonToYard
+            //
+            this.mMenuButtonToWorld.Text = "Travel";
+            this.mMenuButtonToWorld.Click += this.MenuButtonToWorld_Click;
+        }
 
         #endregion
 
@@ -50,115 +145,12 @@ namespace BusyBeekeeper.Screens
 
         #region Instance Methods -------------------------------------------------------
 
-        public override void LoadContent()
+        private void AddSuper(InventoryItem item)
         {
-            base.LoadContent();
+            var lSuper = (Super)item.Tag;
 
-            var lPlayerManager = this.ScreenManager.BeeWorldManager.PlayerManager;
-            this.mPlayer = lPlayerManager.Player;
-            System.Diagnostics.Debug.Assert(this.mPlayer.Location == PlayerLocation.BeeHive);
-            this.mBeeHive = this.mPlayer.CurrentBeeHive;
-            var lBeeYardManager = lPlayerManager.BeeYardManagers[this.mPlayer.CurrentBeeYard.Id];
-            this.mBeeHiveManager = lBeeYardManager.BeeHiveManagers[this.mBeeHive.Id];
-
-            this.mBlankTexture = this.ContentManager.Load<Texture2D>("Sprites/Blank");
-            this.mMetaInfoFont = this.ContentManager.Load<SpriteFont>("Fonts/DefaultTiny");
-            this.mSuperRepository = new SuperRepository(this.ContentManager);
-
-            this.mButtonBeeWorld.Click += this.ButtonBeeWorld_Click;
-            this.mButtonBeeWorld.Font = this.ContentManager.Load<SpriteFont>("Fonts/DefaultSmall");
-            this.mButtonBeeWorld.Text = "World";
-            this.mButtonBeeWorld.TextColor = Color.White;
-            this.mButtonBeeWorld.BackgroundRenderer = new SolidBackgroundRenderer(this.mBlankTexture, Color.Blue);
-            this.mButtonBeeWorld.Size = new Vector2(75, 30);
-            this.mButtonBeeWorld.Position = new Vector2(10, this.ScreenSize.Y - this.mButtonBeeWorld.Size.Y - 10);
-
-            this.mButtonBeeYard.Click += this.ButtonBeeYard_Click;
-            this.mButtonBeeYard.Font = this.ContentManager.Load<SpriteFont>("Fonts/DefaultSmall");
-            this.mButtonBeeYard.Text = "Yard";
-            this.mButtonBeeYard.TextColor = Color.White;
-            this.mButtonBeeYard.BackgroundRenderer = new SolidBackgroundRenderer(this.mBlankTexture, Color.Blue);
-            this.mButtonBeeYard.Size = this.mButtonBeeWorld.Size;
-            this.mButtonBeeYard.Position = new Vector2(
-                this.mButtonBeeWorld.Position.X,
-                this.mButtonBeeWorld.Position.Y - this.mButtonBeeWorld.Size.Y - 10);
-
-            var lGoldBackgroundRenderer = new SolidBackgroundRenderer(this.mBlankTexture, Color.Gold);
-
-            this.mButtonAddSuper.Click += this.ButtonAddSuper_Click;
-            this.mButtonAddSuper.Text = "Add Super";
-            this.mButtonAddSuper.TextColor = Color.Black;
-            this.mButtonAddSuper.Font = this.ContentManager.Load<SpriteFont>("Fonts/DefaultSmall");
-            this.mButtonAddSuper.BackgroundRenderer = lGoldBackgroundRenderer;
-            this.mButtonAddSuper.Size = new Vector2(125, 45);
-            this.mButtonAddSuper.Position = new Vector2(this.ScreenSize.X - this.mButtonAddSuper.Size.X - 10, 10);
-
-            this.mButtonRemoveSuper.Click += this.ButtonRemoveSuper_Click;
-            this.mButtonRemoveSuper.Text = "Remove Super";
-            this.mButtonRemoveSuper.TextColor = Color.Black;
-            this.mButtonRemoveSuper.Font = this.ContentManager.Load<SpriteFont>("Fonts/DefaultSmall");
-            this.mButtonRemoveSuper.BackgroundRenderer = lGoldBackgroundRenderer;
-            this.mButtonRemoveSuper.Size = this.mButtonAddSuper.Size;
-            this.mButtonRemoveSuper.Position = new Vector2(
-                this.mButtonAddSuper.Position.X,
-                this.mButtonAddSuper.Position.Y + this.mButtonAddSuper.Size.Y + 10);
-
-            this.mButtonSmokeHive.Click += this.ButtonSmokeHive_Click;
-            this.mButtonSmokeHive.Text = "Use Smoker";
-            this.mButtonSmokeHive.TextColor = Color.Black;
-            this.mButtonSmokeHive.Font = this.ContentManager.Load<SpriteFont>("Fonts/DefaultSmall");
-            this.mButtonSmokeHive.BackgroundRenderer = lGoldBackgroundRenderer;
-            this.mButtonSmokeHive.Size = this.mButtonRemoveSuper.Size;
-            this.mButtonSmokeHive.Position = new Vector2(
-                this.mButtonRemoveSuper.Position.X,
-                this.mButtonRemoveSuper.Position.Y + this.mButtonRemoveSuper.Size.Y + 10);
-
-            this.mButtonExtractHoney.Click += this.ButtonExtractHoney_Click;
-            this.mButtonExtractHoney.Text = "Extract Honey";
-            this.mButtonExtractHoney.TextColor = Color.Black;
-            this.mButtonExtractHoney.Font = this.ContentManager.Load<SpriteFont>("Fonts/DefaultSmall");
-            this.mButtonExtractHoney.BackgroundRenderer = lGoldBackgroundRenderer;
-            this.mButtonExtractHoney.Size = this.mButtonSmokeHive.Size;
-            this.mButtonExtractHoney.Position = new Vector2(
-                this.mButtonSmokeHive.Position.X,
-                this.mButtonSmokeHive.Position.Y + this.mButtonSmokeHive.Size.Y + 10);
-
-            this.mHudComponent = new BeeHiveHudComponent(this.ScreenManager.BeeWorldManager, this.ScreenSize);
-            this.mHudComponent.LoadContent(this.ContentManager);
-
-            this.mInventorySelectorComponent = new InventoryItemSelectorComponent(this.ScreenSize);
-            this.mInventorySelectorComponent.LoadContent(this.ContentManager);
-
-            this.mSuperTexture = new Texture2D(this.ScreenManager.Game.GraphicsDevice, 128, 128);
-            this.mSuperTexture.SetData(Enumerable.Repeat(Color.Pink, 128 * 128).ToArray());
-
-            this.mComponents.Add(this.mButtonBeeWorld);
-            this.mComponents.Add(this.mButtonBeeYard);
-            this.mComponents.Add(this.mButtonAddSuper);
-            this.mComponents.Add(this.mButtonRemoveSuper);
-            this.mComponents.Add(this.mButtonSmokeHive);
-            this.mComponents.Add(this.mButtonExtractHoney);
-            this.mComponents.Add(this.mHudComponent);
-            this.mComponents.Add(this.mInventorySelectorComponent);
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-            this.mInventorySelectorComponent.Update(gameTime);
-        }
-
-        public override void HandleInput(InputState inputState)
-        {
-            base.HandleInput(inputState);
-
-            // Must handle input backwards to make the topmost component
-            // the first to have a change to handle the input.
-            for (int lIndex = this.mComponents.Count - 1; lIndex >= 0; lIndex--)
-            {
-                var lComponent = this.mComponents[lIndex];
-                if (lComponent.HandleInput(inputState)) return;
-            }
+            this.mBeeHive.Supers.Add(lSuper);
+            this.mPlayer.Supers.Remove(lSuper);
         }
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
@@ -166,26 +158,11 @@ namespace BusyBeekeeper.Screens
             base.Draw(spriteBatch, gameTime);
 
             spriteBatch.Draw(this.mBlankTexture, Vector2.Zero, null, Color.Black, 0, Vector2.Zero, this.ScreenSize, SpriteEffects.None, 0);
-            
-            const float lcSuperWidth = 500;
-            const float lcSuperHeightPerDepth = 50;
-            var lSuperBottomLeftLocation = new Vector2(
-                (this.ScreenSize.X - lcSuperWidth) / 2,
-                this.mHudComponent.Position.Y - 10f);
 
-            foreach (var lSuper in this.mBeeHive.Supers)
+            for (int lIndex = this.mComponents.Count - 1; lIndex >= 0; lIndex--)
             {
-                var lSuperSize = new Vector2(lcSuperWidth, lcSuperHeightPerDepth * lSuper.Depth);
-                var lSuperPosition = new Vector2(
-                    lSuperBottomLeftLocation.X,
-                    lSuperBottomLeftLocation.Y - lSuperSize.Y);
-
-                spriteBatch.Draw(this.mBlankTexture, lSuperPosition, null, Color.White, 0, Vector2.Zero, lSuperSize, SpriteEffects.None, 0);
-
-                lSuperBottomLeftLocation = new Vector2(lSuperPosition.X, lSuperPosition.Y - 1);
+                this.mComponents[lIndex].Draw(spriteBatch, gameTime);
             }
-
-            foreach (var lComponent in this.mComponents) lComponent.Draw(spriteBatch, gameTime);
 
             const float lcTextMarginBottom = 1f;
 
@@ -209,10 +186,9 @@ namespace BusyBeekeeper.Screens
             var lColonyAggressivenessTextSize = this.mMetaInfoFont.MeasureString(lColonyAggressivenessText);
             var lColonyAggressivenessTextPosition = new Vector2(
                 lColonyStrengthTextPosition.X,
-                lColonyStrengthTextPosition.Y + lColonyAggressivenessTextSize.Y + lcTextMarginBottom);
+                lColonyStrengthTextPosition.Y + lColonyStrengthTextSize.Y + lcTextMarginBottom);
 
             var lColonySwarmLiklinessText = string.Concat("Colony Swarm Likliness : ", this.mBeeHive.ColonySwarmLikeliness);
-            var lColonySwarmLiklinessTextSize = this.mMetaInfoFont.MeasureString(lColonySwarmLiklinessText);
             var lColonySwarmLiklinessTextPosition = new Vector2(
                 lColonyAggressivenessTextPosition.X,
                 lColonyAggressivenessTextPosition.Y + lColonyAggressivenessTextSize.Y + lcTextMarginBottom);
@@ -224,13 +200,155 @@ namespace BusyBeekeeper.Screens
             spriteBatch.DrawString(this.mMetaInfoFont, lColonySwarmLiklinessText, lColonySwarmLiklinessTextPosition, Color.Green);
         }
 
-        private void ButtonBeeWorld_Click(Button button)
+        public override void HandleInput(InputState inputState)
+        {
+            base.HandleInput(inputState);
+
+            if (this.mInventorySelectorComponent.HandleInput(inputState)) return;
+
+            // Must handle input backwards to make the topmost component
+            // the first to have a change to handle the input.
+            for (int lIndex = this.mComponents.Count - 1; lIndex >= 0; lIndex--)
+            {
+                var lComponent = this.mComponents[lIndex];
+                if (lComponent.HandleInput(inputState)) return;
+            }
+
+            if (this.mIsSelectionModeActive && inputState.MouseLeftClickUp())
+            {
+                var lCurrentMouseState = inputState.CurrentMouseState;
+                for (int lIndex = 0; lIndex < this.mSuperComponents.Count; lIndex++)
+                {
+                    var lSuperComponent = this.mSuperComponents[lIndex];
+                    if (VectorUtilities.HitTest(lSuperComponent.Position, lSuperComponent.Size, lCurrentMouseState.X, lCurrentMouseState.Y))
+                    {
+                        lSuperComponent.IsSelected = true;
+                        if (this.mSelectedSuper != null) this.mSelectedSuper.IsSelected = false;
+                        this.mSelectedSuper = lSuperComponent;
+                        break;
+                    }
+                }
+            }
+
+            if (!this.mInventorySelectorComponent.Visible)
+            {
+                var lCurrentMouseState = inputState.CurrentMouseState;
+                if (this.mVerticalScrollUpBounds.Contains(lCurrentMouseState.X, lCurrentMouseState.Y))
+                {
+                    this.mVerticalScrollPosition = Math.Min(
+                        this.mVerticalScrollPosition + this.mVerticalScrollAmount,
+                        this.mVerticalScrollHeight);
+                }
+                else if (this.mVerticalScrollDownBounds.Contains(lCurrentMouseState.X, lCurrentMouseState.Y))
+                {
+                    this.mVerticalScrollPosition = Math.Max(
+                        this.mVerticalScrollPosition - this.mVerticalScrollAmount, 0);
+                }
+            }
+        }
+
+        public override void LoadContent()
+        {
+            base.LoadContent();
+
+            var lPlayerManager = this.ScreenManager.BeeWorldManager.PlayerManager;
+            this.mPlayer = lPlayerManager.Player;
+            System.Diagnostics.Debug.Assert(this.mPlayer.Location == PlayerLocation.BeeHive);
+            this.mBeeHive = this.mPlayer.CurrentBeeHive;
+            var lBeeYardManager = lPlayerManager.BeeYardManagers[this.mPlayer.CurrentBeeYard.Id];
+            this.mBeeHiveManager = lBeeYardManager.BeeHiveManagers[this.mBeeHive.Id];
+
+            this.mBlankTexture = this.ContentManager.Load<Texture2D>("Sprites/Blank");
+            this.mMetaInfoFont = this.ContentManager.Load<SpriteFont>("Fonts/DefaultTiny");
+            this.mSuperRepository = new SuperRepository(this.ContentManager);
+
+            this.mButtonMenuComponent = new ButtonMenuComponent(this.ScreenSize);
+            this.mButtonMenuComponent.LoadContent(this.ContentManager);
+            this.mButtonMenuComponent.MenuButtons.Add(this.mMenuButtonSupers);
+            this.mButtonMenuComponent.MenuButtons.Add(this.mMenuButtonQueen);
+            this.mButtonMenuComponent.MenuButtons.Add(this.mMenuButtonUseSmoker);
+            this.mButtonMenuComponent.MenuButtons.Add(this.mMenuButtonToYard);
+            this.mButtonMenuComponent.MenuButtons.Add(this.mMenuButtonToWorld);
+            this.mButtonMenuComponent.MenuButtons.Add(this.mMenuButtonSelectionCommit);
+            this.mButtonMenuComponent.MenuButtons.Add(this.mMenuButtonSelectionCancel);
+
+            this.mHudComponent = new BeeHiveHudComponent(this.ScreenManager.BeeWorldManager, this.ScreenSize);
+            this.mHudComponent.LoadContent(this.ContentManager);
+
+            this.mVerticalScrollUpBounds = new Rectangle(
+                (int)((this.ScreenSize.X - this.mSuperWidth) / 2f), 0,
+                this.mSuperWidth, this.mScrollBoundsHeight);
+            this.mVerticalScrollDownBounds = new Rectangle(
+                this.mVerticalScrollUpBounds.X,
+                (int)this.mHudComponent.Position.Y - this.mVerticalScrollUpBounds.Height,
+                this.mVerticalScrollUpBounds.Width,
+                this.mVerticalScrollUpBounds.Height + (int)this.mHudComponent.Size.Y);
+
+            this.mInventorySelectorComponent = new InventoryItemSelectorComponent(this.ScreenSize);
+            this.mInventorySelectorComponent.LoadContent(this.ContentManager);
+
+            this.mSuperTexture = new Texture2D(this.ScreenManager.Game.GraphicsDevice, 128, 128);
+            this.mSuperTexture.SetData(Enumerable.Repeat(Color.Pink, 128 * 128).ToArray());
+
+            this.mComponents.Add(this.mInventorySelectorComponent);
+            this.mComponents.Add(this.mButtonMenuComponent);
+            this.mComponents.Add(this.mHudComponent);
+        }
+
+        private void MenuButtonQueenChange_Click(MenuButton obj)
+        {
+            this.ScreenManager.BeeWorldManager.IsPaused = true;
+
+            this.mInventorySelectorComponent.Items.Clear();
+            this.mInventorySelectorComponent.Items.AddRange(
+                this.mPlayer.QueenBees.Select(ToInventoryItem));
+
+            this.mInventorySelectorComponent.SelectActionText = "Place Queen";
+            this.mInventorySelectorComponent.Show(
+                this.ChangeQueen, () => this.ScreenManager.BeeWorldManager.IsPaused = false);
+        }
+
+        private void ChangeQueen(InventoryItem inventoryItem)
+        {
+            this.mButtonMenuComponent.IsVisible = false;
+            var lQueenBee = (QueenBee) inventoryItem.Tag;
+            this.mBeeHiveManager.RemoveQueen(() => this.AddQueen(lQueenBee));
+        }
+
+        private void AddQueen(QueenBee queenBee)
+        {
+            this.mBeeHiveManager.AddQueen(queenBee, this.QueenAddComplete);
+        }
+
+        private void QueenAddComplete()
+        {
+            this.mButtonMenuComponent.IsVisible = true;   
+        }
+
+        private void MenuButtonUseSmoker_Click(MenuButton button)
+        {
+            this.mButtonMenuComponent.IsVisible = false;
+            this.mBeeHiveManager.SmokeHive(this.mPlayer.Smoker, this.SmokingFinished);
+        }
+
+        private void MenuButtonQueenRemove_Click(MenuButton obj)
+        {
+            this.mButtonMenuComponent.IsVisible = false;
+            this.mBeeHiveManager.RemoveQueen(this.QueenRemovalFinished);
+        }
+
+        private void QueenRemovalFinished()
+        {
+            this.mButtonMenuComponent.IsVisible = true;
+        }
+
+        private void MenuButtonToWorld_Click(MenuButton button)
         {
             var lWorldScreen = new BeeWorldScreen();
             this.ScreenManager.TransitionTo(lWorldScreen);
         }
 
-        private void ButtonBeeYard_Click(Button button)
+        private void MenuButtonToYard_Click(MenuButton button)
         {
             var lYardScreen = new BeeYardScreen();
             var lPlayerManager = this.ScreenManager.BeeWorldManager.PlayerManager;
@@ -238,61 +356,95 @@ namespace BusyBeekeeper.Screens
             this.ScreenManager.TransitionTo(lYardScreen);
         }
 
-        private void AddSuper(InventoryItem item)
-        {
-            var lSuper = (Super)item.Tag;
-
-            this.mBeeHive.Supers.Add(lSuper);
-            this.mPlayer.Supers.Remove(lSuper);
-        }
-
-        private void ButtonAddSuper_Click(Button button)
+        private void MenuButtonSupersAdd_Click(MenuButton button)
         {
             this.ScreenManager.BeeWorldManager.IsPaused = true;
 
             this.mInventorySelectorComponent.Items.Clear();
             this.mInventorySelectorComponent.Items.AddRange(
-                this.mPlayer.Supers.Select(x => this.ToInventoryItem(x, 1)));
-            //this.mInventorySelectorComponent.Items.AddRange(
-            //    this.mPlayer.Supers
-            //    .GroupBy(x => x.MetaId)
-            //    .Select(x => this.ToInventoryItem(x.First(), x.Count())));
+                this.mPlayer.Supers
+                    .GroupBy(x => x.MetaId)
+                    .Select(x => this.ToInventoryItem(x.First(), x.Count())));
 
             this.mInventorySelectorComponent.SelectActionText = "Add Super";
             this.mInventorySelectorComponent.Show(
                 this.AddSuper, () => this.ScreenManager.BeeWorldManager.IsPaused = false);
         }
 
-        private void ButtonRemoveSuper_Click(Button button)
+        private void MenuButtonSupersRemove_Click(MenuButton button)
         {
+            this.BeginSelectionMode(this.RemoveSuper);
         }
 
-        private void ButtonSmokeHive_Click(Button button)
+        private void MenuButtonSelectionCommit_Click(MenuButton obj)
         {
-            this.ToggleInput(false);
-            this.mBeeHiveManager.SmokeHive(this.mPlayer.Smoker, this.SmokingFinished);
+            System.Diagnostics.Debug.Assert(this.mSuperSelectedCallback != null);
+            this.mSuperSelectedCallback(this.mSelectedSuper);
         }
 
-        private void ButtonExtractHoney_Click(Button button)
+        private void MenuButtonSelectionCancel_Click(MenuButton obj)
         {
+            this.EndSelectionMode();
+        }
+
+        private void RemoveSuper(BeeHiveSuperComponent superComponet)
+        {
+            var lIndex = (int)superComponet.Tag;
+            var lSuper = this.mBeeHive.Supers[lIndex];
+
+            this.mButtonMenuComponent.IsVisible = false;
+
+            this.mSuperComponentBeingRemoved = superComponet;
+            this.mBeeHiveManager.RemoveSuper(lSuper, this.SuperRemovalComplete);
+        }
+
+        public void BeginSelectionMode(Action<BeeHiveSuperComponent> superSelectedCallback)
+        {
+            System.Diagnostics.Debug.Assert(superSelectedCallback != null);
+            this.mIsSelectionModeActive = true;
+            this.mSuperSelectedCallback = superSelectedCallback;
+            this.mSelectedSuper = null;
+
+            this.mMenuButtonSelectionCancel.IsVisible = true;
+            this.mMenuButtonSelectionCommit.IsVisible = true;
+
+            this.mMenuButtonSupers.IsVisible = false;
+            this.mMenuButtonQueen.IsVisible = false;
+            this.mMenuButtonUseSmoker.IsVisible = false;
+            this.mMenuButtonToYard.IsVisible = false;
+            this.mMenuButtonToWorld.IsVisible = false;
+        }
+
+        public void EndSelectionMode()
+        {
+            if (this.mSelectedSuper != null) this.mSelectedSuper.IsSelected = false;
+            this.mIsSelectionModeActive = false;
+            this.mSuperSelectedCallback = null;
+            this.mSelectedSuper = null;
+
+            this.mMenuButtonSelectionCancel.IsVisible = false;
+            this.mMenuButtonSelectionCommit.IsVisible = false;
+
+            this.mMenuButtonSupers.IsVisible = true;
+            this.mMenuButtonQueen.IsVisible = true;
+            this.mMenuButtonUseSmoker.IsVisible = true;
+            this.mMenuButtonToYard.IsVisible = true;
+            this.mMenuButtonToWorld.IsVisible = true;
+        }
+
+        public void SuperRemovalComplete()
+        {
+            this.mButtonMenuComponent.IsVisible = true;
+            this.EndSelectionMode();
         }
 
         private void SmokingFinished()
         {
-            this.mButtonSmokeHive.Text = "Smoke Hive";
-            this.ToggleInput(true);
+            this.mButtonMenuComponent.IsVisible = true;
         }
 
-        private void ToggleInput(bool enable)
-        {
-            this.mButtonAddSuper.IsEnabled = enable;
-            this.mButtonBeeWorld.IsEnabled = enable;
-            this.mButtonBeeYard.IsEnabled = enable;
-            this.mButtonExtractHoney.IsEnabled = enable;
-            this.mButtonRemoveSuper.IsEnabled = enable;
-            this.mButtonSmokeHive.IsEnabled = enable;
-        }
-        
+        #region Inventory Item Convertion Methods
+
         private InventoryItem ToInventoryItem(Super super, int count)
         {
             var lInventoryItem = new InventoryItem();
@@ -302,6 +454,71 @@ namespace BusyBeekeeper.Screens
             lInventoryItem.Quantity = count;
             lInventoryItem.Texture = this.mSuperTexture;
             return lInventoryItem;
+        }
+
+        private InventoryItem ToInventoryItem(QueenBee queenBee)
+        {
+            var lInventoryItem = new InventoryItem();
+            lInventoryItem.Tag = queenBee;
+            lInventoryItem.Name = queenBee.Name;
+            lInventoryItem.Description = queenBee.Description;
+            lInventoryItem.Quantity = 1;
+            lInventoryItem.Texture = this.mSuperTexture;
+            return lInventoryItem;
+        }
+
+        #endregion
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+            
+            for (int lIndex = this.mComponents.Count - 1; lIndex >= 0; lIndex--)
+            {
+                this.mComponents[lIndex].Update(gameTime);
+            }
+
+            while (this.mSuperComponents.Count > this.mBeeHive.Supers.Count)
+            {
+                var lLastIndex = this.mSuperComponents.Count - 1;
+                var lSuperComponent = this.mSuperComponents[lLastIndex];
+                this.mSuperComponents.RemoveAt(lLastIndex);
+                this.mComponents.Remove(lSuperComponent);
+            }
+
+            while (this.mSuperComponents.Count < this.mBeeHive.Supers.Count)
+            {
+                var lSuperComponent = new BeeHiveSuperComponent();
+                lSuperComponent.IsSelected = false;
+                lSuperComponent.Tag = this.mSuperComponents.Count;
+                lSuperComponent.BlankTexture = this.mBlankTexture;
+                this.mSuperComponents.Add(lSuperComponent);
+                this.mComponents.Add(lSuperComponent);
+            }
+
+            var lSuperBottomLeftLocation = new Vector2(
+                (this.ScreenSize.X - mSuperWidth) / 2,
+                this.mHudComponent.Position.Y - 10f + this.mVerticalScrollPosition);
+
+            this.mVerticalScrollHeight = -(this.mHudComponent.Position.Y / 2f);
+            for (int lIndex = 0; lIndex < this.mBeeHive.Supers.Count; lIndex++)
+            {
+                var lSuper = this.mBeeHive.Supers[lIndex];
+                var lSuperComponent = this.mSuperComponents[lIndex];
+
+                var lSuperComponentSize = new Vector2(mSuperWidth, mSuperHeightPerDepth * lSuper.Depth);
+                var lSuperComponentPosition = new Vector2(
+                    lSuperBottomLeftLocation.X,
+                    lSuperBottomLeftLocation.Y - lSuperComponentSize.Y);
+
+                lSuperComponent.Size = lSuperComponentSize;
+                lSuperComponent.Position = lSuperComponentPosition;
+
+                this.mVerticalScrollHeight += lSuperComponentSize.Y;
+
+                lSuperBottomLeftLocation.Y = lSuperComponentPosition.Y - 1;
+            }
+            this.mVerticalScrollHeight = Math.Max(this.mVerticalScrollHeight, 0);
         }
 
         #endregion

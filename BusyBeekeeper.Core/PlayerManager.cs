@@ -8,21 +8,50 @@ namespace BusyBeekeeper.Core
 {
     public sealed class PlayerManager : IUpdatable
     {
+        #region Instance Fields --------------------------------------------------------
+
         private Player mPlayer;
 
         private readonly BeeWorldManager mWorldManager;
         private readonly List<IUpdatable> mUpdatables = new List<IUpdatable>();
         private readonly List<BeeYardManager> mBeeYardManagers = new List<BeeYardManager>();
 
+        private bool mIsTraveling;
+        private int mTravelTicksRemaining;
+        private Action mTravelCompleteCallback;
+
+        #endregion
+
+        #region Constructors -----------------------------------------------------------
+
         public PlayerManager(BeeWorldManager worldManager)
         {
             this.mWorldManager = worldManager;
         }
 
-        private bool mIsTraveling;
-        private int mTravelTicksRemaining;
-        private Action mTravelCompleteCallback;
-        
+        #endregion
+
+        #region Instance Properties ----------------------------------------------------
+
+        public Player Player
+        {
+            get { return this.mPlayer; }
+        }
+
+        public bool IsTraveling
+        {
+            get { return this.mIsTraveling; }
+        }
+
+        public IList<BeeYardManager> BeeYardManagers
+        {
+            get { return this.mBeeYardManagers; }
+        }
+
+        #endregion
+
+        #region Instance Methods -------------------------------------------------------
+
         public void CreateNew(
             int id, string name, PlayerAvatar avatar,
             IObjectRepository<BeeYard> beeYardRepository,
@@ -83,21 +112,6 @@ namespace BusyBeekeeper.Core
             throw new NotImplementedException();
         }
 
-        public Player Player
-        {
-            get { return this.mPlayer; }
-        }
-
-        public bool IsTraveling
-        {
-            get { return this.mIsTraveling; }
-        }
-
-        public IList<BeeYardManager> BeeYardManagers
-        {
-            get { return this.mBeeYardManagers; }
-        }
-
         public void Save()
         {
             if (this.mPlayer == null) return;
@@ -109,7 +123,7 @@ namespace BusyBeekeeper.Core
             if (this.mPlayer != null)
             {
                 this.mPlayer.TotalRealTimePlayed =
-                   this.mPlayer.TotalRealTimePlayed.Add(elapsedRealTime);
+                    this.mPlayer.TotalRealTimePlayed.Add(elapsedRealTime);
             }
         }
 
@@ -191,6 +205,25 @@ namespace BusyBeekeeper.Core
             this.StartTraveling(callback);
         }
 
+        public void TravelToShop(Action callback)
+        {
+            System.Diagnostics.Debug.Assert(this.mPlayer.Location != PlayerLocation.Shop);
+
+            this.mPlayer.CurrentBeeHive = null;
+            this.mPlayer.CurrentBeeYard = null;
+            this.mPlayer.Location = PlayerLocation.Shop;
+
+            this.StartTraveling(callback);
+        }
+
+        public void TravelToMarket()
+        {
+            System.Diagnostics.Debug.Assert(this.mPlayer.Location != PlayerLocation.Market);
+            this.mPlayer.CurrentBeeHive = null;
+            this.mPlayer.CurrentBeeYard = null;
+            this.mPlayer.Location = PlayerLocation.Market;
+        }
+
         /// <summary>
         /// Starts the traveling process.
         /// </summary>
@@ -200,8 +233,10 @@ namespace BusyBeekeeper.Core
             // TODO: Travel ticks should be based on the player's truck speed.
             this.mWorldManager.RealTimePerTick = TimeSpan.FromMilliseconds(300);
             this.mTravelCompleteCallback = callback;
-            this.mTravelTicksRemaining = 5;
+            this.mTravelTicksRemaining = 2;
             this.mIsTraveling = true;
         }
+
+        #endregion
     }
 }

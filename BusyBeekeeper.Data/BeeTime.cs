@@ -9,6 +9,14 @@ namespace BusyBeekeeper.Data
     {
         public const int MinutesInHour = 60;
         public const int HoursInDay = 12;
+        public const int MinutesInDay = MinutesInHour * HoursInDay;
+
+        public BeeTime()
+        {
+            this.Day = 1;
+            this.Hour = 0;
+            this.Minute = 0;
+        }
 
         public int Minute { get; set; }
         public int Hour { get; set; }

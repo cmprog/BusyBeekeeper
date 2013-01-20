@@ -67,6 +67,8 @@ namespace BusyBeekeeper.Core
         {
             const int lcDefaultMillisecondsPerTick = 1000;
             const int lcDefaultBeeMinutesPerTick = 2;
+            //const int lcDefaultMillisecondsPerTick = 300;
+            //const int lcDefaultBeeMinutesPerTick = 4;
 
             this.RealTimePerTick = TimeSpan.FromMilliseconds(lcDefaultMillisecondsPerTick);
             this.BeeMinutesPerTick = lcDefaultBeeMinutesPerTick;

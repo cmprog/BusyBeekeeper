@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -45,6 +46,7 @@ namespace BusyBeekeeper.Screens.CommonComponents
 
         private SpriteFont mFontName;
         private SpriteFont mFontDescription;
+        private SpriteFont mFontQuantity;
 
         private Texture2D mBlankTexture;
 
@@ -115,126 +117,9 @@ namespace BusyBeekeeper.Screens.CommonComponents
 
         #region Instance Methods -------------------------------------------------------
 
-        public override void LoadContent(ContentManager contentManager)
+        protected virtual void Close()
         {
-            base.LoadContent(contentManager);
-
-            this.mBlankTexture = contentManager.Load<Texture2D>("Sprites/Blank");
-
-            this.mFontName = contentManager.Load<SpriteFont>("Fonts/DefaultBig");
-            this.mFontDescription = contentManager.Load<SpriteFont>("Fonts/DefaultNormal");
-
-            this.mButtonClose.Text = "Close";
-            this.mButtonClose.TextColor = Color.White;
-            this.mButtonClose.BackgroundRenderer = new SolidBackgroundRenderer(this.mBlankTexture, Color.DarkRed);
-            this.mButtonClose.Size = new Vector2(sInfoWidth, 50);
-            this.mButtonClose.Position = this.Position + this.Size - this.mButtonClose.Size - new Vector2(sItemPadding, sItemPadding);
-            this.mButtonClose.Font = contentManager.Load<SpriteFont>("Fonts/DefaultNormal");
-            this.mButtonClose.Click += x => this.Close();
-
-            this.mButtonPrevious.Text = "<";
-            this.mButtonPrevious.TextColor = Color.White;
-            this.mButtonPrevious.BackgroundRenderer = new SolidBackgroundRenderer(this.mBlankTexture, Color.Orange);
-            this.mButtonPrevious.Size = new Vector2(sNavigationHeight, sNavigationHeight);
-            this.mButtonPrevious.Position = new Vector2(
-                this.mPosition.X + sItemPadding,
-                this.mPosition.Y + this.mSize.Y - sItemPadding - this.mButtonPrevious.Size.Y);
-            this.mButtonPrevious.Font = contentManager.Load<SpriteFont>("Fonts/DefaultBig");
-            this.mButtonPrevious.Click += x => this.ChangePage(-1);
-
-            this.mButtonNext.Text = ">";
-            this.mButtonNext.TextColor = Color.White;
-            this.mButtonNext.BackgroundRenderer = new SolidBackgroundRenderer(this.mBlankTexture, Color.Orange);
-            this.mButtonNext.Size = this.mButtonPrevious.Size;
-            this.mButtonNext.Position = new Vector2(
-                this.mPosition.X + this.mSize.X - sItemPadding - sInfoWidth - sItemPadding - this.mButtonNext.Size.X,
-                this.mButtonPrevious.Position.Y);
-            this.mButtonNext.Font = contentManager.Load<SpriteFont>("Fonts/DefaultBig");
-            this.mButtonNext.Click += x => this.ChangePage(1);
-
-            this.mLabelPage.TextColor = Color.Black;
-            this.mLabelPage.BackgroundRenderer = new EmptyBackgroundRenderer();
-            this.mLabelPage.Size = new Vector2(
-                this.mButtonNext.Position.X - this.mButtonPrevious.Position.X - this.mButtonPrevious.Size.X - sItemPadding - sItemPadding,
-                this.mButtonNext.Size.Y);
-            this.mLabelPage.Position = new Vector2(
-                this.mButtonPrevious.Position.X + this.mButtonPrevious.Size.X + sItemPadding,
-                this.mButtonPrevious.Position.Y);
-            this.mLabelPage.Font = contentManager.Load<SpriteFont>("Fonts/DefaultSmall");
-
-            this.UpdateNavigationInformation();
-        }
-
-        public override bool HandleInput(InputState inputState)
-        {
-            if (!this.Visible) return false;
-
-            if (inputState.MouseLeftClickUp())
-            {
-                var lCurrentMouseState = inputState.CurrentMouseState;
-                if (VectorUtilities.HitTest(Vector2.Zero, this.ScreenSize, lCurrentMouseState.X, lCurrentMouseState.Y)
-                    && !VectorUtilities.HitTest(this.mPosition, this.mSize, lCurrentMouseState.X, lCurrentMouseState.Y))
-                {
-                    this.Close();
-                    return true;
-                }
-
-                for (int lIndex = 0; lIndex < sItemsPerPage; lIndex++)
-                {
-                    if (VectorUtilities.HitTest(this.mItemPositions[lIndex], this.mItemSize, lCurrentMouseState.X, lCurrentMouseState.Y))
-                    {
-                        this.mSelectedIndexOffset = lIndex;
-                        this.mInfoRecalculationNeeded = true;
-                        return true;
-                    }
-                }
-            }
-
-            if (this.mButtonClose.HandleInput(inputState)) return true;
-            if (this.mButtonPrevious.HandleInput(inputState)) return true;
-            if (this.mButtonNext.HandleInput(inputState)) return true;
-
-            return false;
-        }
-
-        private string FitTextToWidth(
-            SpriteFont font,
-            string originalText,
-            float maxWidth)
-        {
-            var lTextSize = font.MeasureString(originalText);
-            if (lTextSize.X < maxWidth)
-            {
-                return originalText;
-            }
-
-            var lTextBuilder = new StringBuilder();
-            var lLineBuilder = new StringBuilder();
-
-            var lSpaceSize = font.MeasureString(" ");
-            var lWords = originalText.Split(' ');
-            var lLineSize = Vector2.Zero;
-
-            foreach (var lWord in lWords)
-            {
-                var lWordSize = font.MeasureString(lWord);
-
-                if (lLineSize.X + lSpaceSize.X + lWordSize.X > maxWidth)
-                {
-                    lTextBuilder.AppendLine(lLineBuilder.ToString());
-                    lLineBuilder.Clear();
-                }
-
-                lLineBuilder.Append(lWord).Append(' ');
-                lLineSize = font.MeasureString(lLineBuilder);
-            }
-
-            if (lLineBuilder.Length > 0)
-            {
-                lTextBuilder.Append(lLineBuilder.ToString());
-            }
-
-            return lTextBuilder.ToString();
+            this.Visible = false;
         }
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
@@ -278,7 +163,13 @@ namespace BusyBeekeeper.Screens.CommonComponents
                 if (lItemIndex < this.Items.Count)
                 {
                     var lItem = this.mItems[lItemIndex];
+                    
+                    var lQuantityText = lItem.Quantity.ToString();
+                    var lQuantityTextSize = this.mFontQuantity.MeasureString(lQuantityText);
+                    var lQuantityTextPosition = lItemPosition + this.mItemSize - lQuantityTextSize - new Vector2(2);
+
                     spriteBatch.Draw(lItem.Texture, lItemPosition, Color.White);
+                    spriteBatch.DrawString(this.mFontQuantity, lQuantityText, lQuantityTextPosition, Color.Black);
                 }
 
                 if (lItemOffset == this.mSelectedIndexOffset)
@@ -296,6 +187,136 @@ namespace BusyBeekeeper.Screens.CommonComponents
                     spriteBatch.Draw(this.mBlankTexture, lBottomLeft, null, Color.Black, 0, Vector2.Zero, lWidthSize, SpriteEffects.None, 0);
                 }
             }
+        }
+
+        private void ChangePage(int pageOffset)
+        {
+            this.mCurrentPageIndex += pageOffset;
+            this.UpdateNavigationInformation();
+            this.mInfoRecalculationNeeded = true;
+        }
+
+        private string FitTextToWidth(
+            SpriteFont font,
+            string originalText,
+            float maxWidth)
+        {
+            var lTextSize = font.MeasureString(originalText);
+            if (lTextSize.X < maxWidth)
+            {
+                return originalText;
+            }
+
+            var lTextBuilder = new StringBuilder();
+            var lLineBuilder = new StringBuilder();
+
+            var lSpaceSize = font.MeasureString(" ");
+            var lWords = originalText.Split(' ');
+            var lLineSize = Vector2.Zero;
+
+            foreach (var lWord in lWords)
+            {
+                var lWordSize = font.MeasureString(lWord);
+
+                if (lLineSize.X + lSpaceSize.X + lWordSize.X > maxWidth)
+                {
+                    lTextBuilder.AppendLine(lLineBuilder.ToString());
+                    lLineBuilder.Clear();
+                }
+
+                lLineBuilder.Append(lWord).Append(' ');
+                lLineSize = font.MeasureString(lLineBuilder);
+            }
+
+            if (lLineBuilder.Length > 0)
+            {
+                lTextBuilder.Append(lLineBuilder.ToString());
+            }
+
+            return lTextBuilder.ToString();
+        }
+
+        public override bool HandleInput(InputState inputState)
+        {
+            if (!this.Visible) return false;
+
+            if (inputState.MouseLeftClickUp())
+            {
+                var lCurrentMouseState = inputState.CurrentMouseState;
+                if (VectorUtilities.HitTest(Vector2.Zero, this.ScreenSize, lCurrentMouseState.X, lCurrentMouseState.Y)
+                    && !VectorUtilities.HitTest(this.mPosition, this.mSize, lCurrentMouseState.X, lCurrentMouseState.Y))
+                {
+                    this.Close();
+                    return true;
+                }
+
+                for (int lIndex = 0; lIndex < sItemsPerPage; lIndex++)
+                {
+                    if (VectorUtilities.HitTest(this.mItemPositions[lIndex], this.mItemSize, lCurrentMouseState.X, lCurrentMouseState.Y))
+                    {
+                        this.mSelectedIndexOffset = lIndex;
+                        this.mInfoRecalculationNeeded = true;
+                        return true;
+                    }
+                }
+            }
+
+            if (this.mButtonClose.HandleInput(inputState)) return true;
+            if (this.mButtonPrevious.HandleInput(inputState)) return true;
+            if (this.mButtonNext.HandleInput(inputState)) return true;
+
+            return false;
+        }
+
+        public override void LoadContent(ContentManager contentManager)
+        {
+            base.LoadContent(contentManager);
+
+            this.mBlankTexture = contentManager.Load<Texture2D>("Sprites/Blank");
+
+            this.mFontName = contentManager.Load<SpriteFont>("Fonts/DefaultBig");
+            this.mFontDescription = contentManager.Load<SpriteFont>("Fonts/DefaultNormal");
+            this.mFontQuantity = contentManager.Load<SpriteFont>("Fonts/DefaultTiny");
+
+            this.mButtonClose.Text = "Close";
+            this.mButtonClose.TextColor = Color.White;
+            this.mButtonClose.BackgroundRenderer = new SolidBackgroundRenderer(this.mBlankTexture, Color.DarkRed);
+            this.mButtonClose.Size = new Vector2(sInfoWidth, 50);
+            this.mButtonClose.Position = this.Position + this.Size - this.mButtonClose.Size - new Vector2(sItemPadding, sItemPadding);
+            this.mButtonClose.Font = contentManager.Load<SpriteFont>("Fonts/DefaultNormal");
+            this.mButtonClose.Click += x => this.Close();
+
+            this.mButtonPrevious.Text = "<";
+            this.mButtonPrevious.TextColor = Color.White;
+            this.mButtonPrevious.BackgroundRenderer = new SolidBackgroundRenderer(this.mBlankTexture, Color.Orange);
+            this.mButtonPrevious.Size = new Vector2(sNavigationHeight, sNavigationHeight);
+            this.mButtonPrevious.Position = new Vector2(
+                this.mPosition.X + sItemPadding,
+                this.mPosition.Y + this.mSize.Y - sItemPadding - this.mButtonPrevious.Size.Y);
+            this.mButtonPrevious.Font = contentManager.Load<SpriteFont>("Fonts/DefaultBig");
+            this.mButtonPrevious.Click += x => this.ChangePage(-1);
+
+            this.mButtonNext.Text = ">";
+            this.mButtonNext.TextColor = Color.White;
+            this.mButtonNext.BackgroundRenderer = new SolidBackgroundRenderer(this.mBlankTexture, Color.Orange);
+            this.mButtonNext.Size = this.mButtonPrevious.Size;
+            this.mButtonNext.Position = new Vector2(
+                this.mPosition.X + this.mSize.X - sItemPadding - sInfoWidth - sItemPadding - this.mButtonNext.Size.X,
+                this.mButtonPrevious.Position.Y);
+            this.mButtonNext.Font = contentManager.Load<SpriteFont>("Fonts/DefaultBig");
+            this.mButtonNext.Click += x => this.ChangePage(1);
+
+            this.mLabelPage.TextColor = Color.Black;
+            this.mLabelPage.BackgroundRenderer = new EmptyBackgroundRenderer();
+            this.mLabelPage.Size = new Vector2(
+                this.mButtonNext.Position.X - this.mButtonPrevious.Position.X - this.mButtonPrevious.Size.X - sItemPadding - sItemPadding,
+                this.mButtonNext.Size.Y);
+            this.mLabelPage.Position = new Vector2(
+                this.mButtonPrevious.Position.X + this.mButtonPrevious.Size.X + sItemPadding,
+                this.mButtonPrevious.Position.Y);
+            this.mLabelPage.Font = contentManager.Load<SpriteFont>("Fonts/DefaultSmall");
+
+            this.UpdateNavigationInformation();
         }
 
         private void UpdateNavigationInformation()
@@ -316,16 +337,9 @@ namespace BusyBeekeeper.Screens.CommonComponents
             }
         }
 
-        private void ChangePage(int pageOffset)
+        protected void ClearSelection()
         {
-            this.mCurrentPageIndex += pageOffset;
-            this.UpdateNavigationInformation();
-            this.mInfoRecalculationNeeded = true;
-        }
-
-        protected virtual void Close()
-        {
-            this.Visible = false;
+            this.mSelectedIndexOffset = -1;
         }
 
         #endregion
