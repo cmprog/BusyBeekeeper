@@ -13,6 +13,10 @@ namespace BusyBeekeeper.Core
         private readonly BeeYard mBeeYard;
         #endregion
 
+        #region Static Fields ----------------------------------------------------------
+        private const int sMaxHoneyCollectionPerDepth = 1000;
+        #endregion
+
         #region Smoking Fields ---------------------------------------------------------
         private bool mIsSmokingHive;
         private Smoker mSmoker;
@@ -68,12 +72,6 @@ namespace BusyBeekeeper.Core
 
             const int lcMinimumBeePopulation = 50;
 
-            int lQueenPopulationFactor = 0;
-            int lQueenCollectionFactor = 0;
-            int lQueenStrengthFactor = 0;
-            int lQueenAgressionFactor = 5;
-            int lQueenSwarmFactor = 0;
-
             if (this.mIsSmokingHive && (--this.mSmokingTicksRemaining == 0))
             {
                 this.mSmoker = null;
@@ -85,6 +83,7 @@ namespace BusyBeekeeper.Core
             if (this.mIsRemovingSuper && (--this.mSuperRemovalTickRemaining == 0))
             {
                 this.mBeeHive.Supers.Remove(this.mSuperBeingRemoved);
+
                 this.mSuperBeingRemoved = null;
                 this.mIsRemovingSuper = false;
                 this.mSuperRemovalCompleteCallback();
@@ -113,10 +112,14 @@ namespace BusyBeekeeper.Core
                 this.mQueenAddCompleteCallback = null;
             }
 
+            int lQueenPopulationFactor = 0;
+            int lQueenStrengthFactor = 0;
+            int lQueenAgressionFactor = 5;
+            int lQueenSwarmFactor = 0;
+
             if (this.mBeeHive.QueenBee != null)
             {
                 lQueenPopulationFactor = this.mBeeHive.QueenBee.BeePopulationGrowthFactor;
-                lQueenCollectionFactor = this.mBeeHive.QueenBee.HoneyCollectionFactor;
                 lQueenStrengthFactor = this.mBeeHive.QueenBee.ColonyStrengthFactor;
                 lQueenAgressionFactor = this.mBeeHive.QueenBee.NaturalBeeAgressionFactor;
                 lQueenSwarmFactor = this.mBeeHive.QueenBee.SwarmLikelinessFactor;
@@ -126,10 +129,6 @@ namespace BusyBeekeeper.Core
                 lElapsedMinutes, this.mBeeHive.Population, lQueenPopulationFactor);
             this.mBeeHive.Population = Math.Max(lcMinimumBeePopulation, lNewPopulation);
 
-            var lHoneyCollected = this.CalculateHoneyCollected(
-                lElapsedMinutes, this.mBeeHive.Population, lQueenCollectionFactor, this.mBeeYard.GrassGrowth);
-            this.mBeeHive.HoneyCollected += lHoneyCollected;
-
             this.mBeeHive.ColonyStrength = this.CalculateColonyStrenth(
                 this.mBeeHive.Population, lQueenStrengthFactor);
 
@@ -138,6 +137,13 @@ namespace BusyBeekeeper.Core
 
             this.mBeeHive.ColonySwarmLikeliness = this.CalculateNewColonySwarmLikliness(
                 this.mBeeHive.ColonySwarmLikeliness, lNewPopulation, lQueenSwarmFactor, this.mBeeYard.GrassGrowth);
+
+            this.UpdateHoneyCollection(lElapsedMinutes);
+        }
+
+        public void AddSuper(Super super, SuperType type)
+        {
+            this.mBeeHive.Supers.Add(super, type);
         }
 
         public void RemoveSuper(Super super, Action superRemovalCompleteCallback)
@@ -213,14 +219,33 @@ namespace BusyBeekeeper.Core
 
         }
 
-        private int CalculateHoneyCollected(
-            int elapsedMinutes,
-            int population,
-            int queenFactor,
-            int growthFactor)
+        private void UpdateHoneyCollection(int elapsedMinutes)
         {
-            // TODO:
-            return elapsedMinutes;
+            var lQueenCollectionFactor = (this.mBeeHive.QueenBee == null) ? 0 : this.mBeeHive.QueenBee.HoneyCollectionFactor;
+
+            var lTotalHoneyCollected = elapsedMinutes*lQueenCollectionFactor;
+            var lHoneyAmounts = new[]
+                {
+                    (int) (0.6*lTotalHoneyCollected),
+                    (int) (0.3*lTotalHoneyCollected),
+                    (int) (0.1*lTotalHoneyCollected)
+                };
+
+            for (int lSuperIndex = 0, lHoneyAmountIndex = 0;
+                 (lSuperIndex < this.mBeeHive.Supers.Count) && (lHoneyAmountIndex < lHoneyAmounts.Length);
+                 lSuperIndex++)
+            {
+                var lSuper = this.mBeeHive.Supers[lSuperIndex];
+                if (lSuper.Type != SuperType.HoneyCollection) continue;
+
+                var lHoneyCapcity = sMaxHoneyCollectionPerDepth*lSuper.Depth;
+                if (lSuper.HoneyCollected < lHoneyCapcity)
+                {
+                    var lHoneyAmount = lHoneyAmounts[lHoneyAmountIndex];
+                    lSuper.HoneyCollected = Math.Min(lHoneyCapcity, lSuper.HoneyCollected + lHoneyAmount);
+                    lHoneyAmountIndex++;
+                }
+            }
         }
 
         private int CalculateColonyStrenth(

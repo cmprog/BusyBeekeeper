@@ -138,16 +138,24 @@ namespace BusyBeekeeper.Screens.CommonComponents
             {
                 if (this.mInfoRecalculationNeeded)
                 {
-                    var lSelectedItemIndex = (this.mCurrentPageIndex * sItemsPerPage) + this.mSelectedIndexOffset;
-                    var lSelectedItem = this.mItems[lSelectedItemIndex];
-                    
-                    this.mAdjustedNameText = this.FitTextToWidth(this.mFontName, lSelectedItem.Name, sInfoWidth);
-                    var lNameTextSize = this.mFontName.MeasureString(this.mAdjustedNameText);
+                    var lSelectedItemIndex = this.SelectedIndex;
+                    if (lSelectedItemIndex < this.mItems.Count)
+                    {
+                        var lSelectedItem = this.mItems[lSelectedItemIndex];
+                        
+                        this.mAdjustedNameText = this.mFontName.FitTextToWidth(lSelectedItem.Name, sInfoWidth);
+                        var lNameTextSize = this.mFontName.MeasureString(this.mAdjustedNameText);
 
-                    this.mAdjustedDescriptionText = this.FitTextToWidth(this.mFontDescription, lSelectedItem.Description, sInfoWidth);
-                    this.mDescriptionTextPosition = new Vector2(this.mNameTextPosition.X, this.mNameTextPosition.Y + lNameTextSize.Y + sItemPadding);
+                        this.mAdjustedDescriptionText = this.mFontDescription.FitTextToWidth(lSelectedItem.Description, sInfoWidth);
+                        this.mDescriptionTextPosition = new Vector2(this.mNameTextPosition.X, this.mNameTextPosition.Y + lNameTextSize.Y + sItemPadding);
 
-                    this.mInfoRecalculationNeeded = false;
+                        this.mInfoRecalculationNeeded = false;
+                    }
+                    else
+                    {
+                        this.mAdjustedNameText = string.Empty;
+                        this.mAdjustedDescriptionText = string.Empty;
+                    }
                 }
 
                 spriteBatch.DrawString(this.mFontName, this.mAdjustedNameText, this.mNameTextPosition, Color.Black);
@@ -170,21 +178,21 @@ namespace BusyBeekeeper.Screens.CommonComponents
 
                     spriteBatch.Draw(lItem.Texture, lItemPosition, Color.White);
                     spriteBatch.DrawString(this.mFontQuantity, lQuantityText, lQuantityTextPosition, Color.Black);
-                }
 
-                if (lItemOffset == this.mSelectedIndexOffset)
-                {
-                    var lTopLeft = this.mItemPositions[lItemOffset] - new Vector2(1, 1);
-                    var lTopRight = new Vector2(lTopLeft.X + this.mItemSize.X + 2, lTopLeft.Y);
-                    var lBottomLeft = new Vector2(lTopLeft.X, lTopLeft.Y + this.mItemSize.Y + 2);
+                    if (lItemOffset == this.mSelectedIndexOffset)
+                    {
+                        var lTopLeft = this.mItemPositions[lItemOffset] - new Vector2(1, 1);
+                        var lTopRight = new Vector2(lTopLeft.X + this.mItemSize.X + 2, lTopLeft.Y);
+                        var lBottomLeft = new Vector2(lTopLeft.X, lTopLeft.Y + this.mItemSize.Y + 2);
 
-                    var lWidthSize = new Vector2(this.mItemSize.X + 4, 3);
-                    var lHeightSize = new Vector2(3, this.mItemSize.Y + 4);
+                        var lWidthSize = new Vector2(this.mItemSize.X + 4, 3);
+                        var lHeightSize = new Vector2(3, this.mItemSize.Y + 4);
 
-                    spriteBatch.Draw(this.mBlankTexture, lTopLeft, null, Color.Black, 0, Vector2.Zero, lWidthSize, SpriteEffects.None, 0);
-                    spriteBatch.Draw(this.mBlankTexture, lTopLeft, null, Color.Black, 0, Vector2.Zero, lHeightSize, SpriteEffects.None, 0);
-                    spriteBatch.Draw(this.mBlankTexture, lTopRight, null, Color.Black, 0, Vector2.Zero, lHeightSize, SpriteEffects.None, 0);
-                    spriteBatch.Draw(this.mBlankTexture, lBottomLeft, null, Color.Black, 0, Vector2.Zero, lWidthSize, SpriteEffects.None, 0);
+                        spriteBatch.Draw(this.mBlankTexture, lTopLeft, null, Color.Black, 0, Vector2.Zero, lWidthSize, SpriteEffects.None, 0);
+                        spriteBatch.Draw(this.mBlankTexture, lTopLeft, null, Color.Black, 0, Vector2.Zero, lHeightSize, SpriteEffects.None, 0);
+                        spriteBatch.Draw(this.mBlankTexture, lTopRight, null, Color.Black, 0, Vector2.Zero, lHeightSize, SpriteEffects.None, 0);
+                        spriteBatch.Draw(this.mBlankTexture, lBottomLeft, null, Color.Black, 0, Vector2.Zero, lWidthSize, SpriteEffects.None, 0);
+                    }
                 }
             }
         }
@@ -196,49 +204,9 @@ namespace BusyBeekeeper.Screens.CommonComponents
             this.mInfoRecalculationNeeded = true;
         }
 
-        private string FitTextToWidth(
-            SpriteFont font,
-            string originalText,
-            float maxWidth)
+        public override void HandleInput(InputState inputState)
         {
-            var lTextSize = font.MeasureString(originalText);
-            if (lTextSize.X < maxWidth)
-            {
-                return originalText;
-            }
-
-            var lTextBuilder = new StringBuilder();
-            var lLineBuilder = new StringBuilder();
-
-            var lSpaceSize = font.MeasureString(" ");
-            var lWords = originalText.Split(' ');
-            var lLineSize = Vector2.Zero;
-
-            foreach (var lWord in lWords)
-            {
-                var lWordSize = font.MeasureString(lWord);
-
-                if (lLineSize.X + lSpaceSize.X + lWordSize.X > maxWidth)
-                {
-                    lTextBuilder.AppendLine(lLineBuilder.ToString());
-                    lLineBuilder.Clear();
-                }
-
-                lLineBuilder.Append(lWord).Append(' ');
-                lLineSize = font.MeasureString(lLineBuilder);
-            }
-
-            if (lLineBuilder.Length > 0)
-            {
-                lTextBuilder.Append(lLineBuilder.ToString());
-            }
-
-            return lTextBuilder.ToString();
-        }
-
-        public override bool HandleInput(InputState inputState)
-        {
-            if (!this.Visible) return false;
+            if (!this.Visible) return;
 
             if (inputState.MouseLeftClickUp())
             {
@@ -247,25 +215,26 @@ namespace BusyBeekeeper.Screens.CommonComponents
                     && !VectorUtilities.HitTest(this.mPosition, this.mSize, lCurrentMouseState.X, lCurrentMouseState.Y))
                 {
                     this.Close();
-                    return true;
+                    inputState.MouseLeftClickUpHandled = true;
                 }
-
-                for (int lIndex = 0; lIndex < sItemsPerPage; lIndex++)
+                else
                 {
-                    if (VectorUtilities.HitTest(this.mItemPositions[lIndex], this.mItemSize, lCurrentMouseState.X, lCurrentMouseState.Y))
+                    for (int lIndex = 0; lIndex < sItemsPerPage; lIndex++)
                     {
-                        this.mSelectedIndexOffset = lIndex;
-                        this.mInfoRecalculationNeeded = true;
-                        return true;
+                        if (VectorUtilities.HitTest(this.mItemPositions[lIndex], this.mItemSize, lCurrentMouseState.X, lCurrentMouseState.Y))
+                        {
+                            this.mSelectedIndexOffset = lIndex;
+                            this.mInfoRecalculationNeeded = true;
+                            inputState.MouseLeftClickUpHandled = true;
+                            break;
+                        }
                     }
                 }
             }
 
-            if (this.mButtonClose.HandleInput(inputState)) return true;
-            if (this.mButtonPrevious.HandleInput(inputState)) return true;
-            if (this.mButtonNext.HandleInput(inputState)) return true;
-
-            return false;
+            this.mButtonClose.HandleInput(inputState);
+            this.mButtonPrevious.HandleInput(inputState);
+            this.mButtonNext.HandleInput(inputState);
         }
 
         public override void LoadContent(ContentManager contentManager)

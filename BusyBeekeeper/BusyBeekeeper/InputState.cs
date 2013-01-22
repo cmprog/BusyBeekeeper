@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework.Input;
 
 namespace BusyBeekeeper
 {
@@ -14,6 +10,8 @@ namespace BusyBeekeeper
         private MouseState mCurrentMouseState;
         private MouseState mLastMouseState;
 
+        public bool MouseLeftClickUpHandled { get; set; }
+
         public void Update()
         {
             this.mLastKeyboardState = this.mCurrentKeyboardState;
@@ -21,6 +19,8 @@ namespace BusyBeekeeper
 
             this.mLastMouseState = this.mCurrentMouseState;
             this.mCurrentMouseState = Mouse.GetState();
+
+            this.MouseLeftClickUpHandled = false;
         }
 
         public KeyboardState CurrentKeyboardState
@@ -61,8 +61,10 @@ namespace BusyBeekeeper
 
         public bool MouseLeftClickUp()
         {
-            return (this.mLastMouseState.LeftButton == ButtonState.Pressed)
-                && (this.mCurrentMouseState.LeftButton == ButtonState.Released);
+            return
+                !this.MouseLeftClickUpHandled &&
+                (this.mLastMouseState.LeftButton == ButtonState.Pressed) &&
+                (this.mCurrentMouseState.LeftButton == ButtonState.Released);
         }
     }
 }

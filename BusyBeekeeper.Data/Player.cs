@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BusyBeekeeper.Data
 {
@@ -9,12 +8,22 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public sealed class Player
     {
+        #region Instance Fields --------------------------------------------------------
+
         private readonly IList<Award> mAwards = new List<Award>();
         private readonly IList<BeeYard> mBeeYards = new List<BeeYard>();
         private readonly IList<Bottle> mBottles = new List<Bottle>();
         private readonly IList<QueenBee> mQueenBees = new List<QueenBee>();
         private readonly IList<Super> mSupers = new List<Super>();
         private readonly IList<SuperPaint> mSuperPaints = new List<SuperPaint>();
+
+        #endregion
+
+        #region Constructors -----------------------------------------------------------
+
+        #endregion
+
+        #region Instance Properties ----------------------------------------------------
 
         public int Id { get; set; }
 
@@ -29,6 +38,7 @@ namespace BusyBeekeeper.Data
 
         public int AvailableCoins { get; set; }
         public int TotalCoinsEarned { get; set; }
+        public int TotalCoinsSpent { get; set; }
 
         public BeeSuit BeeSuit { get; set; }
         public Smoker Smoker { get; set; }
@@ -70,5 +80,11 @@ namespace BusyBeekeeper.Data
         {
             get { return this.mSuperPaints; }
         }
+
+        #endregion
+
+        #region Instance Methods -------------------------------------------------------
+        
+        #endregion
     }
 }

@@ -99,6 +99,7 @@
     <Compile Include="BeeTimeSpan.cs" />
     <Compile Include="BeeYard.cs" />
     <Compile Include="Bottle.cs" />
+    <Compile Include="HiveSuperCollection.cs" />
     <Compile Include="HoneyExtractor.cs" />
     <Compile Include="LawnMower.cs" />
     <Compile Include="MetaBottle.cs" />

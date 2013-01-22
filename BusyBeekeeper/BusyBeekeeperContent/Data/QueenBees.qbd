@@ -1,5 +1,21 @@
-﻿1
+﻿17
 0||Old Queen||This is an old queen.||50||5||5||0||5||5
+1||Test Queen 1||This queen is for testing purposes.||50||5||5||0||5||5
+2||Test Queen 2||This queen is for testing purposes.||50||5||5||0||5||5
+3||Test Queen 3||This queen is for testing purposes.||50||5||5||0||5||5
+4||Test Queen 4||This queen is for testing purposes.||50||5||5||0||5||5
+5||Test Queen 5||This queen is for testing purposes.||50||5||5||0||5||5
+6||Test Queen 6||This queen is for testing purposes.||50||5||5||0||5||5
+7||Test Queen 7||This queen is for testing purposes.||50||5||5||0||5||5
+8||Test Queen 8||This queen is for testing purposes.||50||5||5||0||5||5
+9||Test Queen 9||This queen is for testing purposes.||50||5||5||0||5||5
+10||Test Queen 10||This queen is for testing purposes.||50||5||5||0||5||5
+11||Test Queen 11||This queen is for testing purposes.||50||5||5||0||5||5
+12||Test Queen 12||This queen is for testing purposes.||50||5||5||0||5||5
+13||Test Queen 13||This queen is for testing purposes.||50||5||5||0||5||5
+14||Test Queen 14||This queen is for testing purposes.||50||5||5||0||5||5
+15||Test Queen 15||This queen is for testing purposes.||50||5||5||0||5||5
+16||Test Queen 16||This queen is for testing purposes.||50||5||5||0||5||5
 
 Legend:
 QueenID||Name||Description||PurchasePrice||BeePopulationGrowthFactor||HoneyCollectionFactor||ColonyStrengthFactor||NaturalBeeAgressionFactor||SwarmLiklinessFactor

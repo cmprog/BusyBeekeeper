@@ -2,7 +2,7 @@ using Microsoft.Xna.Framework.Content.Pipeline;
 
 namespace BusyBeekeeper.Data.Graphics.PipelineExtensions.BeeWorld
 {
-    [ContentImporter(".bwi", DisplayName = "GraphicsData/BeeWorld/BeeWorldInfo - Importer", DefaultProcessor = "BeeWorldInfoProcessor")]
+    [ContentImporter(".bwi", DisplayName = "GraphicsData/BeeWorld/BeeWorldInfo - Importer", DefaultProcessor = "ShopSectionInfoProcessor")]
     public class BeeWorldInfoImporter : ContentImporter<string>
     {
         public override string Import(string filename, ContentImporterContext context)

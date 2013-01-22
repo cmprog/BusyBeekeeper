@@ -34,11 +34,11 @@ namespace BusyBeekeeper.Screens
             this.mFont = contentManager.Load<SpriteFont>("Fonts/DefaultSmall");
         }
 
-        public override bool HandleInput(InputState inputState)
+        public override void HandleInput(InputState inputState)
         {
             if (inputState.MouseLeftClickUp())
             {
-                if (!this.mBeeYard.IsUnlocked) return false;
+                if (!this.mBeeYard.IsUnlocked) return;
 
                 var lCurrentMouseState = inputState.CurrentMouseState;
 
@@ -52,10 +52,8 @@ namespace BusyBeekeeper.Screens
                     this.TravelToYard(this);
                 }
 
-                return lNameIsClicked;
+                inputState.MouseLeftClickUpHandled = true;
             }
-
-            return base.HandleInput(inputState);
         }
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)

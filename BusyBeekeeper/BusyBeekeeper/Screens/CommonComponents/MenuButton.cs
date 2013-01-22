@@ -113,9 +113,9 @@ namespace BusyBeekeeper.Screens.CommonComponents
             get { return this.mMenuButtons; }
         }
 
-        public override bool HandleInput(InputState inputState)
+        public override void HandleInput(InputState inputState)
         {
-            if (!this.IsVisible) return false;
+            if (!this.IsVisible) return;
 
             if (inputState.MouseLeftClickUp())
             {
@@ -147,16 +147,14 @@ namespace BusyBeekeeper.Screens.CommonComponents
 
                     var lClickHandler = this.Click;
                     if (lClickHandler != null) lClickHandler(this);
-                    return true;
+                    inputState.MouseLeftClickUpHandled = true;
                 }
             }
 
             foreach (var lMenuButton in this.ChildMenuButtons)
             {
-                if (lMenuButton.HandleInput(inputState)) return true;
+                lMenuButton.HandleInput(inputState);
             }
-
-            return false;
         }
 
         public override void Update(GameTime gameTime)

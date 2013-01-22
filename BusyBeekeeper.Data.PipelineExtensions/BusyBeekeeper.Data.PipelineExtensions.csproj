@@ -51,6 +51,8 @@
   <ItemGroup>
     <Compile Include="BeeYardDataImporter.cs" />
     <Compile Include="BeeYardDataProcessor.cs" />
+    <Compile Include="SuperPaintDataImporter.cs" />
+    <Compile Include="SuperPaintDataProcessor.cs" />
     <Compile Include="SmokerDataImporter.cs" />
     <Compile Include="SmokerDataProcessor.cs" />
     <Compile Include="QueenBeeDataImporter.cs" />

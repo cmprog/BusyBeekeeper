@@ -89,12 +89,12 @@ namespace BusyBeekeeper.Screens
 
             foreach (var lHiveComponent in this.mHiveComponents)
             {
-                if (lHiveComponent.HandleInput(inputState)) return;
+                lHiveComponent.HandleInput(inputState);
             }
 
-            if (this.mButtonMowGrass.HandleInput(inputState)) return;
-            if (this.mButtonBeeWorld.HandleInput(inputState)) return;
-            if (this.mHudComponent.HandleInput(inputState)) return;
+            this.mButtonMowGrass.HandleInput(inputState);
+            this.mButtonBeeWorld.HandleInput(inputState);
+            this.mHudComponent.HandleInput(inputState);
         }
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)

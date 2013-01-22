@@ -9,7 +9,7 @@ namespace BusyBeekeeper.Screens
 {
     internal class HudComponent : ScreenComponent
     {
-        private readonly int mItemMargin = 10;
+        protected const int sItemMargin = 10;
 
         private readonly BeeWorldManager mWorldManager;
         private readonly Vector2 mScreenSize;
@@ -37,18 +37,24 @@ namespace BusyBeekeeper.Screens
             this.mPosition = screenSize - this.mSize;
 
             const int lcProgressHeight = 10;
-            this.mDayCountPosition = this.mPosition + new Vector2(this.mItemMargin);
+            this.mDayCountPosition = this.mPosition + new Vector2(sItemMargin);
             this.mDayProgressPosition = new Vector2(
-                this.mDayCountPosition.X + this.mDayCountWidth + this.mItemMargin,
+                this.mDayCountPosition.X + this.mDayCountWidth + sItemMargin,
                 this.mDayCountPosition.Y);
             this.mDayProgressSize = new Vector2(
-                this.mSize.X - (3 * this.mItemMargin) - this.mDayCountWidth,
+                this.mSize.X - (3 * sItemMargin) - this.mDayCountWidth,
                 lcProgressHeight);
             this.mDayProgressIndicatorSize = new Vector2(0, this.mDayProgressSize.Y);
         }
 
         protected Texture2D BlankTexture { get { return this.mBlankTexture; } }
         protected Vector2 ScreenSize { get { return this.mScreenSize; } }
+
+        protected SpriteFont Font
+        {
+            get { return this.mFont; }
+        }
+
         public Vector2 Size { get { return this.mSize; } }
         public Vector2 Position { get { return this.mPosition; } }
 

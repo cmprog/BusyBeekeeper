@@ -111,10 +111,10 @@ namespace BusyBeekeeper.Screens
 
             foreach (var lLocationComponent in this.mLocationComponents)
             {
-                if (lLocationComponent.HandleInput(inputState)) return;
+                lLocationComponent.HandleInput(inputState);
             }
 
-            if (this.mHudComponent.HandleInput(inputState)) return;
+            this.mHudComponent.HandleInput(inputState);
         }
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)

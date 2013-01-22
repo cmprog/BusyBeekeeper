@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using BusyBeekeeper.DataRepositories;
 using BusyBeekeeper.Data;
 using BusyBeekeeper.Data.Graphics.BeeYard;
@@ -50,7 +49,7 @@ namespace BusyBeekeeper.Screens
 
         #region Instance Methods -------------------------------------------------------
 
-        public override bool HandleInput(InputState inputState)
+        public override void HandleInput(InputState inputState)
         {
             if (inputState.MouseLeftClickUp())
             {
@@ -58,11 +57,9 @@ namespace BusyBeekeeper.Screens
                 if (VectorUtilities.HitTest(this.mHivePosition, this.mHiveSize, lCurrentMouseState.X, lCurrentMouseState.Y))
                 {
                     this.TravelToHive(this);
-                    return true;
+                    inputState.MouseLeftClickUpHandled = true;
                 }
             }
-
-            return false;
         }
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)

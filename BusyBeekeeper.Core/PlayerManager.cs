@@ -89,11 +89,11 @@ namespace BusyBeekeeper.Core
             
             // TEST:
             this.mPlayer.BeeYards[1].IsUnlocked = true;
-            foreach (var lSuper in Enumerable.Repeat(superRepository.CreateObject(0), 20)) this.mPlayer.Supers.Add(lSuper);
+            for (int lIndex = 0; lIndex < 20; lIndex++) this.mPlayer.Supers.Add(superRepository.CreateObject(0));
             // -- End TEST
 
             var lFirstBeeHive = lFirstBeeYard.BeeHives[0];
-            lFirstBeeHive.Supers.Add(superRepository.CreateObject(0));
+            lFirstBeeHive.Supers.Add(superRepository.CreateObject(0), SuperType.BroodChamber);
             lFirstBeeHive.QueenBee = queenRepository.CreateObject(0);
 
             this.mWorldManager.Time.Reset(this.mPlayer.BeeTime);
@@ -150,10 +150,11 @@ namespace BusyBeekeeper.Core
         /// </summary>
         public void TravelToBeeYard()
         {
-            System.Diagnostics.Debug.Assert(this.mPlayer.Location == PlayerLocation.BeeHive);
-
-            this.mPlayer.CurrentBeeHive = null;
-            this.mPlayer.Location = PlayerLocation.BeeYard;
+            if (this.mPlayer.Location == PlayerLocation.BeeHive)
+            {
+                this.mPlayer.CurrentBeeHive = null;
+                this.mPlayer.Location = PlayerLocation.BeeYard;
+            }
         }
 
         /// <summary>
@@ -196,24 +197,36 @@ namespace BusyBeekeeper.Core
         /// <param name="callback">The callback to call when traveling is complete.</param>
         public void TravelToHoneyHouse(Action callback)
         {
-            System.Diagnostics.Debug.Assert(this.mPlayer.Location != PlayerLocation.HoneyHouse);
-
+            var lPreviousLocation = this.mPlayer.Location;
             this.mPlayer.CurrentBeeHive = null;
             this.mPlayer.CurrentBeeYard = null;
             this.mPlayer.Location = PlayerLocation.HoneyHouse;
 
-            this.StartTraveling(callback);
+            if (lPreviousLocation == PlayerLocation.HoneyHouse)
+            {
+                callback();
+            }
+            else
+            {
+                this.StartTraveling(callback);
+            }
         }
 
         public void TravelToShop(Action callback)
         {
-            System.Diagnostics.Debug.Assert(this.mPlayer.Location != PlayerLocation.Shop);
-
+            var lPreviousLocation = this.mPlayer.Location;
             this.mPlayer.CurrentBeeHive = null;
             this.mPlayer.CurrentBeeYard = null;
             this.mPlayer.Location = PlayerLocation.Shop;
 
-            this.StartTraveling(callback);
+            if (lPreviousLocation == PlayerLocation.Shop)
+            {
+                callback();
+            }
+            else
+            {
+                this.StartTraveling(callback);
+            }
         }
 
         public void TravelToMarket()
@@ -235,6 +248,19 @@ namespace BusyBeekeeper.Core
             this.mTravelCompleteCallback = callback;
             this.mTravelTicksRemaining = 2;
             this.mIsTraveling = true;
+        }
+
+        /// <summary>
+        /// Processes the given coin exchange, ensuring that all the approviate fields are
+        /// updated.
+        /// </summary>
+        /// <param name="coinAmount">The amount of the counts. Positive value means the coins were
+        /// earned, negative value means the coins were spent.</param>
+        public void ProcessCoinExchange(int coinAmount)
+        {
+            this.mPlayer.AvailableCoins += coinAmount;
+            if (coinAmount > 0) this.mPlayer.TotalCoinsEarned += coinAmount;
+            else this.mPlayer.TotalCoinsSpent -= coinAmount;
         }
 
         #endregion

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace BusyBeekeeper.Data
+﻿namespace BusyBeekeeper.Data
 {
     /// <summary>
     /// The basic hosing unit of a bee colony. A bee hive lives at a yard and is made up
@@ -11,19 +6,23 @@ namespace BusyBeekeeper.Data
     /// </summary>
     public class BeeHive
     {
-        private readonly IList<Super> mSupers = new List<Super>();
+        private readonly HiveSuperCollection mSupers;
+
+        public BeeHive()
+        {
+            this.mSupers = new HiveSuperCollection(this);
+        }
 
         public int Id { get; set; }
         
         public QueenBee QueenBee { get; set; }
 
         public int Population { get; set; }
-        public int HoneyCollected { get; set; }
         public int ColonyStrength { get; set; }
         public int ColonyAgressiveness { get; set; }
         public int ColonySwarmLikeliness { get; set; }
 
-        public IList<Super> Supers
+        public HiveSuperCollection Supers
         {
             get { return this.mSupers; }
         }

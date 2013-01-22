@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using BusyBeekeeper.Core;
+﻿using BusyBeekeeper.Core;
 using BusyBeekeeper.Data;
 using Microsoft.Xna.Framework.Content;
 
@@ -13,6 +11,11 @@ namespace BusyBeekeeper.DataRepositories
         public QueenBeeRepository(ContentManager contentManager)
         {
             this.mMetaQueenBees = contentManager.Load<MetaQueenBee[]>("Data/QueenBees");
+        }
+
+        public int Count
+        {
+            get { return this.mMetaQueenBees.Length; }
         }
 
         public MetaQueenBee GetMetaObject(int metaId)

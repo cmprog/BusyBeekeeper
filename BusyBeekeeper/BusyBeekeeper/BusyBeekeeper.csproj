@@ -114,6 +114,7 @@
     <Compile Include="DataRepositories\PlayerAvatarRepository.cs" />
     <Compile Include="DataRepositories\QueenBeeRepository.cs" />
     <Compile Include="DataRepositories\SmokerRepository.cs" />
+    <Compile Include="DataRepositories\SuperPaintRepository.cs" />
     <Compile Include="DataRepositories\SuperRepository.cs" />
     <Compile Include="IGameScreen.cs" />
     <Compile Include="IGameScreenManager.cs" />
@@ -133,6 +134,7 @@
     <Compile Include="Screens\BeeYardScreen.cs" />
     <Compile Include="Screens\CommonComponents\Button.cs" />
     <Compile Include="Screens\CommonComponents\ButtonMenuComponent.cs" />
+    <Compile Include="Screens\CommonComponents\ConfirmationDialogComponent.cs" />
     <Compile Include="Screens\CommonComponents\EmptyBackgroundRenderer.cs" />
     <Compile Include="Screens\CommonComponents\IBackgroundRenderer.cs" />
     <Compile Include="Screens\CommonComponents\InventoryItem.cs" />
@@ -148,9 +150,20 @@
     <Compile Include="Screens\ScreenComponent.cs" />
     <Compile Include="Screens\CommonComponents\SolidBackgroundRenderer.cs" />
     <Compile Include="Screens\GameScreenBase.cs" />
+    <Compile Include="Screens\ShopBottlesSectionScreen.cs" />
+    <Compile Include="Screens\ShopExtractionSectionScreen.cs" />
+    <Compile Include="Screens\ShopFieldSectionScreen.cs" />
+    <Compile Include="Screens\ShopMarketSectionScreen.cs" />
+    <Compile Include="Screens\ShopQueenSectionScreen.cs" />
+    <Compile Include="Screens\ShopQueenSelectionItemComponent.cs" />
     <Compile Include="Screens\ShopScreen.cs" />
+    <Compile Include="Screens\ShopScreenHudComponent.cs" />
+    <Compile Include="Screens\ShopSectionComponent.cs" />
+    <Compile Include="Screens\ShopSuperSectionScreen.cs" />
+    <Compile Include="Screens\ShopSuperSectionItemComponent.cs" />
     <Compile Include="Screens\TravelingScreen.cs" />
     <Compile Include="SharedProperty.cs" />
+    <Compile Include="SpriteFontExtensions.cs" />
     <Compile Include="VectorUtilities.cs" />
   </ItemGroup>
   <ItemGroup>

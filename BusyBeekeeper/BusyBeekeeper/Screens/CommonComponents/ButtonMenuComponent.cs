@@ -101,21 +101,19 @@ namespace BusyBeekeeper.Screens.CommonComponents
             }
         }
 
-        public override bool HandleInput(InputState inputState)
+        public override void HandleInput(InputState inputState)
         {
-            if (!this.IsVisible) return false;
+            if (!this.IsVisible) return;
 
             foreach (var lMenuButton in this.MenuButtons)
             {
-                if (lMenuButton.HandleInput(inputState)) return true;
+                lMenuButton.HandleInput(inputState);
             }
 
             if (inputState.MouseLeftClickUp())
             {
                 this.CloseAllMenuButtons();
             }
-
-            return false;
         }
 
         public void Invalidate()

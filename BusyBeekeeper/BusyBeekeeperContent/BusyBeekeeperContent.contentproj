@@ -152,6 +152,20 @@
       <Processor>BeeWorldInfoProcessor</Processor>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GraphicsData\Shop\ShopSectionInfos.ssi">
+      <Name>ShopSectionInfos</Name>
+      <Importer>ShopSectionInfoImporter</Importer>
+      <Processor>ShopSectionInfoProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Data\SuperPaints.spd">
+      <Name>SuperPaints</Name>
+      <Importer>SuperPaintDataImporter</Importer>
+      <Processor>SuperPaintDataProcessor</Processor>
+    </Compile>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--  To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -80,12 +80,11 @@ namespace BusyBeekeeper.Screens.CommonComponents
             }
         }
 
-        public override bool HandleInput(InputState inputState)
+        public override void HandleInput(InputState inputState)
         {
-            if (base.HandleInput(inputState)) return true;
-            if (!this.Visible) return false;
-            if (this.mButtonSelect.HandleInput(inputState)) return true;
-            return false;
+            base.HandleInput(inputState);
+            if (!this.Visible) return;
+            this.mButtonSelect.HandleInput(inputState);
         }
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)

@@ -17,15 +17,10 @@ namespace BusyBeekeeper.Screens
         public virtual void Update(GameTime gameTime) { }
 
         /// <summary>
-        /// Handles the given input state. If this component handles the input
-        /// in a way which leaves the input considered "consumed" then this method
-        /// will return true, otherwise it returns false. Input is considered "consumed"
-        /// when the action in responce to the input makes it meaningless for other
-        /// components to handle the input.
+        /// Handles the given input state.
         /// </summary>
         /// <param name="inputState">The input state.</param>
-        /// <returns>True if the input was fully consumed, otherwise false.</returns>
-        public virtual bool HandleInput(InputState inputState) { return false; }
+        public virtual void HandleInput(InputState inputState) { }
 
         /// <summary>
         /// Draws the component.

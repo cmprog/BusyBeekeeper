@@ -26,9 +26,9 @@ namespace BusyBeekeeper.Screens.CommonComponents
 
         #region Instance Methods -------------------------------------------------------
 
-        public override bool HandleInput(InputState inputState)
+        public override void HandleInput(InputState inputState)
         {
-            if (!this.IsVisible || !this.IsEnabled) return false;
+            if (!this.IsVisible || !this.IsEnabled) return;
 
             if (inputState.MouseLeftClickUp())
             {
@@ -39,12 +39,10 @@ namespace BusyBeekeeper.Screens.CommonComponents
                     if (lClickHandler != null)
                     {
                         lClickHandler(this);
-                        return true;
                     }
+                    inputState.MouseLeftClickUpHandled = true;
                 }
             }
-
-            return false;
         }
 
         #endregion

@@ -55,9 +55,9 @@ namespace BusyBeekeeper.Screens
             this.mFont = contentManager.Load<SpriteFont>("Fonts/DefaultSmall");
         }
 
-        public override bool HandleInput(InputState inputState)
+        public override void HandleInput(InputState inputState)
         {
-            if (!this.IsEnabled) return false;
+            if (!this.IsEnabled) return;
 
             if (inputState.MouseLeftClickUp())
             {
@@ -66,11 +66,9 @@ namespace BusyBeekeeper.Screens
                 {
                     var lClickHandler = this.Click;
                     if (lClickHandler != null) lClickHandler(this);
-                    return true;
+                    inputState.MouseLeftClickUpHandled = true;
                 }
             }
-
-            return false;
         }
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)

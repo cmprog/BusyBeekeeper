@@ -27,6 +27,8 @@ namespace BusyBeekeeper.Screens
         // MenuButtons
         private readonly MenuButton mMenuButtonSupers = new MenuButton();
         private readonly MenuButton mMenuButtonSupersAdd = new MenuButton();
+        private readonly MenuButton mMenuButtonSupersAddBrood = new MenuButton();
+        private readonly MenuButton mMenuButtonSupersAddHoney = new MenuButton();
         private readonly MenuButton mMenuButtonSupersRemove = new MenuButton();
         private readonly MenuButton mMenuButtonQueen = new MenuButton();
         private readonly MenuButton mMenuButtonQueenChange = new MenuButton();
@@ -81,7 +83,18 @@ namespace BusyBeekeeper.Screens
             // mMenuButtonSupersAdd
             //
             this.mMenuButtonSupersAdd.Text = "Add";
-            this.mMenuButtonSupersAdd.Click += this.MenuButtonSupersAdd_Click;
+            this.mMenuButtonSupersAdd.ChildMenuButtons.Add(this.mMenuButtonSupersAddBrood);
+            this.mMenuButtonSupersAdd.ChildMenuButtons.Add(this.mMenuButtonSupersAddHoney);
+            //
+            // mMenuButtonSupersAdd
+            //
+            this.mMenuButtonSupersAddBrood.Text = "Brood";
+            this.mMenuButtonSupersAddBrood.Click += this.MenuButtonSupersAddBrood_Click;
+            //
+            // mMenuButtonSupersAdd
+            //
+            this.mMenuButtonSupersAddHoney.Text = "Honey";
+            this.mMenuButtonSupersAddHoney.Click += this.MenuButtonSupersAddHoney_Click;
             //
             // mMenuButtonSupersAdd
             //
@@ -145,11 +158,11 @@ namespace BusyBeekeeper.Screens
 
         #region Instance Methods -------------------------------------------------------
 
-        private void AddSuper(InventoryItem item)
+        private void AddSuper(InventoryItem item, SuperType type)
         {
-            var lSuper = (Super)item.Tag;
+            var lSuper = (Super) item.Tag;
 
-            this.mBeeHive.Supers.Add(lSuper);
+            this.mBeeHive.Supers.Add(lSuper, type);
             this.mPlayer.Supers.Remove(lSuper);
         }
 
@@ -164,23 +177,29 @@ namespace BusyBeekeeper.Screens
                 this.mComponents[lIndex].Draw(spriteBatch, gameTime);
             }
 
+            foreach (var lSuperComponent in this.mSuperComponents)
+            {
+                var lSuperIndex = (int) lSuperComponent.Tag;
+                var lSuper = this.mBeeHive.Supers[lSuperIndex];
+                if (lSuper.Type == SuperType.HoneyCollection)
+                {
+                    var lHoneyCollectionText = string.Concat("Honey Collected : ", lSuper.HoneyCollected);
+                    var lHoneyCollectionTextLocation = lSuperComponent.Position + new Vector2(5);
+                    spriteBatch.DrawString(this.mMetaInfoFont, lHoneyCollectionText, lHoneyCollectionTextLocation, Color.Green);
+                }
+            }
+
             const float lcTextMarginBottom = 1f;
 
             var lPopulationText = string.Concat("Population : ", this.mBeeHive.Population);
             var lPopulationTextSize = this.mMetaInfoFont.MeasureString(lPopulationText);
             var lPopulationTextPosition = new Vector2(10, 10);
 
-            var lHoneyCollectedText = string.Concat("Honey Collected : ", this.mBeeHive.HoneyCollected);
-            var lHoneyCollectedTextSize = this.mMetaInfoFont.MeasureString(lHoneyCollectedText);
-            var lHoneyCollectedTextPosition = new Vector2(
-                lPopulationTextPosition.X,
-                lPopulationTextPosition.Y + lPopulationTextSize.Y + lcTextMarginBottom);
-
             var lColonyStrengthText = string.Concat("Colony Strength : ", this.mBeeHive.ColonyStrength);
             var lColonyStrengthTextSize = this.mMetaInfoFont.MeasureString(lColonyStrengthText);
             var lColonyStrengthTextPosition = new Vector2(
-                lHoneyCollectedTextPosition.X,
-                lHoneyCollectedTextPosition.Y + lHoneyCollectedTextSize.Y + lcTextMarginBottom);
+                lPopulationTextPosition.X,
+                lPopulationTextPosition.Y + lPopulationTextSize.Y + lcTextMarginBottom);
 
             var lColonyAggressivenessText = string.Concat("Colony Agressiveness : ", this.mBeeHive.ColonyAgressiveness);
             var lColonyAggressivenessTextSize = this.mMetaInfoFont.MeasureString(lColonyAggressivenessText);
@@ -194,7 +213,6 @@ namespace BusyBeekeeper.Screens
                 lColonyAggressivenessTextPosition.Y + lColonyAggressivenessTextSize.Y + lcTextMarginBottom);
 
             spriteBatch.DrawString(this.mMetaInfoFont, lPopulationText, lPopulationTextPosition, Color.Green);
-            spriteBatch.DrawString(this.mMetaInfoFont, lHoneyCollectedText, lHoneyCollectedTextPosition, Color.Green);
             spriteBatch.DrawString(this.mMetaInfoFont, lColonyStrengthText, lColonyStrengthTextPosition, Color.Green);
             spriteBatch.DrawString(this.mMetaInfoFont, lColonyAggressivenessText, lColonyAggressivenessTextPosition, Color.Green);
             spriteBatch.DrawString(this.mMetaInfoFont, lColonySwarmLiklinessText, lColonySwarmLiklinessTextPosition, Color.Green);
@@ -204,14 +222,14 @@ namespace BusyBeekeeper.Screens
         {
             base.HandleInput(inputState);
 
-            if (this.mInventorySelectorComponent.HandleInput(inputState)) return;
+            this.mInventorySelectorComponent.HandleInput(inputState);
 
             // Must handle input backwards to make the topmost component
             // the first to have a change to handle the input.
             for (int lIndex = this.mComponents.Count - 1; lIndex >= 0; lIndex--)
             {
                 var lComponent = this.mComponents[lIndex];
-                if (lComponent.HandleInput(inputState)) return;
+                lComponent.HandleInput(inputState);
             }
 
             if (this.mIsSelectionModeActive && inputState.MouseLeftClickUp())
@@ -356,19 +374,36 @@ namespace BusyBeekeeper.Screens
             this.ScreenManager.TransitionTo(lYardScreen);
         }
 
-        private void MenuButtonSupersAdd_Click(MenuButton button)
+        private void MenuButtonSupersAddHoney_Click(MenuButton obj)
         {
             this.ScreenManager.BeeWorldManager.IsPaused = true;
 
             this.mInventorySelectorComponent.Items.Clear();
             this.mInventorySelectorComponent.Items.AddRange(
                 this.mPlayer.Supers
-                    .GroupBy(x => x.MetaId)
-                    .Select(x => this.ToInventoryItem(x.First(), x.Count())));
+                    .Where(x => x.Type != SuperType.BroodChamber)
+                    .Select(ToInventoryItem));
 
             this.mInventorySelectorComponent.SelectActionText = "Add Super";
             this.mInventorySelectorComponent.Show(
-                this.AddSuper, () => this.ScreenManager.BeeWorldManager.IsPaused = false);
+                x => this.AddSuper(x, SuperType.HoneyCollection),
+                () => this.ScreenManager.BeeWorldManager.IsPaused = false);
+        }
+
+        private void MenuButtonSupersAddBrood_Click(MenuButton obj)
+        {
+            this.ScreenManager.BeeWorldManager.IsPaused = true;
+
+            this.mInventorySelectorComponent.Items.Clear();
+            this.mInventorySelectorComponent.Items.AddRange(
+                this.mPlayer.Supers
+                    .Where(x => x.Type != SuperType.HoneyCollection)
+                    .Select(ToInventoryItem));
+
+            this.mInventorySelectorComponent.SelectActionText = "Add Super";
+            this.mInventorySelectorComponent.Show(
+                x => this.AddSuper(x, SuperType.BroodChamber),
+                () => this.ScreenManager.BeeWorldManager.IsPaused = false);
         }
 
         private void MenuButtonSupersRemove_Click(MenuButton button)
@@ -445,13 +480,13 @@ namespace BusyBeekeeper.Screens
 
         #region Inventory Item Convertion Methods
 
-        private InventoryItem ToInventoryItem(Super super, int count)
+        private InventoryItem ToInventoryItem(Super super)
         {
             var lInventoryItem = new InventoryItem();
             lInventoryItem.Tag = super;
             lInventoryItem.Name = super.Name;
             lInventoryItem.Description = super.Description;
-            lInventoryItem.Quantity = count;
+            lInventoryItem.Quantity = 1;
             lInventoryItem.Texture = this.mSuperTexture;
             return lInventoryItem;
         }
