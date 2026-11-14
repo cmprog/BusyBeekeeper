@@ -42,6 +42,7 @@ Weekly planning matters as much as playing each moment well.
 ## 3. Decided Design
 
 ### 3.1 The Beekeeper & the Task Queue
+
 - The player controls one main character, **the beekeeper**.
 - The beekeeper has a **task queue**. Tapping a station or action adds a task to the end.
 - Each task = **travel to the station** + **perform the task** (has a duration).
@@ -55,6 +56,7 @@ Weekly planning matters as much as playing each moment well.
   scene to keep the UX simple.
 
 ### 3.2 Helpers (Workers) & Scripts
+
 - Helpers are unlocked over time and **automate** work.
 - Helpers run **scripts**: repeating task lists the player sets up.
 - Scripts are an upgrade path:
@@ -67,6 +69,7 @@ Weekly planning matters as much as playing each moment well.
   play stays the best option.
 
 ### 3.3 Banked Time (Offline Progress)
+
 - While the game is closed, **time away is tracked and banked**, up to a **cap**.
 - The game world does **not** advance while closed. Banked time is a resource instead.
 - During active play, the player can **opt in** to spend banked time as a **speed boost**.
@@ -74,17 +77,19 @@ Weekly planning matters as much as playing each moment well.
   - Banked time cap
   - Boost multiplier (how fast time runs while boosting)
   - (Possibly) how fast time is banked
-  - **Unused day time → banked time**: an *upgrade* (not available at the start) that turns
+  - **Unused day time → banked time**: an _upgrade_ (not available at the start) that turns
     the time left over from ending a day early into banked time
 
 ### 3.4 The Weekly Cycle
-| Day | Phase | Focus | Length |
-|---|---|---|---|
-| Mon–Fri | **Work days** | Hive care, harvesting, extracting, bottling, and preparing products | 2 min each (starting value) |
-| Sat | **Market day** | Fill customer orders at the market stall | 2 min (tuned separately) |
-| Sun | **Supply day** | Buy inventory (jars, frames, supplies, equipment) for the next week | **No time limit** (menu screen) |
+
+| Day     | Phase          | Focus                                                               | Length                          |
+| ------- | -------------- | ------------------------------------------------------------------- | ------------------------------- |
+| Mon–Fri | **Work days**  | Hive care, harvesting, extracting, bottling, and preparing products | 2 min each (starting value)     |
+| Sat     | **Market day** | Fill customer orders at the market stall                            | 2 min (tuned separately)        |
+| Sun     | **Supply day** | Buy inventory (jars, frames, supplies, equipment) for the next week | **No time limit** (menu screen) |
 
 **Day rules**
+
 - **Any timed day can be ended early** if the player chooses. Ending early gives no reward at
   the start (see the banked time upgrade in §3.3).
 - **When the day ends:** the task **in progress finishes**, and any **remaining queued tasks
@@ -93,10 +98,12 @@ Weekly planning matters as much as playing each moment well.
 - **Sunday** is a simple menu with no timer. The player decides when they're done shopping.
 
 **Weekly economy**
+
 - Supplies are limited, so running out mid-week is possible. The week has to be planned.
 - Saturday income pays for Sunday orders and for upgrades.
 
 ### 3.5 Market Day (Saturday)
+
 - **Active play**: customers arrive with **orders**, and the player fills them from the products
   they prepared during the week.
 - **Orders can contain several items** (e.g., "2 jars of honey + 1 candle").
@@ -107,10 +114,12 @@ Weekly planning matters as much as playing each moment well.
 - What was prepared Mon–Fri limits what can be sold, so Saturday rewards good weekly planning.
 
 ### 3.6 Pressures (gradually unlocked)
+
 Real beekeeping challenges create pressure and give each upgrade something to solve. They
 unlock **one at a time** so players learn each concept before the next arrives.
 
 Candidate pressures (not final, see Open Questions):
+
 - **Seasons**: nectar flow, winter, spring buildup
 - **Weather**: rainy days limit hive work or foraging
 - **Colony health**: queen condition, population, brood
@@ -119,19 +128,21 @@ Candidate pressures (not final, see Open Questions):
 - **Product spoilage**: honey crystallizing, demand changes at market
 
 ### 3.7 Scenes
+
 The game is split into separate **scenes**. Moving between location scenes costs time.
 
-| Scene | Type | Purpose |
-|---|---|---|
-| **Bee Yard** | Location (several) | Hive care and harvesting. There can be **multiple bee yards**: one scene type, each with small visual differences. |
-| **Honey House** | Location | **Extraction and bottling** (uncap, extract, filter, bottle, label, value-added products) |
-| **Market** | Location (Sat) | Fill customer orders at the stall |
-| **Shop** | Menu (Sun) | Untimed shopping menu: supplies, equipment, upgrades |
-| **Overworld** | Navigation | Map where the player picks which location to travel to |
-| **Travel** | Transition | Plays while moving between locations, and stands for the travel time spent |
-| **Sleep** | Transition | Plays between days (end-of-day → next morning) |
+| Scene           | Type               | Purpose                                                                                                            |
+| --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| **Bee Yard**    | Location (several) | Hive care and harvesting. There can be **multiple bee yards**: one scene type, each with small visual differences. |
+| **Honey House** | Location           | **Extraction and bottling** (uncap, extract, filter, bottle, label, value-added products)                          |
+| **Market**      | Location (Sat)     | Fill customer orders at the stall                                                                                  |
+| **Shop**        | Menu (Sun)         | Untimed shopping menu: supplies, equipment, upgrades                                                               |
+| **Overworld**   | Navigation         | Map where the player picks which location to travel to                                                             |
+| **Travel**      | Transition         | Plays while moving between locations, and stands for the travel time spent                                         |
+| **Sleep**       | Transition         | Plays between days (end-of-day → next morning)                                                                     |
 
 #### Travel flow
+
 1. The player queues a **Travel** task in the current scene (e.g., walk to the truck or exit).
 2. When the beekeeper reaches that task, the game switches to the **Overworld**.
 3. The player picks a destination.
@@ -140,6 +151,7 @@ The game is split into separate **scenes**. Moving between location scenes costs
 5. The player arrives in the destination scene with an empty queue.
 
 #### The Backyard (starting location)
+
 - The game starts in the player's **backyard**, which holds both a small **bee yard** and the
   **Honey House** (extraction + bottling).
 - Moving between the backyard yard and the Honey House takes **no travel time** and **needs no
@@ -150,6 +162,7 @@ The game is split into separate **scenes**. Moving between location scenes costs
   outside yard.
 
 #### Distance & Vehicles
+
 - Each destination (Honey House, other bee yards, market) has its own **travel distance**
   (time taken).
 - **Vehicles** are an upgrade path with two stats:
@@ -160,17 +173,20 @@ The game is split into separate **scenes**. Moving between location scenes costs
   interesting purchase choices.
 
 ### 3.8 Screen Layout & Camera
+
 - **Landscape** orientation (PWA manifest asks for landscape on phones).
 - Each scene **starts as a single screen**. As the player unlocks or upgrades things, a scene
   can grow wider, and **horizontal scrolling** is used to move around inside it.
 - Touch input has to tell "drag to scroll" apart from "tap to queue a task".
 
 ### 3.9 Central Tuning / Balance Config
+
 All balance numbers live in **one central config**, a **plain TypeScript module** (typed, so a bad value fails the build), not spread
 through the game code, so the game can be tuned and rebalanced over time without hunting
 for magic numbers.
 
 Examples of what belongs there:
+
 - Day lengths (work day, market day)
 - Walk speed, task durations, travel distances (in a scene and per destination)
 - Vehicle speed and cargo capacity
@@ -193,6 +209,7 @@ Nice extras (later): a debug panel to change values while the game runs, and a U
 or debug mode for fast-forwarding.
 
 ### 3.10 Platform & Tech
+
 - **Engine:** [LittleJS](https://github.com/KilledByAPixel/LittleJS)
 - **Delivery:** a static HTML file, hosted on **GitHub Pages**
 - **PWA:** installable on phones (web manifest + service worker for offline play)
@@ -207,6 +224,7 @@ or debug mode for fast-forwarding.
 - **Playtesting:** mostly desktop at first. Friends & family will play on phones.
 
 ### 3.11 Engineering Principles
+
 The goal is to **catch problems at build time, not at runtime**, and to give coding agents
 **deterministic tooling feedback** (types, lint, tests) they can check their work against.
 
@@ -232,6 +250,7 @@ The goal is to **catch problems at build time, not at runtime**, and to give cod
 ## 4. Beekeeping & Production
 
 ### 4.1 Production Chain Overview
+
 ```
 BEE YARD                         HONEY HOUSE                                         MARKET
 Hive fills supers ──carry──▶ Uncap frames ──▶ Extractor ──▶ Bucket ──pour──▶ Bottling tank ──▶ Containers ──▶ Orders
@@ -239,10 +258,12 @@ Hive fills supers ──carry──▶ Uncap frames ──▶ Extractor ──�
       ▲                                           │
       └──── empty supers / frames go back ◀───────┘
 ```
+
 Units change along the chain: **supers** (transport) → **frames** (processing) → **honey
 volume** (bucket/tank) → **containers** (products).
 
 ### 4.2 Hives, Supers & Bees
+
 - **Hives are not bought.** The player **builds a hive** in a yard from parts bought in the Shop:
   - **Brood box** (required, one per hive): where the colony lives. **Not harvested.** Bought
     separately and **includes a queen excluder** (no separate excluder item).
@@ -260,6 +281,7 @@ volume** (bucket/tank) → **containers** (products).
   - Room for more queen traits later (temperament, swarm tendency, disease resistance…)
 
 **Frame state** (kept simple on purpose):
+
 - Each frame is either **bare foundation** or **drawn comb**.
 - Frames on bare foundation need **extra lead time** before they start filling with honey (the bees
   must build comb first).
@@ -269,6 +291,7 @@ volume** (bucket/tank) → **containers** (products).
   but no lead time).
 
 **Inspections:**
+
 - Inspecting a hive **reveals problems** (mites, disease, weak queen…).
 - **Over-inspecting hurts colony health**, so the player must choose how often to inspect.
 - **Hives fill supers on their own over time.** The rate depends on:
@@ -281,6 +304,7 @@ volume** (bucket/tank) → **containers** (products).
   - Pull full supers and carry them back for processing
 
 ### 4.3 Carrying Supers
+
 - The beekeeper can carry supers by hand. **Bigger supers are heavier** and affect:
   - How many can be carried at once
   - **Walk speed inside the scene** while carrying
@@ -288,6 +312,7 @@ volume** (bucket/tank) → **containers** (products).
 - Between scenes, supers travel in **vehicle cargo** (§3.7).
 
 ### 4.4 Yards
+
 - Each yard has **hard limits**:
   - **Max hives** (hive slots)
   - **Max hive size** (supers per hive)
@@ -298,6 +323,7 @@ volume** (bucket/tank) → **containers** (products).
 - **Backyard:** low limits, no travel time (§3.7).
 
 ### 4.5 Honey House Processing
+
 1. **Uncap**: done **frame by frame** with an uncapping tool.
 2. **Extract**: the extractor holds a **limited number of frames** per run. Honey drains into a
    **bucket**.
@@ -308,6 +334,7 @@ Upgrades for the bottling tank: **higher capacity**, and **heated tanks** for fa
 (quicker bottling).
 
 ### 4.6 Machine Progression (general pattern)
+
 Most machines follow the same upgrade arc:
 
 1. **Manual**: the beekeeper must work the machine (e.g., hand-crank extractor)
@@ -319,23 +346,26 @@ Automated machines still need **maintenance**, so there's always some action req
 **Higher-end machines need less maintenance.**
 
 ### 4.7 Containers & Products
+
 **Containers** (each holds a different amount of honey):
 
-| Tier | Container | Notes |
-|---|---|---|
-| Start | **Honey bear** | Starting product, lid included |
-| Early | **Pint jar** | Bigger volume |
-| Early | **Quart jar** | Bigger volume |
-| Late | **Gallon jug** | Bulk |
-| Late | **Commercial contracts** | Large fulfilment orders |
+| Tier  | Container                | Notes                          |
+| ----- | ------------------------ | ------------------------------ |
+| Start | **Honey bear**           | Starting product, lid included |
+| Early | **Pint jar**             | Bigger volume                  |
+| Early | **Quart jar**            | Bigger volume                  |
+| Late  | **Gallon jug**           | Bulk                           |
+| Late  | **Commercial contracts** | Large fulfilment orders        |
 
 **Other products** (unlocked over time):
-- *Mid:* **beeswax products** from cappings (candles, lip balm)
-- *Mid:* **comb honey**: skips extraction, but the **comb is lost**, so the bees must **rebuild
+
+- _Mid:_ **beeswax products** from cappings (candles, lip balm)
+- _Mid:_ **comb honey**: skips extraction, but the **comb is lost**, so the bees must **rebuild
   it**, which slows that super's next fill
-- *Late:* creamed honey (time-based processing), varietal honeys tied to specific yards, mead?
+- _Late:_ creamed honey (time-based processing), varietal honeys tied to specific yards, mead?
 
 ### 4.8 Starting Kit
+
 - **1 hive** in the backyard: **1 brood box** + **1 shallow super**, with **1 queen/colony**
 - **100 Beebucks** (starting money, a config value to tune in playtesting)
 - **Honey bears** (lids included)
@@ -344,9 +374,10 @@ Automated machines still need **maintenance**, so there's always some action req
 - **4-frame manual extractor**
 - **Small basic bottling tank**
 - Enough starting consumables to cover the two-week delivery lead time (§4.9)
-- *(TBD: number of buckets, exact consumable counts, frame state of the starting super)*
+- _(TBD: number of buckets, exact consumable counts, frame state of the starting super)_
 
 ### 4.9 Shop & Ordering
+
 - The **Shop** (Sunday menu) sells **everything**: consumables, supers, bees/queens, equipment,
   machine upgrades, vehicles, and yards.
 - **Currency:** **Beebucks**.
@@ -362,18 +393,20 @@ Automated machines still need **maintenance**, so there's always some action req
 - **Bulk discounts**: possible, but **late game** only.
 
 ### 4.10 Stations by Scene (draft)
-| Scene | Stations / tasks |
-|---|---|
-| **Bee Yard** | Hives (inspect, add empty super, pull full super, treat/feed later), supply drop |
-| **Honey House** | Super drop-off, uncapping station, extractor, buckets, bottling tank, bottling/labeling station, storage shelves |
-| **Market** | Display/stock table, customer counter, cash box |
-| **Shop** *(menu)* | Everything for sale (§4.9) |
+
+| Scene             | Stations / tasks                                                                                                 |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Bee Yard**      | Hives (inspect, add empty super, pull full super, treat/feed later), supply drop                                 |
+| **Honey House**   | Super drop-off, uncapping station, extractor, buckets, bottling tank, bottling/labeling station, storage shelves |
+| **Market**        | Display/stock table, customer counter, cash box                                                                  |
+| **Shop** _(menu)_ | Everything for sale (§4.9)                                                                                       |
 
 ---
 
 ## 5. Open Questions
 
 ### Core loop & pacing
+
 - [x] ~~How long is a game day?~~ → 2 min work days and market day, tuned separately (§3.4)
 - [x] ~~How does a day end?~~ → on a timer, or early if the player chooses (§3.4)
 - [x] ~~Is Sunday timed?~~ → No, an untimed menu (§3.4)
@@ -383,6 +416,7 @@ Automated machines still need **maintenance**, so there's always some action req
 - [ ] Are there carry limits (e.g., the beekeeper can only carry N frames at once)?
 
 ### Scenes & travel
+
 - [x] ~~Queue scope?~~ → Current scene only, plus a queueable Travel task (§3.1)
 - [x] ~~Overworld?~~ → Destination picker, opened when a Travel task is reached (§3.7)
 - [x] ~~Travel time?~~ → Per-destination distance, reduced by vehicle speed (§3.7)
@@ -400,6 +434,7 @@ Automated machines still need **maintenance**, so there's always some action req
       varieties, size, risks) or only in looks?
 
 ### Market day (Saturday)
+
 - [x] ~~Active or simulated?~~ → Active: fill customer orders (§3.5)
 - [x] ~~Customer patience?~~ → Limited, with upgrades and items to help (§3.5)
 - [x] ~~Multi-item orders?~~ → Yes (§3.5)
@@ -409,6 +444,7 @@ Automated machines still need **maintenance**, so there's always some action req
 - [ ] Can helpers run the stall?
 
 ### Supply day (Sunday)
+
 - [x] ~~What can be ordered?~~ → Everything: consumables, supers, bees, equipment, vehicles, yards (§4.9)
 - [x] ~~Delivery timing?~~ → Arrives Saturday after market. Bulk discounts late game (§4.9)
 - [x] ~~Confirm lead time?~~ → Confirmed: Sunday orders arrive the following Saturday, with
@@ -418,6 +454,7 @@ Automated machines still need **maintenance**, so there's always some action req
 - [ ] Is the Shop only on Sunday, or can upgrades be bought at other times?
 
 ### Hives, bees & yards
+
 - [x] ~~Brood box?~~ → Yes, a separate purchase that includes a queen excluder, not harvested (§4.2)
 - [x] ~~Requeening / aging?~~ → Requeening possible with some risk. Queens don't age (§4.2)
 - [x] ~~Frame state?~~ → Bare foundation vs. drawn comb. Both sold in the Shop (§4.2)
@@ -431,6 +468,7 @@ Automated machines still need **maintenance**, so there's always some action req
 - [ ] Are frames tracked per frame, or as a per-super state ("this super is drawn / bare")?
 
 ### Products, inventory & economy
+
 - [x] ~~Product list?~~ → Honey bear → pint → quart → gallon/contracts, plus wax products,
       comb honey, creamed, varietals (§4.7)
 - [ ] Do products need quality or variety (e.g., floral sources by season or bee yard)?
@@ -443,6 +481,7 @@ Automated machines still need **maintenance**, so there's always some action req
 - [ ] Starting consumable counts (bears, labels) and buckets: tune during playtesting
 
 ### Machines
+
 - [x] ~~Manual vs. automated?~~ → Manual first, then capacity, then automation, then scale,
       with maintenance (§4.6)
 - [ ] What does maintenance look like: a periodic task, a breakdown chance, or a slow drop in
@@ -450,6 +489,7 @@ Automated machines still need **maintenance**, so there's always some action req
 - [ ] Which machines follow the arc: extractor, uncapper, bottling, others?
 
 ### Helpers
+
 - [ ] How are helpers acquired: hired with money, unlocked by milestones?
 - [ ] Do helpers need wages, rest, or skill growth?
 - [ ] What can a script do: plain loops only, or conditions like "if jars < 5, restock"?
@@ -457,21 +497,25 @@ Automated machines still need **maintenance**, so there's always some action req
 - [ ] How many helpers at most, and do they get in each other's way?
 
 ### Pressures
+
 - [ ] Which pressures come first, and in what order?
 - [ ] How punishing should failure be (e.g., losing a colony)? Cozy vs. challenging tone?
 - [ ] Are the pressures simulated (hidden state) or shown clearly to the player?
 
 ### Long-term progression
+
 - [ ] Is there a prestige/reset layer (e.g., seasons or years, new apiary locations)?
 - [ ] Is there an end goal or win state, or does it go on forever?
 - [ ] How does the operation grow: more hives per yard, more yards, bigger Honey House?
 
 ### Banked time
+
 - [ ] Starting cap (e.g., 1 hour? 8 hours?) and starting boost multiplier?
 - [ ] Does boosting speed up helpers too, or only the beekeeper?
 - [ ] Is banked time 1:1 with real time away, or scaled?
 
 ### Tech
+
 - [x] ~~Camera?~~ → Single screen per scene at first, horizontal scrolling as it grows (§3.8)
 - [x] ~~Orientation?~~ → Landscape (§3.8)
 - [x] ~~Market scene?~~ → Its own scene (§3.7)
@@ -487,6 +531,7 @@ Automated machines still need **maintenance**, so there's always some action req
 Phases are rough and will shift as open questions are answered.
 
 ### Phase 0 — Foundations
+
 - Project skeleton: Vite + TypeScript (strict) + LittleJS
 - Tooling: ESLint, Prettier, Vitest, and a single `npm run check` gate
 - Project `CLAUDE.md` describing conventions and the check command for coding agents
@@ -499,6 +544,7 @@ Phases are rough and will shift as open questions are answered.
 - Save/load scaffold with versioning
 
 ### Phase 1 — Core Loop Prototype ("one work day")
+
 - The **backyard**: a small bee yard and the **Honey House**, with no travel time
 - Beekeeper movement + walking time inside a scene
 - Task queue: add, run in order, cancel
@@ -510,6 +556,7 @@ Phases are rough and will shift as open questions are answered.
 - **Goal:** answer "is queueing tasks fun?"
 
 ### Phase 2 — The Week
+
 - Day/week cycle (Mon–Fri work, Sat market, Sun supply) with the **Sleep** transition
 - **Market** scene: customers with multi-item orders and patience timers
 - **Shop** menu: untimed Sunday purchasing, with **next-Saturday delivery** shown clearly on screen
@@ -519,6 +566,7 @@ Phases are rough and will shift as open questions are answered.
 - First upgrades (queue length, task speed, walk speed, patience, storage)
 
 ### Phase 3 — Incremental Layer
+
 - Upgrade tree
 - Banked offline time + opt-in speed boost, with cap/multiplier upgrades
 - "Unused day time → banked time" upgrade
@@ -528,22 +576,26 @@ Phases are rough and will shift as open questions are answered.
 - Horizontal scrolling for scenes that grow wider than one screen
 
 ### Phase 4 — Helpers & Scripts
+
 - Hire the first helper
 - Script editor (repeating task lists) with a touch-friendly UI
 - Script upgrades (length, task types)
 
 ### Phase 5 — Pressures
+
 - First pressure added and balanced (likely seasons/nectar flow or colony health)
 - Later pressures unlocked one at a time
 - Upgrades and tools that counter each pressure
 
 ### Phase 6 — Content & Polish
+
 - More products and recipes
 - Art, animation, sound
 - Tutorial / onboarding
 - Balancing pass, friends & family playtest on phones
 
 ### Later / Maybe
+
 - Prestige layer (new seasons/years/locations)
 - Achievements
 - Save export/import, cloud sync
