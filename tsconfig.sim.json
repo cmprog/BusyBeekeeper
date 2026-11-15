@@ -1,0 +1,12 @@
+{
+  // Type-checks the pure layers (sim/ + config/) WITHOUT browser/DOM types, so any use of
+  // browser APIs there is a compile error. Run as part of `npm run typecheck`.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": []
+  },
+  "include": ["src/sim", "src/config"],
+  // Tests are still type-checked by the main tsconfig; vitest's own types need more than ES2022.
+  "exclude": ["src/**/*.test.ts"]
+}

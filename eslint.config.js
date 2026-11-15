@@ -4,6 +4,34 @@ import prettier from 'eslint-config-prettier';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+// Require JS `#private` fields instead of TypeScript's `private` keyword (which is only
+// enforced at compile time). Shared because `no-restricted-syntax` options don't merge
+// between config blocks: a later block replaces the whole list.
+const noPrivateKeyword = [
+  {
+    selector:
+      ":matches(PropertyDefinition, MethodDefinition, TSParameterProperty)[accessibility='private']",
+    message: 'Use a #private member instead of the `private` keyword.',
+  },
+];
+
+// Pure layers: game rules and config. Must stay deterministic and runnable in plain Node
+// (see CLAUDE.md). Browser APIs are blocked separately by tsconfig.sim.json (no DOM lib).
+const pureLayers = ['src/sim/**/*.ts', 'src/config/**/*.ts'];
+
+// The ONLY LittleJS exports the pure layers may use: deterministic data/math utilities.
+// Engine-loop or stateful parts (Timer, time/timeDelta, rand/randInt, EngineObject, input,
+// drawing, audio) stay in game/. Add to this list deliberately when a new utility is needed.
+const littleJsPureUtilities = [
+  'RandomGenerator',
+  'Vector2',
+  'vec2',
+  'clamp',
+  'lerp',
+  'percent',
+  'smoothStep',
+];
+
 export default tseslint.config(
   {
     ignores: ['dist/', 'coverage/', 'node_modules/'],
@@ -45,6 +73,51 @@ export default tseslint.config(
 
       eqeqeq: ['error', 'always'],
       'no-console': ['error', { allow: ['warn', 'error'] }],
+      'no-restricted-syntax': ['error', ...noPrivateKeyword],
+    },
+  },
+
+  // sim/ + config/: LittleJS pure utilities only, no game/ layer, no hidden time or randomness.
+  {
+    files: pureLayers,
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'littlejsengine',
+              allowImportNames: littleJsPureUtilities,
+              message:
+                'sim/ and config/ may only use allowlisted LittleJS utilities (see eslint.config.js).',
+            },
+          ],
+          patterns: [
+            {
+              regex: '^littlejsengine/',
+              message: 'Import LittleJS from "littlejsengine" only (allowlisted names).',
+            },
+            {
+              regex: '(^|/)game(/|$)',
+              message: 'sim/ and config/ must not import from game/. Dependencies point inward.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-properties': [
+        'error',
+        { object: 'Math', property: 'random', message: 'Use the seeded Rng passed into the sim.' },
+        { object: 'Date', property: 'now', message: 'Sim time comes in as an explicit dt.' },
+        { object: 'performance', property: 'now', message: 'Sim time comes in as an explicit dt.' },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        ...noPrivateKeyword,
+        {
+          selector: "NewExpression[callee.name='Date']",
+          message: 'Sim time comes in as an explicit dt, not wall-clock dates.',
+        },
+      ],
     },
   },
 

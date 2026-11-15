@@ -231,12 +231,13 @@ The goal is to **catch problems at build time, not at runtime**, and to give cod
 - **Strict typing.** TypeScript `strict` plus extra strictness flags (e.g.,
   `noUncheckedIndexedAccess`). No `any` without a written reason.
 - **Simulation is separate from the engine.** Game rules (queue, clock, production, economy,
-  saves) live in **plain TypeScript with no LittleJS or DOM imports**, so they can be unit tested
-  in Node. LittleJS is used only for rendering and input, and talks to the simulation through a
-  small interface.
+  saves) live in **plain TypeScript with no DOM imports**, so they can be unit tested in Node.
+  The sim may use **allowlisted pure LittleJS utilities** (`RandomGenerator`, `Vector2`, math
+  helpers), but not engine-loop or stateful parts (`Timer`, engine time, `EngineObject`, input,
+  drawing). The sim owns the authoritative state, and LittleJS objects only visualise it.
 - **Deterministic simulation.** Time and randomness are **passed in**: the simulation advances by
-  an explicit `dt`, and RNG is seeded. The same inputs always give the same results, so tests
-  are reliable and bugs can be replayed.
+  an explicit `dt`, and randomness comes from a seeded LittleJS `RandomGenerator`. The same inputs
+  always give the same results, so tests are reliable and bugs can be replayed.
 - **Purpose-driven tests.** Tests cover **critical rules and risky logic** (e.g., queue
   cancel/end-of-day behaviour, production math, save migrations), not coverage for its own sake.
   Every test should protect a rule we'd be upset to see broken.

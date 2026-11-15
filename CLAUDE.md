@@ -19,14 +19,25 @@ src/
   main.ts   Entry point: wires game/ to sim/.
 ```
 
-**Boundary rule:** `sim/` must never import from `game/`, LittleJS, or DOM/browser APIs.
-This keeps the rules unit-testable in plain Node.
+**Boundary rule:** `sim/` and `config/` must never import from `game/` or DOM/browser APIs, and
+may only use the **allowlisted pure LittleJS utilities** (`RandomGenerator`, `vec2`, `clamp`, …;
+the list is `littleJsPureUtilities` in `eslint.config.js`). Engine-loop and stateful LittleJS
+parts (`Timer`, `time`, `rand`, `EngineObject`, input, drawing) belong in `game/` only. The sim
+owns the authoritative state, and `game/` objects only visualise it.
+
+This is enforced by ESLint and by `tsconfig.sim.json`, which type-checks these folders without
+DOM types. Don't work around these errors: move the code to `game/`, pass the value in, or (for a
+genuinely pure LittleJS utility) add it to the allowlist.
 
 ## Rules
 
 - **Deterministic sim.** No `Date.now()`, `performance.now()`, or `Math.random()` in `sim/`.
-  Time arrives as an explicit `dt`, and randomness comes from a seeded RNG that is passed in.
-- **No magic numbers.** Balance values (durations, speeds, costs, limits) live in `src/config/`.
+  Time arrives as an explicit `dt`. Randomness comes from a LittleJS `RandomGenerator` that is
+  passed in, and its `seed` is saved so the sequence resumes after a load.
+- **No magic numbers.** Balance values (durations, speeds, costs, limits) live in
+  `src/config/defaultConfig.ts`, typed by `GameConfig`. Names carry their unit
+  (`workDaySeconds`, `startingBeebucks`). Sim code receives a `GameConfig` as a parameter rather
+  than importing `defaultConfig`, so tests can use tuned values.
 - **Strict types.** No `any`, no non-null `!` assertions, and no lint-disable comments without a
   written reason on the same line.
 - **Exhaustive unions.** Model variants (task types, scenes) as discriminated unions and handle
