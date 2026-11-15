@@ -19,7 +19,7 @@ export type LoadOutcome =
   | { readonly kind: 'loaded'; readonly data: SaveData }
   | {
       readonly kind: 'failed';
-      readonly reason: SaveLoadFailureReason | 'storageUnavailable';
+      readonly reason: SaveLoadFailureReason | 'incompatible' | 'storageUnavailable';
       readonly backedUp: boolean;
     };
 
@@ -31,8 +31,11 @@ export class SaveStore {
     this.#storage = storage;
   }
 
-  /** Loads the save. If it can't be read, it's copied to the backup key before failing. */
-  load(): LoadOutcome {
+  /**
+   * Loads the save. If it can't be read, or `isUsable` rejects it (e.g. it doesn't fit the
+   * current layout), it's copied to the backup key before failing.
+   */
+  load(isUsable: (data: SaveData) => boolean = () => true): LoadOutcome {
     let raw: string | null;
     try {
       raw = this.#storage.getItem(saveKeys.save);
@@ -47,7 +50,11 @@ export class SaveStore {
 
     const result = deserializeSave(raw);
     if (result.ok) {
-      return { kind: 'loaded', data: result.data };
+      if (isUsable(result.data)) {
+        return { kind: 'loaded', data: result.data };
+      }
+      console.error('Save does not fit the current game layout');
+      return { kind: 'failed', reason: 'incompatible', backedUp: this.#backup(raw) };
     }
 
     console.error(`Save failed to load (${result.reason}): ${result.message}`);

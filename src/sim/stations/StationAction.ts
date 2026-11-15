@@ -15,7 +15,7 @@ export interface StationActionByType {
     | { readonly kind: 'pickUpSuper' };
   readonly extractor:
     | { readonly kind: 'loadExtractor'; readonly superId: SuperId; readonly frames: number }
-    | { readonly kind: 'extract'; readonly bucketId: StationId };
+    | { readonly kind: 'extract'; readonly bucketId: StationId; readonly honeyOz: number };
   readonly bucket: {
     readonly kind: 'pourBucket';
     readonly tankId: StationId;

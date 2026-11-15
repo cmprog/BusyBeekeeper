@@ -238,6 +238,12 @@ or debug mode for fast-forwarding.
 - **Tests:** **Vitest** unit tests for critical paths only (see §3.11)
 - **Saves:** `localStorage`, holding one **versioned JSON** save. Export/import isn't
   needed at first (easy to add later because the save is a single JSON string).
+  - Saved when a day ends, when the next day starts, and **whenever the page is hidden** (phones
+    kill backgrounded apps), so a reload **resumes mid-day**: clock, queue, stock and stats.
+    A task in progress restarts from its walk.
+  - Loaded saves are validated with a **valibot** schema that is type-checked against the sim's
+    interfaces. A save that fails, or doesn't fit the current station layout, is backed up and a
+    new game starts with a notice.
 - **Art (prototype):** **coloured shapes + emoji**. Gameplay first, no time spent on art yet.
 - **Playtesting:** mostly desktop at first. Friends & family will play on phones.
 

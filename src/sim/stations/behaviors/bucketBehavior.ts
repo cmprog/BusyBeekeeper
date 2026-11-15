@@ -1,9 +1,12 @@
+import * as v from 'valibot';
+import { countSchema } from '../../save/schemaParts';
 import { fail, findStation, stationStateOf, succeed, withStationState } from '../productionAccess';
 import type { StationBehavior } from '../StationBehavior';
 
 /** Pours as much of the bucket as the scene's bottling tank has room for. */
 export const bucketBehavior: StationBehavior<'bucket'> = {
   initialState: () => ({ type: 'bucket', honeyOz: 0 }),
+  stateSchema: v.object({ type: v.literal('bucket'), honeyOz: countSchema }),
 
   resolve({ station, state, layout, config }) {
     if (state.carriedSuperId !== null) {

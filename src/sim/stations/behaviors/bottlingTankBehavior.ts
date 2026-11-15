@@ -1,9 +1,12 @@
+import * as v from 'valibot';
+import { countSchema } from '../../save/schemaParts';
 import { fail, stationStateOf, succeed, withStationState } from '../productionAccess';
 import type { StationBehavior } from '../StationBehavior';
 
 /** Fills and labels as many bears as possible, up to the batch size. */
 export const bottlingTankBehavior: StationBehavior<'bottlingTank'> = {
   initialState: () => ({ type: 'bottlingTank', honeyOz: 0 }),
+  stateSchema: v.object({ type: v.literal('bottlingTank'), honeyOz: countSchema }),
 
   resolve({ station, state, config }) {
     if (state.carriedSuperId !== null) {

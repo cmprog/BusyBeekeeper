@@ -1,3 +1,4 @@
+import * as v from 'valibot';
 import {
   fail,
   harvestedSuperOf,
@@ -16,6 +17,7 @@ const FILL_TOLERANCE_OZ = 1e-6;
 /** Pull the super to harvest it, or put the carried super back on. */
 export const hiveBehavior: StationBehavior<'hive'> = {
   initialState: () => ({ type: 'hive', superId: null }),
+  stateSchema: v.object({ type: v.literal('hive'), superId: v.nullable(v.string()) }),
 
   resolve({ station, state, config }) {
     const hive = stationStateOf(state, station.id, 'hive');

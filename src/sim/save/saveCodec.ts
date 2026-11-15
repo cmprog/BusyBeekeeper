@@ -2,6 +2,7 @@ import { CURRENT_SAVE_VERSION } from './SaveData';
 import type { SaveData } from './SaveData';
 import { saveMigrations } from './migrations';
 import { runMigrations } from './runMigrations';
+import { validateSaveData } from './saveSchema';
 import type { VersionedRecord } from './runMigrations';
 
 export type SaveLoadFailureReason = 'corrupt' | 'invalid' | 'newerVersion' | 'migrationFailed';
@@ -45,11 +46,11 @@ export function deserializeSave(json: string): DeserializeResult {
     return fail('migrationFailed', error instanceof Error ? error.message : 'Unknown error');
   }
 
-  if (!isSaveData(migrated)) {
-    return fail('invalid', 'Save data does not match the expected shape');
+  const validation = validateSaveData(migrated);
+  if (!validation.ok) {
+    return fail('invalid', `Save data does not match the expected shape (${validation.message})`);
   }
-
-  return { ok: true, data: migrated };
+  return { ok: true, data: validation.data };
 }
 
 function fail(reason: SaveLoadFailureReason, message: string): DeserializeResult {
@@ -62,16 +63,4 @@ function isVersionedRecord(value: unknown): value is VersionedRecord {
   }
   const version = (value as Record<string, unknown>)['version'];
   return typeof version === 'number' && Number.isInteger(version) && version >= 1;
-}
-
-function isSaveData(record: VersionedRecord): record is VersionedRecord & SaveData {
-  return (
-    record.version === CURRENT_SAVE_VERSION &&
-    isFiniteNumber(record['beebucks']) &&
-    isFiniteNumber(record['rngSeed'])
-  );
-}
-
-function isFiniteNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value);
 }

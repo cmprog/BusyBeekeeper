@@ -1,3 +1,4 @@
+import * as v from 'valibot';
 import type { ProductionState } from '../../production/ProductionState';
 import type { SuperId } from '../../production/HoneySuper';
 import {
@@ -15,6 +16,7 @@ import type { StationBehavior } from '../StationBehavior';
 /** Set the carried super down, uncap its frames one by one, then pick the empty super up. */
 export const uncappingTableBehavior: StationBehavior<'uncappingTable'> = {
   initialState: () => ({ type: 'uncappingTable', superId: null }),
+  stateSchema: v.object({ type: v.literal('uncappingTable'), superId: v.nullable(v.string()) }),
 
   resolve({ station, state, layout, config }) {
     const table = stationStateOf(state, station.id, 'uncappingTable');

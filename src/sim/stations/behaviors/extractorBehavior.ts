@@ -1,3 +1,5 @@
+import * as v from 'valibot';
+import { countSchema } from '../../save/schemaParts';
 import {
   fail,
   findStation,
@@ -16,6 +18,12 @@ import type { StationBehavior } from '../StationBehavior';
  */
 export const extractorBehavior: StationBehavior<'extractor'> = {
   initialState: () => ({ type: 'extractor', loadedSuperId: null, loadedFrames: 0, honeyOz: 0 }),
+  stateSchema: v.object({
+    type: v.literal('extractor'),
+    loadedSuperId: v.nullable(v.string()),
+    loadedFrames: countSchema,
+    honeyOz: countSchema,
+  }),
 
   resolve({ station, state, layout, config }) {
     if (state.carriedSuperId !== null) {
@@ -49,7 +57,10 @@ export const extractorBehavior: StationBehavior<'extractor'> = {
       if (bucket.honeyOz + extractor.honeyOz > config.equipment.bucketCapacityOz) {
         return fail('bucketFull');
       }
-      return succeed({ kind: 'extract', bucketId }, config.tasks.extractSeconds);
+      return succeed(
+        { kind: 'extract', bucketId, honeyOz: extractor.honeyOz },
+        config.tasks.extractSeconds,
+      );
     }
     return fail('nothingToExtract');
   },

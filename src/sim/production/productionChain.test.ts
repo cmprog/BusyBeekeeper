@@ -84,6 +84,13 @@ describe('production chain', () => {
     expect(stationStateOf(production, 'tank', 'bottlingTank').honeyOz).toBe(4);
     expect(stationStateOf(production, 'bucket', 'bucket').honeyOz).toBe(0);
     expect(stationStateOf(production, 'hive', 'hive').superId).toBe(STARTING_SUPER_ID);
+    expect(day.state.stats).toEqual({
+      tasksCompleted: steps.length + 2,
+      tasksFailed: 1,
+      framesUncapped: 8,
+      honeyExtractedOz: 256,
+      bearsBottled: 21,
+    });
   });
 
   it('a partly full super gives proportionally less honey, rounded down', () => {

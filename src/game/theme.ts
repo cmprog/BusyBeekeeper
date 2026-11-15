@@ -74,6 +74,9 @@ export const theme = {
       slotIcon: 36,
       button: 22,
       inventory: 24,
+      day: 28,
+      summaryTitle: 34,
+      summaryLine: 22,
       slotVerb: 14,
     },
   },
@@ -85,6 +88,11 @@ export const theme = {
     hintTopPx: 80,
     warningTopPx: 116,
     inventoryItemWidthPx: 96,
+    /** Centre of the end-of-day summary panel, from the top edge. */
+    summaryCenterYPx: 340,
+    summaryWidthPx: 440,
+    summaryPaddingPx: 28,
+    summaryLineHeightPx: 38,
     inventoryPanelHeightPx: 48,
     /** How far the slot icon moves up to make room for the action verb under it. */
     slotIconLiftPx: 8,
@@ -141,6 +149,8 @@ export const theme = {
   /** How long a tap highlight or warning stays visible. */
   flashSeconds: 0.2,
   warningSeconds: 1.2,
+  /** How long a longer notice (e.g. a save problem) stays visible. */
+  noticeSeconds: 6,
 } as const;
 
 /** Applies engine-wide theme settings. Call once from gameInit. */

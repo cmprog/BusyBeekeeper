@@ -1,6 +1,7 @@
 import type { Position } from '../Position';
 import type { ProductionState } from '../production/ProductionState';
 import type { PlannedAction } from '../stations/StationAction';
+import type { DayStats } from './DayStats';
 import type { Task } from './Task';
 
 /**
@@ -37,4 +38,5 @@ export interface WorkDayState {
   readonly nextTaskId: number;
   /** Carries over from day to day; a work day only borrows it. */
   readonly production: ProductionState;
+  readonly stats: DayStats;
 }

@@ -11,6 +11,8 @@ import {
 } from 'littlejsengine';
 import type { GameConfig } from '../config/GameConfig';
 import type { ProductionState } from '../sim/production/ProductionState';
+import { createSaveData } from '../sim/save/createSaveData';
+import type { SaveData } from '../sim/save/SaveData';
 import type { Station, StationId } from '../sim/stations/Station';
 import type { StationAction } from '../sim/stations/StationAction';
 import type { Task } from '../sim/workday/Task';
@@ -50,25 +52,52 @@ function backyardInventory(production: ProductionState): readonly InventoryHudIt
   ];
 }
 
+export interface BackyardSceneOptions {
+  /** A loaded save to resume, or undefined for a new game. */
+  readonly saved: SaveData | undefined;
+  /** Writes a save. Returns false if it couldn't be stored. */
+  readonly persist: (data: SaveData) => boolean;
+}
+
 /**
  * Phase 1 test scene: the backyard, with the Bee Yard and the Honey House. Tap a station to
  * queue its task, tap a queue slot to cancel it, and end the day early or start a new one
- * (stock carries over) with the button.
+ * (stock carries over) with the button. Saves when a day ends, when the next day starts, and
+ * (via startGame) whenever the page is hidden.
  *
  * Owns no game rules: it forwards input to the sim's `WorkDay` and draws its state.
  * The HUD is drawn with `useWebGL = false` so it lands on the 2D layer above the scene.
  */
 export class BackyardScene {
   readonly #config: GameConfig;
+  readonly #persist: (data: SaveData) => boolean;
+  #dayNumber: number;
   #day: WorkDay;
+  #saveFailureShown = false;
   readonly #flashTimer = new Timer();
   #flashedStation: StationId | undefined;
   readonly #warningTimer = new Timer();
   #warningText = '';
 
-  constructor(config: GameConfig) {
+  constructor(config: GameConfig, options: BackyardSceneOptions) {
     this.#config = config;
-    this.#day = new WorkDay(config);
+    this.#persist = options.persist;
+    this.#dayNumber = options.saved?.dayNumber ?? 1;
+    this.#day = new WorkDay(config, options.saved?.workDay);
+  }
+
+  /** Saves the game now. Shows a notice the first time saving fails. */
+  saveNow(): void {
+    const saved = this.#persist(createSaveData(this.#dayNumber, this.#day.state));
+    if (!saved && !this.#saveFailureShown) {
+      this.#saveFailureShown = true;
+      this.showNotice("Progress couldn't be saved (storage may be full or blocked).");
+    }
+  }
+
+  /** A message that stays up longer than a task warning, e.g. about the save. */
+  showNotice(text: string): void {
+    this.#warn(text, theme.noticeSeconds);
   }
 
   get #layout(): readonly Station[] {
@@ -77,6 +106,7 @@ export class BackyardScene {
 
   /** Call from gameUpdate (fixed 60 Hz). */
   update(): void {
+    const statusBefore = this.#day.state.status;
     // LittleJS maps touch to mouse button 0, so one code path covers both.
     if (mouseWasPressed(0)) {
       this.#handleTap();
@@ -85,6 +115,9 @@ export class BackyardScene {
       if (event.type === 'taskFailed') {
         this.#warn(taskFailureText[event.reason]);
       }
+    }
+    if (statusBefore !== 'ended' && this.#day.state.status === 'ended') {
+      this.saveNow();
     }
   }
 
@@ -104,6 +137,15 @@ export class BackyardScene {
     const status = this.#day.state.status;
     const centerX = viewport.canvasWidthPx / 2;
 
+    drawTextScreen(
+      `Day ${String(this.#dayNumber)}`,
+      vec2(theme.hud.edgePx, theme.hud.clockTopPx),
+      theme.font.sizePx.day,
+      theme.colors.text,
+      0,
+      undefined,
+      'left',
+    );
     drawTextScreen(
       formatClock(this.#day.remainingSeconds),
       vec2(centerX, theme.hud.clockTopPx),
@@ -128,6 +170,9 @@ export class BackyardScene {
     drawInventoryPanel(backyardInventory(this.#day.state.production));
     this.#renderQueue();
     this.#renderButton(status);
+    if (status === 'ended') {
+      this.#renderDaySummary();
+    }
   }
 
   #handleTap(): void {
@@ -143,8 +188,7 @@ export class BackyardScene {
 
     if (rectContains(this.#buttonRect(), mousePosScreen)) {
       if (this.#day.state.status === 'ended') {
-        const production = this.#day.state.production;
-        this.#day = new WorkDay(this.#config, WorkDay.initialState(this.#config, production));
+        this.#startNextDay();
       } else {
         this.#day.endDayEarly();
       }
@@ -164,9 +208,54 @@ export class BackyardScene {
     }
   }
 
-  #warn(text: string): void {
+  #startNextDay(): void {
+    const production = this.#day.state.production;
+    this.#dayNumber += 1;
+    this.#day = new WorkDay(this.#config, WorkDay.initialState(this.#config, production));
+    this.saveNow();
+  }
+
+  #warn(text: string, seconds: number = theme.warningSeconds): void {
     this.#warningText = text;
-    this.#warningTimer.set(theme.warningSeconds);
+    this.#warningTimer.set(seconds);
+  }
+
+  /** The end-of-day panel, centred over the scene until the next day starts. */
+  #renderDaySummary(): void {
+    const { stats } = this.#day.state;
+    const lines = [
+      `🍯 Bears bottled: ${String(stats.bearsBottled)}`,
+      `Honey extracted: ${String(stats.honeyExtractedOz)} oz`,
+      `Frames uncapped: ${String(stats.framesUncapped)}`,
+      `Unused time: ${formatClock(this.#day.remainingSeconds)}`,
+    ];
+    const { summaryCenterYPx, summaryWidthPx, summaryPaddingPx, summaryLineHeightPx } = theme.hud;
+    // One line for the title, then one per stat.
+    const height = summaryPaddingPx * 2 + summaryLineHeightPx * (lines.length + 1);
+    const centerX = viewport.canvasWidthPx / 2;
+    const top = summaryCenterYPx - height / 2;
+
+    drawFilledRect(
+      { center: vec2(centerX, summaryCenterYPx), size: vec2(summaryWidthPx, height) },
+      theme.colors.hudPanel,
+      true,
+    );
+    const lineY = (index: number): number =>
+      top + summaryPaddingPx + summaryLineHeightPx * (index + 0.5);
+    drawTextScreen(
+      `Day ${String(this.#dayNumber)} complete`,
+      vec2(centerX, lineY(0)),
+      theme.font.sizePx.summaryTitle,
+      theme.colors.text,
+    );
+    lines.forEach((line, index) => {
+      drawTextScreen(
+        line,
+        vec2(centerX, lineY(index + 1)),
+        theme.font.sizePx.summaryLine,
+        theme.colors.text,
+      );
+    });
   }
 
   #renderArea(area: SceneArea): void {
@@ -368,7 +457,7 @@ function buttonLabel(status: DayStatus): string {
     case 'windingDown':
       return 'Ending…';
     case 'ended':
-      return 'New day';
+      return 'Next day';
   }
 }
 

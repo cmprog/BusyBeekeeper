@@ -1,3 +1,4 @@
+import type * as v from 'valibot';
 import type { GameConfig } from '../../config/GameConfig';
 import type { ProductionState } from '../production/ProductionState';
 import type { TaskFailure } from '../production/TaskFailure';
@@ -28,6 +29,11 @@ export type BehaviorResolution<A> =
 export interface StationBehavior<K extends StationType> {
   /** State for a newly placed station of this type. */
   initialState(): StationStateByType[K];
+  /**
+   * Validates this type's state when a save loads. Typed against the state interface, so a
+   * state field the schema doesn't cover is a compile error.
+   */
+  readonly stateSchema: v.GenericSchema<StationStateByType[K]>;
   /** On arrival: what to do and how long it takes, or why it can't be done. */
   resolve(context: StationContext): BehaviorResolution<StationActionByType[K]>;
   /**

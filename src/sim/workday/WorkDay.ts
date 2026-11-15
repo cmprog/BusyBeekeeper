@@ -7,6 +7,7 @@ import type { Station, StationId } from '../stations/Station';
 import type { PlannedAction } from '../stations/StationAction';
 import type { StationContext } from '../stations/StationBehavior';
 import { applyPlannedAction, resolveStationTask } from '../stations/stationBehaviors';
+import { countCompletedAction, countFailedTask, emptyDayStats } from './DayStats';
 import type { Task } from './Task';
 import type { WorkDayEvent } from './WorkDayEvent';
 import type { ActiveTask, WorkDayState } from './WorkDayState';
@@ -53,6 +54,7 @@ export class WorkDay {
       queuedTasks: [],
       nextTaskId: 1,
       production,
+      stats: emptyDayStats,
     };
   }
 
@@ -154,6 +156,7 @@ export class WorkDay {
         };
       }
       if (progress.outcome) {
+        this.#count(progress.outcome);
         events.push(progress.outcome);
       }
 
@@ -227,6 +230,14 @@ export class WorkDay {
       outcome: { type: 'taskCompleted', task, action: current.planned.action },
       completed: { planned: current.planned, station },
     };
+  }
+
+  #count(outcome: WorkDayEvent): void {
+    const stats =
+      outcome.type === 'taskCompleted'
+        ? countCompletedAction(this.#state.stats, outcome.action)
+        : countFailedTask(this.#state.stats);
+    this.#state = { ...this.#state, stats };
   }
 
   #station(stationId: StationId): Station {
