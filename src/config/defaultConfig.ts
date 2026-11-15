@@ -10,8 +10,8 @@ export const defaultConfig: GameConfig = {
     startingBeebucks: 100,
   },
   startingKit: {
-    emptyBears: 24,
-    labels: 24,
+    emptyBears: 48,
+    labels: 48,
     superFill: 1,
   },
   beekeeper: {

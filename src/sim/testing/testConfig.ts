@@ -11,6 +11,8 @@ export const testConfig: GameConfig = {
   time: { ...defaultConfig.time, workDaySeconds: 60 },
   beekeeper: { walkSpeedUnitsPerSecond: 1 },
   queue: { maxTasks: 3 },
+  // Pinned so stock assertions don't move when the real starting kit is tuned.
+  startingKit: { emptyBears: 24, labels: 24, superFill: 1 },
   hive: { superFillSeconds: 20 },
   tasks: {
     handleSuperSeconds: 2,

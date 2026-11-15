@@ -9,29 +9,32 @@ import {
   Timer,
   vec2,
 } from 'littlejsengine';
-import type { GameConfig } from '../config/GameConfig';
-import type { ProductionState } from '../sim/production/ProductionState';
-import { createSaveData } from '../sim/save/createSaveData';
-import type { SaveData } from '../sim/save/SaveData';
-import type { Station, StationId } from '../sim/stations/Station';
-import type { StationAction } from '../sim/stations/StationAction';
-import type { Task } from '../sim/workday/Task';
-import { WorkDay } from '../sim/workday/WorkDay';
-import type { EnqueueRefusal } from '../sim/workday/WorkDay';
-import type { ActiveTask, DayStatus } from '../sim/workday/WorkDayState';
-import { actionVerbs } from './actionVerbs';
-import { drawFilledRect, drawProgressBar } from './draw';
-import { drawInventoryPanel } from './hud/drawInventoryPanel';
-import type { InventoryHudItem } from './hud/drawInventoryPanel';
-import { rectContains } from './Rect';
-import type { Rect } from './Rect';
-import { areaRect } from './SceneArea';
-import type { SceneArea } from './SceneArea';
-import { stationRenderers } from './stations/stationRenderers';
-import { stationVisuals } from './stationVisuals';
-import { taskFailureText } from './taskFailureText';
-import { theme } from './theme';
-import { viewport } from './viewport';
+import type { GameConfig } from '../../config/GameConfig';
+import type { ProductionState } from '../../sim/production/ProductionState';
+import { createSaveData } from '../../sim/save/createSaveData';
+import type { SaveData } from '../../sim/save/SaveData';
+import type { Station, StationId } from '../../sim/stations/Station';
+import type { StationAction } from '../../sim/stations/StationAction';
+import type { Task } from '../../sim/workday/Task';
+import { WorkDay } from '../../sim/workday/WorkDay';
+import type { EnqueueRefusal } from '../../sim/workday/WorkDay';
+import type { ActiveTask, DayStatus } from '../../sim/workday/WorkDayState';
+import { actionVerbs } from '../actionVerbs';
+import { drawFilledRect, drawProgressBar } from '../draw';
+import { drawButton } from '../hud/drawButton';
+import { drawInventoryPanel } from '../hud/drawInventoryPanel';
+import type { InventoryHudItem } from '../hud/drawInventoryPanel';
+import { rectContains } from '../Rect';
+import type { Rect } from '../Rect';
+import { areaRect } from '../SceneArea';
+import type { SceneArea } from '../SceneArea';
+import { stationRenderers } from '../stations/stationRenderers';
+import { stationVisuals } from '../stationVisuals';
+import { taskFailureText } from '../taskFailureText';
+import { theme } from '../theme';
+import { viewport } from '../viewport';
+import type { Scene } from './Scene';
+import type { SceneContext } from './SceneContext';
 
 const backyardAreas: readonly SceneArea[] = [
   { label: 'Bee Yard', color: theme.colors.yardArea, stationTypes: ['hive'] },
@@ -52,25 +55,18 @@ function backyardInventory(production: ProductionState): readonly InventoryHudIt
   ];
 }
 
-export interface BackyardSceneOptions {
-  /** A loaded save to resume, or undefined for a new game. */
-  readonly saved: SaveData | undefined;
-  /** Writes a save. Returns false if it couldn't be stored. */
-  readonly persist: (data: SaveData) => boolean;
-}
-
 /**
  * Phase 1 test scene: the backyard, with the Bee Yard and the Honey House. Tap a station to
  * queue its task, tap a queue slot to cancel it, and end the day early or start a new one
- * (stock carries over) with the button. Saves when a day ends, when the next day starts, and
- * (via startGame) whenever the page is hidden.
+ * (stock carries over) with the button. Menu saves and returns to the main menu. Saves when a
+ * new game starts, when a day ends, when the next day starts, and whenever the page is hidden.
  *
  * Owns no game rules: it forwards input to the sim's `WorkDay` and draws its state.
  * The HUD is drawn with `useWebGL = false` so it lands on the 2D layer above the scene.
  */
-export class BackyardScene {
+export class BackyardScene implements Scene {
+  readonly #context: SceneContext;
   readonly #config: GameConfig;
-  readonly #persist: (data: SaveData) => boolean;
   #dayNumber: number;
   #day: WorkDay;
   #saveFailureShown = false;
@@ -79,32 +75,26 @@ export class BackyardScene {
   readonly #warningTimer = new Timer();
   #warningText = '';
 
-  constructor(config: GameConfig, options: BackyardSceneOptions) {
-    this.#config = config;
-    this.#persist = options.persist;
-    this.#dayNumber = options.saved?.dayNumber ?? 1;
-    this.#day = new WorkDay(config, options.saved?.workDay);
-  }
-
-  /** Saves the game now. Shows a notice the first time saving fails. */
-  saveNow(): void {
-    const saved = this.#persist(createSaveData(this.#dayNumber, this.#day.state));
-    if (!saved && !this.#saveFailureShown) {
-      this.#saveFailureShown = true;
-      this.showNotice("Progress couldn't be saved (storage may be full or blocked).");
+  /** `saved` is the game to resume, or undefined to start a new one (saved straight away). */
+  constructor(context: SceneContext, saved: SaveData | undefined) {
+    this.#context = context;
+    this.#config = context.config;
+    this.#dayNumber = saved?.dayNumber ?? 1;
+    this.#day = new WorkDay(this.#config, saved?.workDay);
+    if (!saved) {
+      // Replace any old save now, so a reload can't bring back the game the player left.
+      this.#saveNow();
     }
   }
 
-  /** A message that stays up longer than a task warning, e.g. about the save. */
-  showNotice(text: string): void {
-    this.#warn(text, theme.noticeSeconds);
+  onPageHidden(): void {
+    this.#saveNow();
   }
 
   get #layout(): readonly Station[] {
     return this.#config.backyard.stations;
   }
 
-  /** Call from gameUpdate (fixed 60 Hz). */
   update(): void {
     const statusBefore = this.#day.state.status;
     // LittleJS maps touch to mouse button 0, so one code path covers both.
@@ -117,11 +107,10 @@ export class BackyardScene {
       }
     }
     if (statusBefore !== 'ended' && this.#day.state.status === 'ended') {
-      this.saveNow();
+      this.#saveNow();
     }
   }
 
-  /** Call from gameRender: everything in world space. */
   render(): void {
     for (const area of backyardAreas) {
       this.#renderArea(area);
@@ -132,7 +121,6 @@ export class BackyardScene {
     this.#renderBeekeeper();
   }
 
-  /** Call from gameRenderPost: the HUD, in screen space. */
   renderPost(): void {
     const status = this.#day.state.status;
     const centerX = viewport.canvasWidthPx / 2;
@@ -169,7 +157,7 @@ export class BackyardScene {
 
     drawInventoryPanel(backyardInventory(this.#day.state.production));
     this.#renderQueue();
-    this.#renderButton(status);
+    this.#renderButtons(status);
     if (status === 'ended') {
       this.#renderDaySummary();
     }
@@ -183,6 +171,12 @@ export class BackyardScene {
       if (task) {
         this.#day.cancel(task.id);
       }
+      return;
+    }
+
+    if (rectContains(this.#menuButtonRect(), mousePosScreen)) {
+      this.#saveNow();
+      this.#context.goTo({ kind: 'mainMenu' });
       return;
     }
 
@@ -212,7 +206,19 @@ export class BackyardScene {
     const production = this.#day.state.production;
     this.#dayNumber += 1;
     this.#day = new WorkDay(this.#config, WorkDay.initialState(this.#config, production));
-    this.saveNow();
+    this.#saveNow();
+  }
+
+  /** Saves the game now. Shows a notice the first time saving fails. */
+  #saveNow(): void {
+    const saved = this.#context.persist(createSaveData(this.#dayNumber, this.#day.state));
+    if (!saved && !this.#saveFailureShown) {
+      this.#saveFailureShown = true;
+      this.#warn(
+        "Progress couldn't be saved (storage may be full or blocked).",
+        theme.noticeSeconds,
+      );
+    }
   }
 
   #warn(text: string, seconds: number = theme.warningSeconds): void {
@@ -369,14 +375,9 @@ export class BackyardScene {
     });
   }
 
-  #renderButton(status: DayStatus): void {
-    const rect = this.#buttonRect();
-    drawFilledRect(
-      rect,
-      status === 'windingDown' ? theme.colors.hudSlotEmpty : theme.colors.button,
-      true,
-    );
-    drawTextScreen(buttonLabel(status), rect.center, theme.font.sizePx.button, theme.colors.text);
+  #renderButtons(status: DayStatus): void {
+    drawButton(this.#menuButtonRect(), 'Menu');
+    drawButton(this.#buttonRect(), buttonLabel(status), { enabled: status !== 'windingDown' });
   }
 
   /** The active task first, then the queued tasks: the order the queue slots show them. */
@@ -415,6 +416,18 @@ export class BackyardScene {
         viewport.canvasHeightPx - edgePx - buttonHeightPx / 2,
       ),
       size: vec2(buttonWidthPx, buttonHeightPx),
+    };
+  }
+
+  /** Left of the day button, along the bottom edge. */
+  #menuButtonRect(): Rect {
+    const { edgePx, buttonWidthPx, buttonHeightPx, smallButtonWidthPx, queueSlotGapPx } = theme.hud;
+    return {
+      center: vec2(
+        viewport.canvasWidthPx - edgePx - buttonWidthPx - queueSlotGapPx - smallButtonWidthPx / 2,
+        viewport.canvasHeightPx - edgePx - buttonHeightPx / 2,
+      ),
+      size: vec2(smallButtonWidthPx, buttonHeightPx),
     };
   }
 }

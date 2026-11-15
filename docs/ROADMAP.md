@@ -103,10 +103,15 @@ Weekly planning matters as much as playing each moment well.
   are dropped** (not run).
 - Work day and market day lengths are **separate tuning values**, even though they start out equal.
 - **Sunday** is a simple menu with no timer. The player decides when they're done shopping.
+- **The first week starts on Thursday.** Two work days, then the first market and shop, so the
+  game opens up sooner. The starting kit covers those two days and the onboarding gifts carry
+  week 2 until the first order arrives (§4.8, §4.9). Built with the week cycle in Phase 2.
 
 **Weekly economy**
 
 - Supplies are limited, so running out mid-week is possible. The week has to be planned.
+- **The early game is deliberately linear:** one obvious production chain, with choices and
+  complexity introduced gradually as the game opens up.
 - Saturday income pays for Sunday orders and for upgrades.
 
 ### 3.5 Market Day (Saturday)
@@ -242,8 +247,13 @@ or debug mode for fast-forwarding.
     kill backgrounded apps), so a reload **resumes mid-day**: clock, queue, stock and stats.
     A task in progress restarts from its walk.
   - Loaded saves are validated with a **valibot** schema that is type-checked against the sim's
-    interfaces. A save that fails, or doesn't fit the current station layout, is backed up and a
-    new game starts with a notice.
+    interfaces. A save that fails, or doesn't fit the current station layout, is backed up, and
+    the main menu explains why Continue isn't offered.
+- **Main menu:** opens on launch with **Continue** (when a usable save exists) and **New Game**,
+  which asks before replacing that save. A **Menu** button in play saves and returns to it. Save
+  slots may come later.
+- **Dev controls** (speed toggle and similar) are reached through a hidden gesture during play,
+  and only exist in dev builds. Not built yet.
 - **Art (prototype):** **coloured shapes + emoji**. Gameplay first, no time spent on art yet.
 - **Playtesting:** mostly desktop at first. Friends & family will play on phones.
 
@@ -420,8 +430,11 @@ Automated machines still need **maintenance**, so there's always some action req
 - **Simple uncapping tool**
 - **4-frame manual extractor**
 - **Small basic bottling tank**
-- Enough starting consumables to cover the two-week delivery lead time (§4.9)
-- _(TBD: number of buckets, exact consumable counts, frame state of the starting super)_
+- **48 honey bears and 48 labels**: about two good work days (one full super makes 21 bears),
+  enough for the Thursday and Friday of the first week (§3.4). The onboarding gifts cover
+  week 2, until the first Sunday order arrives (§4.9)
+- The starting super begins full
+- _(TBD: number of buckets)_
 
 ### 4.9 Shop & Ordering
 
@@ -461,8 +474,8 @@ Automated machines still need **maintenance**, so there's always some action req
 - [x] ~~Reward for ending early?~~ → None at the start. Unused time → banked time is an upgrade (§3.3)
 - [x] ~~Starting queue length?~~ → 3, counting the active task (§3.1)
 - [ ] How far can queue length be upgraded?
-- [ ] Highlight stations whose task would currently succeed? Helps new players but removes
-      some planning. Left out for now; revisit in the Phase 1 tuning pass.
+- [x] ~~Highlight stations whose task would currently succeed?~~ → No. The early game is linear
+      enough without them. Revisit when a new playtester tries the game.
 - [ ] Carry limits beyond Phase 1's one super with hands full (§4.3): more supers, weight?
 
 ### Scenes & travel
@@ -590,8 +603,8 @@ Phases are rough and will shift as open questions are answered.
 - PWA basics: manifest, icons, service worker
 - Mouse + touch input, responsive landscape canvas
 - Central tuning config module (all balance values come from it from the start)
-- Scene manager (switch scenes, transition scenes): moved to Phase 2, when there's more than
-  one scene
+- Scene manager (switch scenes, transition scenes): built in Phase 1 for the main menu, without
+  transitions
 - Save/load scaffold with versioning
 
 ### Phase 1 — Core Loop Prototype ("one work day")
@@ -604,6 +617,7 @@ Phases are rough and will shift as open questions are answered.
 - Starting kit only (§4.8). One super size is enough to begin with
 - Basic HUD: queue display, inventory, day clock
 - End-of-day rules: the task in progress finishes and the rest of the queue is dropped, plus End Day early
+- End-of-day summary, saving with mid-day resume, and a main menu (Continue / New Game)
 - **Goal:** answer "is queueing tasks fun?"
 
 ### Phase 2 — The Week

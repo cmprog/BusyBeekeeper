@@ -78,6 +78,9 @@ export const theme = {
       summaryTitle: 34,
       summaryLine: 22,
       slotVerb: 14,
+      menuTitle: 64,
+      menuButton: 28,
+      menuPrompt: 22,
     },
   },
   hud: {
@@ -103,6 +106,18 @@ export const theme = {
     queueProgressHeightPx: 8,
     buttonWidthPx: 200,
     buttonHeightPx: 56,
+    /** A secondary button beside the main one (e.g. Menu next to End day). */
+    smallButtonWidthPx: 120,
+    menu: {
+      titleTopPx: 200,
+      /** The confirmation question, above the buttons. */
+      promptTopPx: 320,
+      firstButtonCenterYPx: 400,
+      buttonWidthPx: 360,
+      buttonHeightPx: 64,
+      buttonGapPx: 20,
+      noticeTopPx: 620,
+    },
   },
   world: {
     stationSize: 3,
