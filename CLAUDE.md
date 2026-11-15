@@ -46,8 +46,9 @@ genuinely pure LittleJS utility) add it to the allowlist.
   inline them: add a named entry to the theme.
 - **Exhaustive unions.** Model variants (task types, scenes) as discriminated unions and handle
   them with exhaustive `switch`.
-- **Saves are versioned.** Any change to the saved state shape bumps the save version and adds a
-  migration with a test.
+- **Saves are versioned.** Any change to `SaveData`'s shape bumps `CURRENT_SAVE_VERSION` and adds
+  a migration in `src/sim/save/migrations.ts`, with a test that an old save still loads. Never edit
+  a shipped migration.
 
 ## Conventions
 

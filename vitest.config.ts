@@ -8,8 +8,5 @@ export default defineConfig({
     environment: 'node',
     // Fail on accidental `.only` so a focused test can't silently skip the rest.
     allowOnly: false,
-    // TEMPORARY: no tests exist yet. Remove once the first real test lands (save migrations,
-    // Phase 0) so that a misconfigured `include` can't silently run zero tests.
-    passWithNoTests: true,
   },
 });
