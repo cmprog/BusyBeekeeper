@@ -186,6 +186,17 @@ The game is split into separate **scenes**. Moving between location scenes costs
   can grow wider, and **horizontal scrolling** is used to move around inside it.
 - Touch input has to tell "drag to scroll" apart from "tap to queue a task".
 
+**HUD (decided in Phase 1):**
+
+- The **inventory panel** sits top-right, and **each scene chooses what it shows** (the backyard
+  shows bottling stock; the market will show what's for sale). Top-left stays free for the day
+  and Beebucks.
+- **Queue slots** show the station's icon while waiting, plus a short verb ("Uncap",
+  "Extract") once the beekeeper is working on it.
+- **Stations show their state** with gauges drawn above them: supers stacked on a hive with fill
+  bars (built for several supers per hive), frame pips, and honey levels in oz.
+- Scenes are divided into labelled **areas** (Bee Yard, Honey House) drawn behind the stations.
+
 ### 3.9 Central Tuning / Balance Config
 
 All balance numbers live in **one central config**, a **plain TypeScript module** (typed, so a bad value fails the build), not spread
@@ -444,6 +455,8 @@ Automated machines still need **maintenance**, so there's always some action req
 - [x] ~~Reward for ending early?~~ → None at the start. Unused time → banked time is an upgrade (§3.3)
 - [x] ~~Starting queue length?~~ → 3, counting the active task (§3.1)
 - [ ] How far can queue length be upgraded?
+- [ ] Highlight stations whose task would currently succeed? Helps new players but removes
+      some planning. Left out for now; revisit in the Phase 1 tuning pass.
 - [ ] Carry limits beyond Phase 1's one super with hands full (§4.3): more supers, weight?
 
 ### Scenes & travel

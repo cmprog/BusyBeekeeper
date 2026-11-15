@@ -31,6 +31,7 @@ const palette = {
   bark: color(0.12, 0.1, 0.08),
   wood: color(0.55, 0.36, 0.22),
   steel: color(0.5, 0.53, 0.57),
+  woodLight: color(0.78, 0.6, 0.4),
   white: color(1, 1, 1),
   red: color(0.85, 0.27, 0.22),
 } as const;
@@ -48,6 +49,17 @@ export const theme = {
     beekeeper: palette.white,
     progressTrack: color(0.12, 0.1, 0.08, 0.6),
     progressFill: palette.honeyLight,
+    textOutline: palette.bark,
+    /** A super's wooden box. */
+    superBox: palette.woodLight,
+    frameCapped: palette.honey,
+    frameUncapped: palette.honeyLight,
+    /** An extracted frame, empty and back in its super. */
+    frameEmpty: color(0.96, 0.91, 0.77, 0.45),
+    /** A slot with no frame in it (an extractor slot, or a frame away in the extractor). */
+    frameSlotEmpty: color(0.12, 0.1, 0.08, 0.35),
+    yardArea: color(0.3, 0.47, 0.22),
+    honeyHouseArea: color(0.6, 0.48, 0.34),
     hudPanel: color(0.12, 0.1, 0.08, 0.8),
     hudSlotEmpty: color(0.12, 0.1, 0.08, 0.35),
     button: palette.honey,
@@ -61,7 +73,8 @@ export const theme = {
       hint: 18,
       slotIcon: 36,
       button: 22,
-      debug: 16,
+      inventory: 24,
+      slotVerb: 14,
     },
   },
   hud: {
@@ -71,8 +84,12 @@ export const theme = {
     clockTopPx: 40,
     hintTopPx: 80,
     warningTopPx: 116,
-    /** Temporary production readout, until the inventory HUD (Phase 1 step 4). */
-    debugTopPx: 150,
+    inventoryItemWidthPx: 96,
+    inventoryPanelHeightPx: 48,
+    /** How far the slot icon moves up to make room for the action verb under it. */
+    slotIconLiftPx: 8,
+    /** Distance of the action verb below the slot's centre. */
+    slotVerbOffsetPx: 22,
     queueSlotSizePx: 72,
     queueSlotGapPx: 12,
     queueProgressHeightPx: 8,
@@ -80,17 +97,46 @@ export const theme = {
     buttonHeightPx: 56,
   },
   world: {
-    stationSize: 4,
-    stationIconSize: 2,
-    stationLabelSize: 0.6,
+    stationSize: 3,
+    stationIconSize: 1.5,
+    stationLabelSize: 0.4,
     /** Distance of a station's label below its centre. */
-    stationLabelOffset: 2.6,
+    stationLabelOffset: 1.8,
     beekeeperSize: 1.4,
     beekeeperIconSize: 1.2,
     progressWidth: 2,
     progressHeight: 0.25,
     /** Distance of the work progress bar above the beekeeper's centre. */
     progressOffset: 1.2,
+    /** Gap between a station's top edge and the status drawn above it (supers, gauges). */
+    statusGap: 0.25,
+    superWidth: 2.7,
+    superHeight: 0.6,
+    superGap: 0.1,
+    /** Frame pips and fill gauges drawn above a station. */
+    statusBarHeight: 0.45,
+    pipGap: 0.08,
+    gaugeTextSize: 0.4,
+    /** Dark outline that keeps gauge text readable over both the fill and the empty track. */
+    gaugeTextOutline: 0.08,
+    /** Nudges gauge text down to sit visually centred on the bar (about 2 px). */
+    gaugeTextDrop: 0.05,
+    /** Padding around the stations an area (Bee Yard, Honey House) encloses. */
+    areaPadding: 0.6,
+    /** Padding below the lowest station label in an area. */
+    areaBottomPadding: 0.3,
+    /** Extra room above an area's stations for their status and the area's label. */
+    areaTopRoom: 1.4,
+    areaLabelSize: 0.7,
+    /** Distance of an area's label below its top edge. */
+    areaLabelInset: 0.55,
+    carriedSuperWidth: 1.1,
+    carriedSuperHeight: 0.45,
+    /** Offset of the carried super from the beekeeper's centre. */
+    carriedSuperOffsetX: 0.9,
+  },
+  motion: {
+    extractorSpinRadiansPerSecond: 8,
   },
   /** How long a tap highlight or warning stays visible. */
   flashSeconds: 0.2,

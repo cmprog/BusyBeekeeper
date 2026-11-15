@@ -1,6 +1,5 @@
 import {
   drawCircle,
-  drawRect,
   drawText,
   drawTextScreen,
   mousePos,
@@ -10,25 +9,51 @@ import {
   Timer,
   vec2,
 } from 'littlejsengine';
-import type { Color } from 'littlejsengine';
 import type { GameConfig } from '../config/GameConfig';
-import type { Station, StationId } from '../sim/stations/Station';
 import type { ProductionState } from '../sim/production/ProductionState';
+import type { Station, StationId } from '../sim/stations/Station';
+import type { StationAction } from '../sim/stations/StationAction';
 import type { Task } from '../sim/workday/Task';
 import { WorkDay } from '../sim/workday/WorkDay';
 import type { EnqueueRefusal } from '../sim/workday/WorkDay';
 import type { ActiveTask, DayStatus } from '../sim/workday/WorkDayState';
+import { actionVerbs } from './actionVerbs';
+import { drawFilledRect, drawProgressBar } from './draw';
+import { drawInventoryPanel } from './hud/drawInventoryPanel';
+import type { InventoryHudItem } from './hud/drawInventoryPanel';
 import { rectContains } from './Rect';
 import type { Rect } from './Rect';
+import { areaRect } from './SceneArea';
+import type { SceneArea } from './SceneArea';
+import { stationRenderers } from './stations/stationRenderers';
 import { stationVisuals } from './stationVisuals';
 import { taskFailureText } from './taskFailureText';
 import { theme } from './theme';
 import { viewport } from './viewport';
 
+const backyardAreas: readonly SceneArea[] = [
+  { label: 'Bee Yard', color: theme.colors.yardArea, stationTypes: ['hive'] },
+  {
+    label: 'Honey House',
+    color: theme.colors.honeyHouseArea,
+    stationTypes: ['uncappingTable', 'extractor', 'bucket', 'bottlingTank'],
+  },
+];
+
+/** What the backyard's inventory panel shows: bottling stock. */
+function backyardInventory(production: ProductionState): readonly InventoryHudItem[] {
+  const { filledBears, emptyBears, labels } = production.inventory;
+  return [
+    { icon: '🍯', count: filledBears },
+    { icon: '🫙', count: emptyBears },
+    { icon: '🏷️', count: labels },
+  ];
+}
+
 /**
- * Phase 1 test scene: the backyard with the honey production stations. Tap a station to queue
- * its task, tap a queue slot to cancel it, and end the day early or start a new one (stock
- * carries over) with the button.
+ * Phase 1 test scene: the backyard, with the Bee Yard and the Honey House. Tap a station to
+ * queue its task, tap a queue slot to cancel it, and end the day early or start a new one
+ * (stock carries over) with the button.
  *
  * Owns no game rules: it forwards input to the sim's `WorkDay` and draws its state.
  * The HUD is drawn with `useWebGL = false` so it lands on the 2D layer above the scene.
@@ -46,6 +71,10 @@ export class BackyardScene {
     this.#day = new WorkDay(config);
   }
 
+  get #layout(): readonly Station[] {
+    return this.#config.backyard.stations;
+  }
+
   /** Call from gameUpdate (fixed 60 Hz). */
   update(): void {
     // LittleJS maps touch to mouse button 0, so one code path covers both.
@@ -61,7 +90,10 @@ export class BackyardScene {
 
   /** Call from gameRender: everything in world space. */
   render(): void {
-    for (const station of this.#config.backyard.stations) {
+    for (const area of backyardAreas) {
+      this.#renderArea(area);
+    }
+    for (const station of this.#layout) {
       this.#renderStation(station);
     }
     this.#renderBeekeeper();
@@ -93,13 +125,7 @@ export class BackyardScene {
       );
     }
 
-    drawTextScreen(
-      productionSummary(this.#day.state.production),
-      vec2(centerX, theme.hud.debugTopPx),
-      theme.font.sizePx.debug,
-      theme.colors.text,
-    );
-
+    drawInventoryPanel(backyardInventory(this.#day.state.production));
     this.#renderQueue();
     this.#renderButton(status);
   }
@@ -125,8 +151,8 @@ export class BackyardScene {
       return;
     }
 
-    const station = this.#config.backyard.stations.find((candidate) =>
-      rectContains(this.#stationRect(candidate), mousePos),
+    const station = this.#layout.find((candidate) =>
+      rectContains(stationRect(candidate), mousePos),
     );
     if (station) {
       this.#flashedStation = station.id;
@@ -143,32 +169,77 @@ export class BackyardScene {
     this.#warningTimer.set(theme.warningSeconds);
   }
 
+  #renderArea(area: SceneArea): void {
+    const rect = areaRect(area, this.#layout);
+    if (!rect) {
+      return;
+    }
+    drawFilledRect(rect, area.color);
+    const labelY = rect.center.y + rect.size.y / 2 - theme.world.areaLabelInset;
+    drawText(area.label, vec2(rect.center.x, labelY), theme.world.areaLabelSize, theme.colors.text);
+  }
+
   #renderStation(station: Station): void {
     const visual = stationVisuals[station.type];
-    const rect = this.#stationRect(station);
+    const renderer = stationRenderers[station.type];
+    const rect = stationRect(station);
     const flashing = this.#flashedStation === station.id && this.#flashTimer.active();
+    const context = {
+      station,
+      rect,
+      production: this.#day.state.production,
+      config: this.#config,
+      activeAction: this.#activeActionAt(station.id),
+    };
 
-    drawRect(rect.center, rect.size, flashing ? theme.colors.tapFlash : visual.color);
-    drawText(visual.icon, rect.center, theme.world.stationIconSize);
+    drawFilledRect(rect, flashing ? theme.colors.tapFlash : visual.color);
+    drawText(
+      visual.icon,
+      rect.center,
+      theme.world.stationIconSize,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      renderer.iconAngle?.(context) ?? 0,
+    );
     drawText(
       visual.label,
       rect.center.subtract(vec2(0, theme.world.stationLabelOffset)),
       theme.world.stationLabelSize,
       theme.colors.text,
     );
+    renderer.drawStatus(context);
   }
 
   #renderBeekeeper(): void {
-    const { beekeeperPosition, activeTask } = this.#day.state;
+    const { beekeeperPosition, activeTask, production } = this.#day.state;
     const pos = vec2(beekeeperPosition.x, beekeeperPosition.y);
 
     drawCircle(pos, theme.world.beekeeperSize, theme.colors.beekeeper);
     drawText('🧑‍🌾', pos, theme.world.beekeeperIconSize);
 
+    if (production.carriedSuperId !== null) {
+      drawFilledRect(
+        {
+          center: pos.add(vec2(theme.world.carriedSuperOffsetX, 0)),
+          size: vec2(theme.world.carriedSuperWidth, theme.world.carriedSuperHeight),
+        },
+        theme.colors.superBox,
+      );
+    }
+
     if (activeTask?.phase === 'working') {
-      const barCenter = pos.add(vec2(0, theme.world.progressOffset));
-      const barSize = vec2(theme.world.progressWidth, theme.world.progressHeight);
-      drawProgressBar({ center: barCenter, size: barSize }, workProgress(activeTask), false);
+      drawProgressBar(
+        {
+          center: pos.add(vec2(0, theme.world.progressOffset)),
+          size: vec2(theme.world.progressWidth, theme.world.progressHeight),
+        },
+        workProgress(activeTask),
+      );
     }
   }
 
@@ -178,11 +249,24 @@ export class BackyardScene {
 
     this.#queueSlotRects().forEach((rect, index) => {
       const task = tasks[index];
-      drawScreenRect(rect, task ? theme.colors.hudPanel : theme.colors.hudSlotEmpty);
+      drawFilledRect(rect, task ? theme.colors.hudPanel : theme.colors.hudSlotEmpty, true);
       if (!task) {
         return;
       }
-      drawTextScreen(this.#stationIcon(task.stationId), rect.center, theme.font.sizePx.slotIcon);
+
+      const working = index === 0 && activeTask?.phase === 'working' ? activeTask : undefined;
+      const iconCenter = working
+        ? rect.center.subtract(vec2(0, theme.hud.slotIconLiftPx))
+        : rect.center;
+      drawTextScreen(this.#stationIcon(task.stationId), iconCenter, theme.font.sizePx.slotIcon);
+      if (working) {
+        drawTextScreen(
+          actionVerbs[working.planned.action.kind],
+          rect.center.add(vec2(0, theme.hud.slotVerbOffsetPx)),
+          theme.font.sizePx.slotVerb,
+          theme.colors.text,
+        );
+      }
 
       if (index === 0 && activeTask) {
         // Thin bar along the slot's bottom edge: empty while walking, fills while working.
@@ -191,17 +275,17 @@ export class BackyardScene {
           center: rect.center.add(vec2(0, (rect.size.y - barHeight) / 2)),
           size: vec2(rect.size.x, barHeight),
         };
-        const progress = activeTask.phase === 'working' ? workProgress(activeTask) : 0;
-        drawProgressBar(bar, progress, true);
+        drawProgressBar(bar, working ? workProgress(working) : 0, true);
       }
     });
   }
 
   #renderButton(status: DayStatus): void {
     const rect = this.#buttonRect();
-    drawScreenRect(
+    drawFilledRect(
       rect,
       status === 'windingDown' ? theme.colors.hudSlotEmpty : theme.colors.button,
+      true,
     );
     drawTextScreen(buttonLabel(status), rect.center, theme.font.sizePx.button, theme.colors.text);
   }
@@ -212,13 +296,15 @@ export class BackyardScene {
     return activeTask ? [activeTask.task, ...queuedTasks] : queuedTasks;
   }
 
-  #stationRect(station: Station): Rect {
-    const { x, y } = station.position;
-    return { center: vec2(x, y), size: vec2(theme.world.stationSize) };
+  #activeActionAt(stationId: StationId): StationAction | undefined {
+    const activeTask = this.#day.state.activeTask;
+    return activeTask?.phase === 'working' && activeTask.task.stationId === stationId
+      ? activeTask.planned.action
+      : undefined;
   }
 
   #stationIcon(stationId: StationId): string {
-    const station = this.#config.backyard.stations.find((candidate) => candidate.id === stationId);
+    const station = this.#layout.find((candidate) => candidate.id === stationId);
     return station ? stationVisuals[station.type].icon : '?';
   }
 
@@ -244,56 +330,16 @@ export class BackyardScene {
   }
 }
 
-function workProgress(activeTask: Extract<ActiveTask, { phase: 'working' }>): number {
+type WorkingTask = Extract<ActiveTask, { phase: 'working' }>;
+
+function stationRect(station: Station): Rect {
+  const { x, y } = station.position;
+  return { center: vec2(x, y), size: vec2(theme.world.stationSize) };
+}
+
+function workProgress(activeTask: WorkingTask): number {
   const { workTotalSeconds, workRemainingSeconds } = activeTask;
   return workTotalSeconds > 0 ? 1 - workRemainingSeconds / workTotalSeconds : 1;
-}
-
-/** Temporary one-line readout of the production state, until the inventory HUD (step 4). */
-function productionSummary(production: ProductionState): string {
-  const parts: string[] = [];
-  for (const { id, contents } of Object.values(production.supers)) {
-    const where = production.carriedSuperId === id ? ' (carried)' : '';
-    parts.push(
-      contents.stage === 'filling'
-        ? `Super: on hive ${String(Math.floor(contents.fill * 100))}%`
-        : `Super${where}: capped ${String(contents.frames.capped)}, ` +
-            `uncapped ${String(contents.frames.uncapped)}, empty ${String(contents.frames.extracted)}`,
-    );
-  }
-  for (const station of Object.values(production.stations)) {
-    if (station.type === 'extractor') {
-      parts.push(`Extractor: ${String(station.loadedFrames)} frames`);
-    } else if (station.type === 'bucket' || station.type === 'bottlingTank') {
-      parts.push(`${stationVisuals[station.type].label}: ${String(station.honeyOz)} oz`);
-    }
-  }
-  const { filledBears, emptyBears, labels } = production.inventory;
-  parts.push(
-    `Bears: ${String(filledBears)} filled, ${String(emptyBears)} empty, ${String(labels)} labels`,
-  );
-  return parts.join('  ·  ');
-}
-
-function drawScreenRect(rect: Rect, color: Color): void {
-  drawRect(rect.center, rect.size, color, 0, false, true);
-}
-
-/** Left-to-right fill. `screenSpace` picks the HUD (pixels) or the scene (world units). */
-function drawProgressBar(rect: Rect, progress: number, screenSpace: boolean): void {
-  const fillWidth = rect.size.x * Math.min(1, Math.max(0, progress));
-  const fillCenter = vec2(rect.center.x - (rect.size.x - fillWidth) / 2, rect.center.y);
-  // HUD bars must skip WebGL to draw above the scene; world bars use the engine default.
-  const useWebGL = screenSpace ? false : undefined;
-  drawRect(rect.center, rect.size, theme.colors.progressTrack, 0, useWebGL, screenSpace);
-  drawRect(
-    fillCenter,
-    vec2(fillWidth, rect.size.y),
-    theme.colors.progressFill,
-    0,
-    useWebGL,
-    screenSpace,
-  );
 }
 
 /** Remaining day time as m:ss, rounded up so the clock reads 0:00 only when time is up. */
