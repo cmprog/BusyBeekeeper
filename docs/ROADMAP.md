@@ -46,6 +46,10 @@ Weekly planning matters as much as playing each moment well.
 - The player controls one main character, **the beekeeper**.
 - The beekeeper has a **task queue**. Tapping a station or action adds a task to the end.
 - Each task = **travel to the station** + **perform the task** (has a duration).
+- Each station has **one task**. **What it does is decided when the beekeeper arrives**, from the
+  state at that moment (e.g. the hive's task pulls the super, or puts the empty one back). If it
+  can't be done, the task **fails with a short message**: the walk was the cost of the mistake.
+  Checking at queue time can't work, because earlier tasks in the queue change what is possible.
 - Queued tasks can be **cancelled** but **not reordered**. To reorder, cancel and re-queue.
 - The **active task can be cancelled too**: the beekeeper stops where they are, its progress is
   lost (nothing is refunded), and the next queued task starts.
@@ -313,6 +317,8 @@ volume** (bucket/tank) → **containers** (products).
   - How many can be carried at once
   - **Walk speed inside the scene** while carrying
 - **Beekeeper strength** is a possible upgrade path.
+- **Phase 1:** the beekeeper carries **one super at a time**, and their **hands are full** while
+  carrying it: only the hive and the uncapping table (where supers go) can be used.
 - Between scenes, supers travel in **vehicle cargo** (§3.7).
 
 ### 4.4 Yards
@@ -336,6 +342,26 @@ volume** (bucket/tank) → **containers** (products).
 
 Upgrades for the bottling tank: **higher capacity**, and **heated tanks** for faster flow
 (quicker bottling).
+
+**Task rules (decided for Phase 1):**
+
+- **Uncap one frame per task.** Better uncapping tools are the upgrade path that makes this less
+  tedious (more frames per task).
+- **Load the extractor** with every uncapped frame that fits, in one task. Load time is **per
+  frame loaded**, so topping up a part-loaded extractor is quicker.
+- **Extracting takes a fixed time**, however many frames are loaded. Extracted frames go back into
+  the super, and the honey drains into the bucket. Extraction is refused if the bucket would
+  overflow.
+- **Pouring** moves as much of the bucket as the bottling tank has room for.
+- **Bottling** fills and labels as many bears as possible, up to a **batch size** (an upgrade
+  path), limited by honey, empty bears and labels.
+- **Manual machines keep the beekeeper busy** (cranking is task time). Machines that run on their
+  own, freeing the beekeeper, are the automation upgrade (§4.6).
+- **Partial supers can be pulled.** They give proportionally less honey: the player chooses
+  between harvesting now and waiting.
+- The empty super can be picked up once every frame is back from the extractor, then put back on
+  the hive. A full super can also be put straight back.
+- Honey is measured in **whole ounces** (a frame holds 32 oz, a bear 12 oz) so the math is exact.
 
 ### 4.6 Machine Progression (general pattern)
 
@@ -418,7 +444,7 @@ Automated machines still need **maintenance**, so there's always some action req
 - [x] ~~Reward for ending early?~~ → None at the start. Unused time → banked time is an upgrade (§3.3)
 - [x] ~~Starting queue length?~~ → 3, counting the active task (§3.1)
 - [ ] How far can queue length be upgraded?
-- [ ] Are there carry limits (e.g., the beekeeper can only carry N frames at once)?
+- [ ] Carry limits beyond Phase 1's one super with hands full (§4.3): more supers, weight?
 
 ### Scenes & travel
 

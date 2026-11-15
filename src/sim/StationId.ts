@@ -1,9 +1,13 @@
 /**
- * Places in a scene the beekeeper can walk to and work at.
- *
- * Placeholder set for the Phase 1 backyard. Production stations (extractor, bottling tank, …)
- * replace these in Phase 1 step 3.
+ * Places in a scene the beekeeper can walk to and work at. Each station has one task; what it
+ * does is decided when the beekeeper arrives (see resolveStationAction.ts).
  */
-export const stationIds = ['hive', 'honeyHouse'] as const;
+export const stationIds = [
+  'hive',
+  'uncappingTable',
+  'extractor',
+  'bucket',
+  'bottlingTank',
+] as const;
 
 export type StationId = (typeof stationIds)[number];

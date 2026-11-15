@@ -11,5 +11,8 @@ export interface StationVisual {
 /** How each station looks. A `Record`, so adding a station without a visual is a type error. */
 export const stationVisuals: Readonly<Record<StationId, StationVisual>> = {
   hive: { label: 'Hive', icon: '🐝', color: theme.colors.hive },
-  honeyHouse: { label: 'Honey House', icon: '🏠', color: theme.colors.honeyHouse },
+  uncappingTable: { label: 'Uncapping', icon: '🔪', color: theme.colors.table },
+  extractor: { label: 'Extractor', icon: '🌀', color: theme.colors.machine },
+  bucket: { label: 'Bucket', icon: '🪣', color: theme.colors.machine },
+  bottlingTank: { label: 'Bottling', icon: '🍯', color: theme.colors.machine },
 };

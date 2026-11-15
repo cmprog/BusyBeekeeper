@@ -1,22 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { GameConfig } from '../../config/GameConfig';
-import { defaultConfig } from '../../config/defaultConfig';
+import { testConfig as config } from '../testing/testConfig';
 import { WorkDay } from './WorkDay';
 import type { WorkDayState } from './WorkDayState';
 
-// Round numbers so expected times are exact: hive is 5 units from the start (a 3-4-5 triangle)
-// and the honey house is 3 units from the hive. At 1 unit/s, start → hive takes 5 s.
-const config: GameConfig = {
-  ...defaultConfig,
-  time: { ...defaultConfig.time, workDaySeconds: 60 },
-  beekeeper: { walkSpeedUnitsPerSecond: 1 },
-  queue: { maxTasks: 3 },
-  tasks: { placeholderWorkSeconds: 2 },
-  backyard: {
-    beekeeperStart: { x: 0, y: 0 },
-    stations: { hive: { x: 3, y: 4 }, honeyHouse: { x: 0, y: 4 } },
-  },
-};
+// Pulling the super takes 5 s walk + 2 s work; setting it down on the table takes 3 s + 2 s.
 
 function activeTaskId(day: WorkDay): number | undefined {
   return day.state.activeTask?.task.id;
@@ -25,8 +12,8 @@ function activeTaskId(day: WorkDay): number | undefined {
 describe('WorkDay', () => {
   it('runs tasks in queue order, each taking walk time plus work time', () => {
     const day = new WorkDay(config);
-    day.enqueue('hive'); // 5 s walk + 2 s work
-    day.enqueue('honeyHouse'); // 3 s walk + 2 s work
+    day.enqueue('hive');
+    day.enqueue('uncappingTable');
 
     day.tick(6.5);
     expect(activeTaskId(day)).toBe(1);
@@ -54,7 +41,7 @@ describe('WorkDay', () => {
   it('cancelling a queued task removes only that task', () => {
     const day = new WorkDay(config);
     day.enqueue('hive');
-    day.enqueue('honeyHouse');
+    day.enqueue('uncappingTable');
     day.enqueue('hive');
 
     expect(day.cancel(2)).toBe(true);
@@ -66,7 +53,7 @@ describe('WorkDay', () => {
   it('cancelling the active task stops the beekeeper in place and starts the next task', () => {
     const day = new WorkDay(config);
     day.enqueue('hive');
-    day.enqueue('honeyHouse');
+    day.enqueue('uncappingTable');
     day.tick(2.5); // halfway to the hive
 
     expect(day.cancel(1)).toBe(true);
@@ -76,11 +63,36 @@ describe('WorkDay', () => {
     expect(day.state.activeTask?.phase).toBe('walking');
   });
 
+  it('cancelling a task mid-work loses its progress and applies nothing', () => {
+    const day = new WorkDay(config);
+    day.enqueue('hive');
+    day.tick(6); // working on the pull
+
+    day.cancel(1);
+    day.tick(10);
+
+    expect(day.state.production.honeySuper.location).toBe('hive');
+  });
+
+  it('fails a task that cannot be done on arrival, then moves on to the next', () => {
+    const day = new WorkDay(config);
+    day.enqueue('bucket'); // nothing in the bucket to pour
+    day.enqueue('hive');
+
+    const events = day.tick(12); // the bucket is 12 units away
+
+    expect(events).toEqual([
+      { type: 'taskFailed', task: { id: 1, stationId: 'bucket' }, reason: 'bucketEmpty' },
+    ]);
+    expect(activeTaskId(day)).toBe(2);
+    expect(day.state.activeTask?.phase).toBe('walking');
+  });
+
   it('when time runs out, finishes the active task, drops the queue, and refuses new tasks', () => {
     const day = new WorkDay(config);
     day.tick(55); // 5 s left
     day.enqueue('hive'); // takes 7 s, so it runs past the end of the day
-    day.enqueue('honeyHouse');
+    day.enqueue('uncappingTable');
 
     day.tick(5);
     expect(day.state.status).toBe('windingDown');
@@ -91,12 +103,13 @@ describe('WorkDay', () => {
     day.tick(2);
     expect(day.state.status).toBe('ended');
     expect(day.state.activeTask).toBeNull();
+    expect(day.state.production.honeySuper.location).toBe('carried');
   });
 
   it('ending the day early follows the same rules and keeps the unused time', () => {
     const day = new WorkDay(config);
     day.enqueue('hive');
-    day.enqueue('honeyHouse');
+    day.enqueue('uncappingTable');
     day.tick(1);
 
     day.endDayEarly();
@@ -115,19 +128,28 @@ describe('WorkDay', () => {
   });
 
   it('gives the same result for one large tick as for many small ticks', () => {
-    // Banked time and offline catch-up depend on this (ROADMAP §3.3).
+    // Banked time and offline catch-up depend on this (ROADMAP §3.3). The half-full super keeps
+    // filling until it is pulled at t = 7 s, exactly 0.75 full (24 oz a frame): a whole-ounce
+    // boundary that float drift from small ticks must not round down.
+    const halfFull = {
+      ...config,
+      startingKit: { ...config.startingKit, superFill: 0.5 },
+      hive: { superFillSeconds: 28 },
+    };
     function play(tickSizeSeconds: number, totalSeconds: number): WorkDayState {
-      const day = new WorkDay({ ...config, time: { ...config.time, workDaySeconds: 15 } });
+      const day = new WorkDay({ ...halfFull, time: { ...config.time, workDaySeconds: 15 } });
       day.enqueue('hive');
-      day.enqueue('honeyHouse');
-      day.enqueue('hive');
+      day.enqueue('uncappingTable');
+      day.enqueue('uncappingTable');
       for (let t = 0; t < totalSeconds; t += tickSizeSeconds) {
         day.tick(tickSizeSeconds);
       }
       return day.state;
     }
 
-    for (const totalSeconds of [3, 9.5, 14, 20]) {
+    // Sample times sit inside tasks, not on the exact moment one ends: there, float rounding can
+    // legitimately land either side (by far less than a frame).
+    for (const totalSeconds of [3, 9.5, 13.5, 20]) {
       const big = play(totalSeconds, totalSeconds);
       const small = play(0.25, totalSeconds);
       expect(small.status).toBe(big.status);
@@ -137,6 +159,14 @@ describe('WorkDay', () => {
       expect(small.elapsedSeconds).toBeCloseTo(big.elapsedSeconds, 9);
       expect(small.beekeeperPosition.x).toBeCloseTo(big.beekeeperPosition.x, 9);
       expect(small.beekeeperPosition.y).toBeCloseTo(big.beekeeperPosition.y, 9);
+      const { honeySuper: smallSuper, ...smallRest } = small.production;
+      const { honeySuper: bigSuper, ...bigRest } = big.production;
+      expect(smallRest).toEqual(bigRest);
+      if (smallSuper.location === 'hive' && bigSuper.location === 'hive') {
+        expect(smallSuper.fill).toBeCloseTo(bigSuper.fill, 9);
+      } else {
+        expect(smallSuper).toEqual(bigSuper);
+      }
     }
   });
 });

@@ -30,6 +30,7 @@ const palette = {
   cream: color(0.96, 0.91, 0.77),
   bark: color(0.12, 0.1, 0.08),
   wood: color(0.55, 0.36, 0.22),
+  steel: color(0.5, 0.53, 0.57),
   white: color(1, 1, 1),
   red: color(0.85, 0.27, 0.22),
 } as const;
@@ -42,7 +43,8 @@ export const theme = {
     /** Brief highlight on whatever was just tapped. */
     tapFlash: palette.honeyLight,
     hive: palette.honey,
-    honeyHouse: palette.wood,
+    table: palette.wood,
+    machine: palette.steel,
     beekeeper: palette.white,
     progressTrack: color(0.12, 0.1, 0.08, 0.6),
     progressFill: palette.honeyLight,
@@ -59,6 +61,7 @@ export const theme = {
       hint: 18,
       slotIcon: 36,
       button: 22,
+      debug: 16,
     },
   },
   hud: {
@@ -68,6 +71,8 @@ export const theme = {
     clockTopPx: 40,
     hintTopPx: 80,
     warningTopPx: 116,
+    /** Temporary production readout, until the inventory HUD (Phase 1 step 4). */
+    debugTopPx: 150,
     queueSlotSizePx: 72,
     queueSlotGapPx: 12,
     queueProgressHeightPx: 8,

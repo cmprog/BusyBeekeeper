@@ -1,4 +1,6 @@
 import type { Position } from '../Position';
+import type { ProductionState } from '../production/ProductionState';
+import type { StationAction } from '../production/StationAction';
 import type { Task } from './Task';
 
 /**
@@ -9,12 +11,16 @@ import type { Task } from './Task';
  */
 export type DayStatus = 'running' | 'windingDown' | 'ended';
 
-export interface ActiveTask {
-  readonly task: Task;
-  /** Every task first walks to its station, then works there. */
-  readonly phase: 'walking' | 'working';
-  readonly workRemainingSeconds: number;
-}
+/** Every task first walks to its station; on arrival its action is decided and work starts. */
+export type ActiveTask =
+  | { readonly phase: 'walking'; readonly task: Task }
+  | {
+      readonly phase: 'working';
+      readonly task: Task;
+      readonly action: StationAction;
+      readonly workTotalSeconds: number;
+      readonly workRemainingSeconds: number;
+    };
 
 /** Complete state of one work day. Plain readonly data, so it can go straight into a save. */
 export interface WorkDayState {
@@ -29,4 +35,6 @@ export interface WorkDayState {
   /** Waiting tasks in run order, not including the active task. */
   readonly queuedTasks: readonly Task[];
   readonly nextTaskId: number;
+  /** Carries over from day to day; a work day only borrows it. */
+  readonly production: ProductionState;
 }

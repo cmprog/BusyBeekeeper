@@ -14,20 +14,22 @@ import type { Color } from 'littlejsengine';
 import type { GameConfig } from '../config/GameConfig';
 import { stationIds } from '../sim/StationId';
 import type { StationId } from '../sim/StationId';
+import type { ProductionState } from '../sim/production/ProductionState';
 import type { Task } from '../sim/workday/Task';
-import { taskWorkSeconds } from '../sim/workday/taskWorkSeconds';
 import { WorkDay } from '../sim/workday/WorkDay';
 import type { EnqueueRefusal } from '../sim/workday/WorkDay';
-import type { DayStatus } from '../sim/workday/WorkDayState';
+import type { ActiveTask, DayStatus } from '../sim/workday/WorkDayState';
 import { rectContains } from './Rect';
 import type { Rect } from './Rect';
 import { stationVisuals } from './stationVisuals';
+import { taskFailureText } from './taskFailureText';
 import { theme } from './theme';
 import { viewport } from './viewport';
 
 /**
- * Phase 1 test scene: the backyard with placeholder stations. Tap a station to queue a task,
- * tap a queue slot to cancel it, and end the day early or start a new one with the button.
+ * Phase 1 test scene: the backyard with the honey production stations. Tap a station to queue
+ * its task, tap a queue slot to cancel it, and end the day early or start a new one (stock
+ * carries over) with the button.
  *
  * Owns no game rules: it forwards input to the sim's `WorkDay` and draws its state.
  * The HUD is drawn with `useWebGL = false` so it lands on the 2D layer above the scene.
@@ -51,7 +53,11 @@ export class BackyardScene {
     if (mouseWasPressed(0)) {
       this.#handleTap();
     }
-    this.#day.tick(timeDelta);
+    for (const event of this.#day.tick(timeDelta)) {
+      if (event.type === 'taskFailed') {
+        this.#warn(taskFailureText[event.reason]);
+      }
+    }
   }
 
   /** Call from gameRender: everything in world space. */
@@ -88,6 +94,13 @@ export class BackyardScene {
       );
     }
 
+    drawTextScreen(
+      productionSummary(this.#day.state.production),
+      vec2(centerX, theme.hud.debugTopPx),
+      theme.font.sizePx.debug,
+      theme.colors.text,
+    );
+
     this.#renderQueue();
     this.#renderButton(status);
   }
@@ -105,7 +118,8 @@ export class BackyardScene {
 
     if (rectContains(this.#buttonRect(), mousePosScreen)) {
       if (this.#day.state.status === 'ended') {
-        this.#day = new WorkDay(this.#config);
+        const production = this.#day.state.production;
+        this.#day = new WorkDay(this.#config, WorkDay.initialState(this.#config, production));
       } else {
         this.#day.endDayEarly();
       }
@@ -118,10 +132,14 @@ export class BackyardScene {
       this.#flashTimer.set(theme.flashSeconds);
       const result = this.#day.enqueue(stationId);
       if (!result.ok) {
-        this.#warningText = refusalText(result.reason);
-        this.#warningTimer.set(theme.warningSeconds);
+        this.#warn(refusalText(result.reason));
       }
     }
+  }
+
+  #warn(text: string): void {
+    this.#warningText = text;
+    this.#warningTimer.set(theme.warningSeconds);
   }
 
   #renderStation(stationId: StationId): void {
@@ -149,11 +167,7 @@ export class BackyardScene {
     if (activeTask?.phase === 'working') {
       const barCenter = pos.add(vec2(0, theme.world.progressOffset));
       const barSize = vec2(theme.world.progressWidth, theme.world.progressHeight);
-      drawProgressBar(
-        { center: barCenter, size: barSize },
-        this.#workProgress(activeTask.task, activeTask.workRemainingSeconds),
-        false,
-      );
+      drawProgressBar({ center: barCenter, size: barSize }, workProgress(activeTask), false);
     }
   }
 
@@ -176,10 +190,7 @@ export class BackyardScene {
           center: rect.center.add(vec2(0, (rect.size.y - barHeight) / 2)),
           size: vec2(rect.size.x, barHeight),
         };
-        const progress =
-          activeTask.phase === 'working'
-            ? this.#workProgress(activeTask.task, activeTask.workRemainingSeconds)
-            : 0;
+        const progress = activeTask.phase === 'working' ? workProgress(activeTask) : 0;
         drawProgressBar(bar, progress, true);
       }
     });
@@ -198,11 +209,6 @@ export class BackyardScene {
   #tasksInRunOrder(): readonly Task[] {
     const { activeTask, queuedTasks } = this.#day.state;
     return activeTask ? [activeTask.task, ...queuedTasks] : queuedTasks;
-  }
-
-  #workProgress(task: Task, workRemainingSeconds: number): number {
-    const total = taskWorkSeconds(task, this.#config);
-    return total > 0 ? 1 - workRemainingSeconds / total : 1;
   }
 
   #stationRect(stationId: StationId): Rect {
@@ -230,6 +236,29 @@ export class BackyardScene {
       size: vec2(buttonWidthPx, buttonHeightPx),
     };
   }
+}
+
+function workProgress(activeTask: Extract<ActiveTask, { phase: 'working' }>): number {
+  const { workTotalSeconds, workRemainingSeconds } = activeTask;
+  return workTotalSeconds > 0 ? 1 - workRemainingSeconds / workTotalSeconds : 1;
+}
+
+/** Temporary one-line readout of the production state, until the inventory HUD (step 4). */
+function productionSummary(production: ProductionState): string {
+  const { honeySuper, extractor, bucketHoneyOz, tankHoneyOz, inventory } = production;
+  const superText =
+    honeySuper.location === 'hive'
+      ? `on hive ${String(Math.floor(honeySuper.fill * 100))}%`
+      : `${honeySuper.location === 'carried' ? 'carried' : 'on table'} ` +
+        `(capped ${String(honeySuper.frames.capped)}, uncapped ${String(honeySuper.frames.uncapped)}, ` +
+        `empty ${String(honeySuper.frames.extracted)})`;
+  return [
+    `Super: ${superText}`,
+    `Extractor: ${String(extractor.loadedFrames)} frames`,
+    `Bucket: ${String(bucketHoneyOz)} oz`,
+    `Tank: ${String(tankHoneyOz)} oz`,
+    `Bears: ${String(inventory.filledBears)} filled, ${String(inventory.emptyBears)} empty, ${String(inventory.labels)} labels`,
+  ].join('  ·  ');
 }
 
 function drawScreenRect(rect: Rect, color: Color): void {

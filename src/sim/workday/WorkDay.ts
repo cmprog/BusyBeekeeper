@@ -1,8 +1,13 @@
 import type { GameConfig } from '../../config/GameConfig';
 import { distanceBetween } from '../Position';
+import { applyStationAction } from '../production/applyStationAction';
+import { fillHive } from '../production/fillHive';
+import { initialProductionState } from '../production/initialProductionState';
+import type { ProductionState } from '../production/ProductionState';
+import { resolveStationAction } from '../production/resolveStationAction';
 import type { StationId } from '../StationId';
 import type { Task } from './Task';
-import { taskWorkSeconds } from './taskWorkSeconds';
+import type { WorkDayEvent } from './WorkDayEvent';
 import type { ActiveTask, WorkDayState } from './WorkDayState';
 
 export type EnqueueRefusal = 'queueFull' | 'dayOver';
@@ -10,6 +15,12 @@ export type EnqueueRefusal = 'queueFull' | 'dayOver';
 export type EnqueueResult =
   | { readonly ok: true; readonly task: Task }
   | { readonly ok: false; readonly reason: EnqueueRefusal };
+
+/** How far the active task got in one step, and what happened if it finished. */
+interface TaskProgress {
+  readonly usedSeconds: number;
+  readonly outcome?: WorkDayEvent;
+}
 
 /**
  * One work day in a scene: the day clock plus the beekeeper's task queue (ROADMAP §3.1, §3.4).
@@ -26,7 +37,11 @@ export class WorkDay {
     this.#state = state;
   }
 
-  static initialState(config: GameConfig): WorkDayState {
+  /** A fresh day. Pass the previous day's production so stock carries over. */
+  static initialState(
+    config: GameConfig,
+    production: ProductionState = initialProductionState(config),
+  ): WorkDayState {
     return {
       status: 'running',
       elapsedSeconds: 0,
@@ -34,6 +49,7 @@ export class WorkDay {
       activeTask: null,
       queuedTasks: [],
       nextTaskId: 1,
+      production,
     };
   }
 
@@ -57,7 +73,7 @@ export class WorkDay {
       return { ok: false, reason: 'queueFull' };
     }
 
-    const task: Task = { kind: 'placeholder', id: state.nextTaskId, stationId };
+    const task: Task = { id: state.nextTaskId, stationId };
     this.#state = {
       ...state,
       queuedTasks: [...state.queuedTasks, task],
@@ -95,11 +111,13 @@ export class WorkDay {
     }
   }
 
-  tick(dtSeconds: number): void {
+  /** Advances time. Returns what happened, in order, for the presentation layer. */
+  tick(dtSeconds: number): readonly WorkDayEvent[] {
     if (!Number.isFinite(dtSeconds) || dtSeconds < 0) {
       throw new RangeError(`tick needs a finite, non-negative dt (got ${String(dtSeconds)})`);
     }
 
+    const events: WorkDayEvent[] = [];
     let remaining = dtSeconds;
     while (remaining > 0 && this.#state.status !== 'ended') {
       const running = this.#state.status === 'running';
@@ -108,61 +126,101 @@ export class WorkDay {
       const step = running ? Math.min(remaining, this.remainingSeconds) : remaining;
 
       const activeTask = this.#state.activeTask;
-      const used = activeTask ? this.#advanceActiveTask(activeTask, step) : step;
-
+      const progress: TaskProgress = activeTask
+        ? this.#progressActiveTask(activeTask, step)
+        : { usedSeconds: step };
+      const used = progress.usedSeconds;
       remaining -= used;
-      if (running) {
-        this.#state = { ...this.#state, elapsedSeconds: this.#state.elapsedSeconds + used };
-        if (this.remainingSeconds <= 0) {
-          this.#closeDay();
-        }
+
+      // The step's time passes before its outcome applies, so a super pulled at the end of the
+      // step includes the honey the bees made during it.
+      this.#state = {
+        ...this.#state,
+        elapsedSeconds: running ? this.#state.elapsedSeconds + used : this.#state.elapsedSeconds,
+        production: fillHive(this.#state.production, used, this.#config),
+      };
+      if (progress.outcome) {
+        this.#applyOutcome(progress.outcome);
+        events.push(progress.outcome);
+      }
+
+      if (running && this.remainingSeconds <= 0) {
+        this.#closeDay();
       }
       this.#startNextTask();
       this.#endIfWoundDown();
     }
+    return events;
   }
 
   /**
-   * Advances the active task by up to `limitSeconds`, stopping early if it completes.
-   * Returns the time actually used.
+   * Advances the active task by up to `limitSeconds`, stopping early if it completes or fails.
+   * Production effects are left to the caller (see `tick`).
    */
-  #advanceActiveTask(activeTask: ActiveTask, limitSeconds: number): number {
+  #progressActiveTask(activeTask: ActiveTask, limitSeconds: number): TaskProgress {
+    const task = activeTask.task;
+    let current = activeTask;
     let used = 0;
-    let { phase, workRemainingSeconds } = activeTask;
-    let position = this.#state.beekeeperPosition;
 
-    if (phase === 'walking') {
-      const target = this.#config.backyard.stations[activeTask.task.stationId];
+    if (current.phase === 'walking') {
+      const position = this.#state.beekeeperPosition;
+      const target = this.#config.backyard.stations[task.stationId];
       const arriveSeconds =
         distanceBetween(position, target) / this.#config.beekeeper.walkSpeedUnitsPerSecond;
       if (limitSeconds < arriveSeconds) {
         const fraction = limitSeconds / arriveSeconds;
-        position = {
-          x: position.x + (target.x - position.x) * fraction,
-          y: position.y + (target.y - position.y) * fraction,
+        this.#state = {
+          ...this.#state,
+          beekeeperPosition: {
+            x: position.x + (target.x - position.x) * fraction,
+            y: position.y + (target.y - position.y) * fraction,
+          },
         };
-        this.#state = { ...this.#state, beekeeperPosition: position };
-        return limitSeconds;
+        return { usedSeconds: limitSeconds };
       }
-      position = target;
+
       used = arriveSeconds;
-      phase = 'working';
+      this.#state = { ...this.#state, beekeeperPosition: target };
+      const resolution = resolveStationAction(task.stationId, this.#state.production, this.#config);
+      if (!resolution.ok) {
+        this.#state = { ...this.#state, activeTask: null };
+        return {
+          usedSeconds: used,
+          outcome: { type: 'taskFailed', task, reason: resolution.reason },
+        };
+      }
+      current = {
+        phase: 'working',
+        task,
+        action: resolution.action,
+        workTotalSeconds: resolution.workSeconds,
+        workRemainingSeconds: resolution.workSeconds,
+      };
     }
 
     const available = limitSeconds - used;
-    if (available < workRemainingSeconds) {
-      workRemainingSeconds -= available;
+    if (available < current.workRemainingSeconds) {
       this.#state = {
         ...this.#state,
-        beekeeperPosition: position,
-        activeTask: { ...activeTask, phase, workRemainingSeconds },
+        activeTask: { ...current, workRemainingSeconds: current.workRemainingSeconds - available },
       };
-      return limitSeconds;
+      return { usedSeconds: limitSeconds };
     }
 
-    // Completed. Production effects get applied here in Phase 1 step 3.
-    this.#state = { ...this.#state, beekeeperPosition: position, activeTask: null };
-    return used + workRemainingSeconds;
+    this.#state = { ...this.#state, activeTask: null };
+    return {
+      usedSeconds: used + current.workRemainingSeconds,
+      outcome: { type: 'taskCompleted', task, action: current.action },
+    };
+  }
+
+  #applyOutcome(outcome: WorkDayEvent): void {
+    if (outcome.type === 'taskCompleted') {
+      this.#state = {
+        ...this.#state,
+        production: applyStationAction(outcome.action, this.#state.production, this.#config),
+      };
+    }
   }
 
   #startNextTask(): void {
@@ -173,11 +231,7 @@ export class WorkDay {
     }
     this.#state = {
       ...state,
-      activeTask: {
-        task: next,
-        phase: 'walking',
-        workRemainingSeconds: taskWorkSeconds(next, this.#config),
-      },
+      activeTask: { phase: 'walking', task: next },
       queuedTasks: rest,
     };
   }
