@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Placeholder app icon. Colours mirror src/game/theme.ts (bark, honey, honeyLight).
+       Full-bleed background so platforms can mask/round it; artwork stays inside the
+       maskable safe zone (radius ~205 from centre). Regenerate PNGs with `npm run icons`. -->
+  <rect width="512" height="512" fill="#1f1a14" />
+  <polygon points="256,76 411.9,166 411.9,346 256,436 100.1,346 100.1,166" fill="#d99926" />
+  <polygon points="256,146 351.3,201 351.3,311 256,366 160.7,311 160.7,201" fill="#ffd933" />
+</svg>

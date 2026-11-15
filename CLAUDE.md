@@ -8,6 +8,8 @@ static files to GitHub Pages (PWA). The design, decisions and phased plan are in
 - `npm run check`: typecheck, lint, format check, then tests. **Must pass before any change is done.**
 - `npm run dev`: dev server. `npm run build`: production build to `dist/`.
 - `npm run format` / `npm run lint:fix`: auto-fix formatting and fixable lint issues.
+- `npm run icons`: regenerate PWA icon PNGs in `public/` from `public/icon.svg`. Commit the output.
+- Deploys: every push to `main` runs `.github/workflows/deploy.yml` (check, build, GitHub Pages).
 
 ## Structure
 

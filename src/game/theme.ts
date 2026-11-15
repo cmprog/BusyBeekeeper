@@ -10,8 +10,9 @@ import type { Color } from 'littlejsengine';
  * Two tiers: `palette` holds the raw named colours, and `theme.colors` maps UI *roles* onto
  * them. Game code uses roles, so a palette tweak re-skins everything consistently.
  *
- * index.html repeats the page background/text colours in CSS (needed before JS loads), so
- * keep those in sync with `palette.bark` / `palette.cream`.
+ * Some colours must be repeated outside TypeScript, so keep these in sync with the palette:
+ * index.html CSS (bark, cream), vite.config.ts PWA manifest (bark), public/icon.svg and
+ * pwa-assets.config.ts (bark, honey, honeyLight).
  */
 
 /** Frozen so a shared colour can't be mutated by accident (LittleJS Colors are mutable). */

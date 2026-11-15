@@ -31,5 +31,5 @@
     /* Only skip checking third-party .d.ts files */
     "skipLibCheck": true
   },
-  "include": ["src", "vite.config.ts", "vitest.config.ts"]
+  "include": ["src", "vite.config.ts", "vitest.config.ts", "pwa-assets.config.ts"]
 }
