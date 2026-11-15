@@ -1,5 +1,6 @@
+import { defaultConfig } from './config/defaultConfig';
 import { startGame } from './game/startGame';
 
-startGame().catch((error: unknown) => {
+startGame(defaultConfig).catch((error: unknown) => {
   console.error('Failed to start Busy Beekeeper', error);
 });

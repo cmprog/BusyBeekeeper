@@ -2,11 +2,14 @@ import type { GameConfig } from '../../config/GameConfig';
 import { distanceBetween } from '../Position';
 import type { StationId } from '../StationId';
 import type { Task } from './Task';
+import { taskWorkSeconds } from './taskWorkSeconds';
 import type { ActiveTask, WorkDayState } from './WorkDayState';
+
+export type EnqueueRefusal = 'queueFull' | 'dayOver';
 
 export type EnqueueResult =
   | { readonly ok: true; readonly task: Task }
-  | { readonly ok: false; readonly reason: 'queueFull' | 'dayOver' };
+  | { readonly ok: false; readonly reason: EnqueueRefusal };
 
 /**
  * One work day in a scene: the day clock plus the beekeeper's task queue (ROADMAP §3.1, §3.4).
@@ -170,7 +173,11 @@ export class WorkDay {
     }
     this.#state = {
       ...state,
-      activeTask: { task: next, phase: 'walking', workRemainingSeconds: this.#workSeconds(next) },
+      activeTask: {
+        task: next,
+        phase: 'walking',
+        workRemainingSeconds: taskWorkSeconds(next, this.#config),
+      },
       queuedTasks: rest,
     };
   }
@@ -183,14 +190,6 @@ export class WorkDay {
   #endIfWoundDown(): void {
     if (this.#state.status === 'windingDown' && !this.#state.activeTask) {
       this.#state = { ...this.#state, status: 'ended' };
-    }
-  }
-
-  #workSeconds(task: Task): number {
-    switch (task.kind) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Task has one variant until step 3; the switch keeps the exhaustiveness check in place.
-      case 'placeholder':
-        return this.#config.tasks.placeholderWorkSeconds;
     }
   }
 }
