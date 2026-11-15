@@ -47,11 +47,14 @@ Weekly planning matters as much as playing each moment well.
 - The beekeeper has a **task queue**. Tapping a station or action adds a task to the end.
 - Each task = **travel to the station** + **perform the task** (has a duration).
 - Queued tasks can be **cancelled** but **not reordered**. To reorder, cancel and re-queue.
+- The **active task can be cancelled too**: the beekeeper stops where they are, its progress is
+  lost (nothing is refunded), and the next queued task starts.
 - The queue holds tasks in the **current scene only**. The player never queues tasks in a scene
   they aren't looking at.
 - **"Travel"** is a task that can be queued. It ends the scene's queue and opens the
   Overworld (§3.7).
-- The queue length limit is a likely upgrade path (see Open Questions).
+- The queue holds **3 tasks to start, counting the active task** (config `queue.maxTasks`). Its
+  length is an upgrade path; how far it goes is still open.
 - Helper scripts **will** span scenes (§3.2), but the player's queue stays scoped to the current
   scene to keep the UX simple.
 
@@ -413,7 +416,8 @@ Automated machines still need **maintenance**, so there's always some action req
 - [x] ~~Is Sunday timed?~~ → No, an untimed menu (§3.4)
 - [x] ~~Unfinished tasks at end of day?~~ → the task in progress finishes, the rest are dropped (§3.4)
 - [x] ~~Reward for ending early?~~ → None at the start. Unused time → banked time is an upgrade (§3.3)
-- [ ] Starting queue length, and how far it can be upgraded?
+- [x] ~~Starting queue length?~~ → 3, counting the active task (§3.1)
+- [ ] How far can queue length be upgraded?
 - [ ] Are there carry limits (e.g., the beekeeper can only carry N frames at once)?
 
 ### Scenes & travel
@@ -541,7 +545,8 @@ Phases are rough and will shift as open questions are answered.
 - PWA basics: manifest, icons, service worker
 - Mouse + touch input, responsive landscape canvas
 - Central tuning config module (all balance values come from it from the start)
-- Scene manager (switch scenes, transition scenes)
+- Scene manager (switch scenes, transition scenes): moved to Phase 2, when there's more than
+  one scene
 - Save/load scaffold with versioning
 
 ### Phase 1 — Core Loop Prototype ("one work day")
