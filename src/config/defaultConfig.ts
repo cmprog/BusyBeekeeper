@@ -46,12 +46,12 @@ export const defaultConfig: GameConfig = {
   },
   backyard: {
     beekeeperStart: { x: 9, y: 6 },
-    stations: {
-      hive: { x: 5, y: 9 },
-      uncappingTable: { x: 12, y: 11 },
-      extractor: { x: 19, y: 11 },
-      bucket: { x: 19, y: 5.5 },
-      bottlingTank: { x: 26, y: 9 },
-    },
+    stations: [
+      { id: 'backyard-hive-1', type: 'hive', position: { x: 5, y: 9 } },
+      { id: 'uncapping-table', type: 'uncappingTable', position: { x: 12, y: 11 } },
+      { id: 'extractor', type: 'extractor', position: { x: 19, y: 11 } },
+      { id: 'bucket', type: 'bucket', position: { x: 19, y: 5.5 } },
+      { id: 'bottling-tank', type: 'bottlingTank', position: { x: 26, y: 9 } },
+    ],
   },
 };

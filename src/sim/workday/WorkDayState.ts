@@ -1,6 +1,6 @@
 import type { Position } from '../Position';
 import type { ProductionState } from '../production/ProductionState';
-import type { StationAction } from '../production/StationAction';
+import type { PlannedAction } from '../stations/StationAction';
 import type { Task } from './Task';
 
 /**
@@ -17,7 +17,7 @@ export type ActiveTask =
   | {
       readonly phase: 'working';
       readonly task: Task;
-      readonly action: StationAction;
+      readonly planned: PlannedAction;
       readonly workTotalSeconds: number;
       readonly workRemainingSeconds: number;
     };

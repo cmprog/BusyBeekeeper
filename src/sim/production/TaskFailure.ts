@@ -2,7 +2,9 @@
 export type TaskFailure =
   | 'handsFull'
   | 'noSuperOnHive'
+  | 'hiveHasSuper'
   | 'noSuperOnTable'
+  | 'tableOccupied'
   | 'nothingToUncap'
   | 'nothingToExtract'
   | 'bucketFull'

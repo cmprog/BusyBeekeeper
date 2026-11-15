@@ -46,6 +46,10 @@ genuinely pure LittleJS utility) add it to the allowlist.
   `src/game/theme.ts`. Use its roles (`theme.colors.text`), not raw values. Lint blocks
   `rgb`/`hsl`/`new Color` outside `theme.ts`. Sizes and spacing can't be lint-checked, so never
   inline them: add a named entry to the theme.
+- **Station behaviours, not station objects.** Each station _type_ has one stateless behaviour
+  in `src/sim/stations/behaviors/` (decide on arrival + apply on completion), registered in
+  `stationBehaviors.ts`. Station _instances_ (id, type, position) are scene layout in config.
+  Their changing state stays plain data in `ProductionState`, keyed by station id.
 - **Exhaustive unions.** Model variants (task types, scenes) as discriminated unions and handle
   them with exhaustive `switch`.
 - **Saves are versioned.** Any change to `SaveData`'s shape bumps `CURRENT_SAVE_VERSION` and adds
@@ -57,7 +61,8 @@ genuinely pure LittleJS utility) add it to the allowlist.
 - Standard TypeScript naming (camelCase locals, PascalCase types). Use `#private` class fields,
   not the `private` keyword.
 - `import type` for type-only imports.
-- One primary export per file, with the file named after it.
+- One primary export per file, with the file named after it. Exception: a module of small,
+  closely related helpers (e.g. `productionAccess.ts`) or a registry with its dispatch functions.
 
 ## Tests
 

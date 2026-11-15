@@ -1,4 +1,4 @@
-import type { StationId } from '../StationId';
+import type { StationId } from '../stations/Station';
 
 /**
  * A queued task: walk to a station and do its job there. The job itself (pull a super, uncap a

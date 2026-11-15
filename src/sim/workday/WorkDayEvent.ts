@@ -1,4 +1,4 @@
-import type { StationAction } from '../production/StationAction';
+import type { StationAction } from '../stations/StationAction';
 import type { TaskFailure } from '../production/TaskFailure';
 import type { Task } from './Task';
 

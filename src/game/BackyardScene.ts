@@ -12,8 +12,7 @@ import {
 } from 'littlejsengine';
 import type { Color } from 'littlejsengine';
 import type { GameConfig } from '../config/GameConfig';
-import { stationIds } from '../sim/StationId';
-import type { StationId } from '../sim/StationId';
+import type { Station, StationId } from '../sim/stations/Station';
 import type { ProductionState } from '../sim/production/ProductionState';
 import type { Task } from '../sim/workday/Task';
 import { WorkDay } from '../sim/workday/WorkDay';
@@ -62,8 +61,8 @@ export class BackyardScene {
 
   /** Call from gameRender: everything in world space. */
   render(): void {
-    for (const stationId of stationIds) {
-      this.#renderStation(stationId);
+    for (const station of this.#config.backyard.stations) {
+      this.#renderStation(station);
     }
     this.#renderBeekeeper();
   }
@@ -126,11 +125,13 @@ export class BackyardScene {
       return;
     }
 
-    const stationId = stationIds.find((id) => rectContains(this.#stationRect(id), mousePos));
-    if (stationId) {
-      this.#flashedStation = stationId;
+    const station = this.#config.backyard.stations.find((candidate) =>
+      rectContains(this.#stationRect(candidate), mousePos),
+    );
+    if (station) {
+      this.#flashedStation = station.id;
       this.#flashTimer.set(theme.flashSeconds);
-      const result = this.#day.enqueue(stationId);
+      const result = this.#day.enqueue(station.id);
       if (!result.ok) {
         this.#warn(refusalText(result.reason));
       }
@@ -142,10 +143,10 @@ export class BackyardScene {
     this.#warningTimer.set(theme.warningSeconds);
   }
 
-  #renderStation(stationId: StationId): void {
-    const visual = stationVisuals[stationId];
-    const rect = this.#stationRect(stationId);
-    const flashing = this.#flashedStation === stationId && this.#flashTimer.active();
+  #renderStation(station: Station): void {
+    const visual = stationVisuals[station.type];
+    const rect = this.#stationRect(station);
+    const flashing = this.#flashedStation === station.id && this.#flashTimer.active();
 
     drawRect(rect.center, rect.size, flashing ? theme.colors.tapFlash : visual.color);
     drawText(visual.icon, rect.center, theme.world.stationIconSize);
@@ -181,7 +182,7 @@ export class BackyardScene {
       if (!task) {
         return;
       }
-      drawTextScreen(stationVisuals[task.stationId].icon, rect.center, theme.font.sizePx.slotIcon);
+      drawTextScreen(this.#stationIcon(task.stationId), rect.center, theme.font.sizePx.slotIcon);
 
       if (index === 0 && activeTask) {
         // Thin bar along the slot's bottom edge: empty while walking, fills while working.
@@ -211,9 +212,14 @@ export class BackyardScene {
     return activeTask ? [activeTask.task, ...queuedTasks] : queuedTasks;
   }
 
-  #stationRect(stationId: StationId): Rect {
-    const { x, y } = this.#config.backyard.stations[stationId];
+  #stationRect(station: Station): Rect {
+    const { x, y } = station.position;
     return { center: vec2(x, y), size: vec2(theme.world.stationSize) };
+  }
+
+  #stationIcon(stationId: StationId): string {
+    const station = this.#config.backyard.stations.find((candidate) => candidate.id === stationId);
+    return station ? stationVisuals[station.type].icon : '?';
   }
 
   /** One slot per task the queue can hold, along the bottom-left edge. */
@@ -245,20 +251,28 @@ function workProgress(activeTask: Extract<ActiveTask, { phase: 'working' }>): nu
 
 /** Temporary one-line readout of the production state, until the inventory HUD (step 4). */
 function productionSummary(production: ProductionState): string {
-  const { honeySuper, extractor, bucketHoneyOz, tankHoneyOz, inventory } = production;
-  const superText =
-    honeySuper.location === 'hive'
-      ? `on hive ${String(Math.floor(honeySuper.fill * 100))}%`
-      : `${honeySuper.location === 'carried' ? 'carried' : 'on table'} ` +
-        `(capped ${String(honeySuper.frames.capped)}, uncapped ${String(honeySuper.frames.uncapped)}, ` +
-        `empty ${String(honeySuper.frames.extracted)})`;
-  return [
-    `Super: ${superText}`,
-    `Extractor: ${String(extractor.loadedFrames)} frames`,
-    `Bucket: ${String(bucketHoneyOz)} oz`,
-    `Tank: ${String(tankHoneyOz)} oz`,
-    `Bears: ${String(inventory.filledBears)} filled, ${String(inventory.emptyBears)} empty, ${String(inventory.labels)} labels`,
-  ].join('  ·  ');
+  const parts: string[] = [];
+  for (const { id, contents } of Object.values(production.supers)) {
+    const where = production.carriedSuperId === id ? ' (carried)' : '';
+    parts.push(
+      contents.stage === 'filling'
+        ? `Super: on hive ${String(Math.floor(contents.fill * 100))}%`
+        : `Super${where}: capped ${String(contents.frames.capped)}, ` +
+            `uncapped ${String(contents.frames.uncapped)}, empty ${String(contents.frames.extracted)}`,
+    );
+  }
+  for (const station of Object.values(production.stations)) {
+    if (station.type === 'extractor') {
+      parts.push(`Extractor: ${String(station.loadedFrames)} frames`);
+    } else if (station.type === 'bucket' || station.type === 'bottlingTank') {
+      parts.push(`${stationVisuals[station.type].label}: ${String(station.honeyOz)} oz`);
+    }
+  }
+  const { filledBears, emptyBears, labels } = production.inventory;
+  parts.push(
+    `Bears: ${String(filledBears)} filled, ${String(emptyBears)} empty, ${String(labels)} labels`,
+  );
+  return parts.join('  ·  ');
 }
 
 function drawScreenRect(rect: Rect, color: Color): void {

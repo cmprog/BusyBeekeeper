@@ -1,11 +1,12 @@
 import type { GameConfig } from '../../config/GameConfig';
 import { distanceBetween } from '../Position';
-import { applyStationAction } from '../production/applyStationAction';
 import { fillHive } from '../production/fillHive';
 import { initialProductionState } from '../production/initialProductionState';
 import type { ProductionState } from '../production/ProductionState';
-import { resolveStationAction } from '../production/resolveStationAction';
-import type { StationId } from '../StationId';
+import type { Station, StationId } from '../stations/Station';
+import type { PlannedAction } from '../stations/StationAction';
+import type { StationContext } from '../stations/StationBehavior';
+import { applyPlannedAction, resolveStationTask } from '../stations/stationBehaviors';
 import type { Task } from './Task';
 import type { WorkDayEvent } from './WorkDayEvent';
 import type { ActiveTask, WorkDayState } from './WorkDayState';
@@ -20,6 +21,8 @@ export type EnqueueResult =
 interface TaskProgress {
   readonly usedSeconds: number;
   readonly outcome?: WorkDayEvent;
+  /** Set when the task completed: the action to apply, and where. */
+  readonly completed?: { readonly planned: PlannedAction; readonly station: Station };
 }
 
 /**
@@ -62,8 +65,12 @@ export class WorkDay {
     return Math.max(0, this.#config.time.workDaySeconds - this.#state.elapsedSeconds);
   }
 
-  /** Adds a task to the end of the queue, starting it right away if the beekeeper is idle. */
+  /**
+   * Adds a task at a station to the end of the queue, starting it right away if the beekeeper
+   * is idle. The station must be in this scene's layout.
+   */
   enqueue(stationId: StationId): EnqueueResult {
+    this.#station(stationId); // throws for an unknown station: always a caller bug
     const state = this.#state;
     if (state.status !== 'running') {
       return { ok: false, reason: 'dayOver' };
@@ -139,8 +146,14 @@ export class WorkDay {
         elapsedSeconds: running ? this.#state.elapsedSeconds + used : this.#state.elapsedSeconds,
         production: fillHive(this.#state.production, used, this.#config),
       };
+      if (progress.completed) {
+        const { planned, station } = progress.completed;
+        this.#state = {
+          ...this.#state,
+          production: applyPlannedAction(planned, this.#context(station)),
+        };
+      }
       if (progress.outcome) {
-        this.#applyOutcome(progress.outcome);
         events.push(progress.outcome);
       }
 
@@ -159,12 +172,13 @@ export class WorkDay {
    */
   #progressActiveTask(activeTask: ActiveTask, limitSeconds: number): TaskProgress {
     const task = activeTask.task;
+    const station = this.#station(task.stationId);
     let current = activeTask;
     let used = 0;
 
     if (current.phase === 'walking') {
       const position = this.#state.beekeeperPosition;
-      const target = this.#config.backyard.stations[task.stationId];
+      const target = station.position;
       const arriveSeconds =
         distanceBetween(position, target) / this.#config.beekeeper.walkSpeedUnitsPerSecond;
       if (limitSeconds < arriveSeconds) {
@@ -181,7 +195,7 @@ export class WorkDay {
 
       used = arriveSeconds;
       this.#state = { ...this.#state, beekeeperPosition: target };
-      const resolution = resolveStationAction(task.stationId, this.#state.production, this.#config);
+      const resolution = resolveStationTask(this.#context(station));
       if (!resolution.ok) {
         this.#state = { ...this.#state, activeTask: null };
         return {
@@ -192,7 +206,7 @@ export class WorkDay {
       current = {
         phase: 'working',
         task,
-        action: resolution.action,
+        planned: resolution.planned,
         workTotalSeconds: resolution.workSeconds,
         workRemainingSeconds: resolution.workSeconds,
       };
@@ -210,17 +224,26 @@ export class WorkDay {
     this.#state = { ...this.#state, activeTask: null };
     return {
       usedSeconds: used + current.workRemainingSeconds,
-      outcome: { type: 'taskCompleted', task, action: current.action },
+      outcome: { type: 'taskCompleted', task, action: current.planned.action },
+      completed: { planned: current.planned, station },
     };
   }
 
-  #applyOutcome(outcome: WorkDayEvent): void {
-    if (outcome.type === 'taskCompleted') {
-      this.#state = {
-        ...this.#state,
-        production: applyStationAction(outcome.action, this.#state.production, this.#config),
-      };
+  #station(stationId: StationId): Station {
+    const station = this.#config.backyard.stations.find((candidate) => candidate.id === stationId);
+    if (!station) {
+      throw new RangeError(`No station '${stationId}' in this scene`);
     }
+    return station;
+  }
+
+  #context(station: Station): StationContext {
+    return {
+      station,
+      state: this.#state.production,
+      layout: this.#config.backyard.stations,
+      config: this.#config,
+    };
   }
 
   #startNextTask(): void {

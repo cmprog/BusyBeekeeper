@@ -1,16 +1,30 @@
 import type { GameConfig } from '../../config/GameConfig';
+import type { HoneySuper } from './HoneySuper';
 import type { ProductionState } from './ProductionState';
 
-/** The bees fill the super while it is on the hive, up to full. Off the hive, nothing fills. */
+/** The bees fill every super that is on a hive, up to full. Off a hive, nothing fills. */
 export function fillHive(
   state: ProductionState,
   seconds: number,
   config: GameConfig,
 ): ProductionState {
-  const honeySuper = state.honeySuper;
-  if (honeySuper.location !== 'hive' || honeySuper.fill >= 1 || seconds === 0) {
+  if (seconds === 0) {
     return state;
   }
-  const fill = Math.min(1, honeySuper.fill + seconds / config.hive.superFillSeconds);
-  return { ...state, honeySuper: { location: 'hive', fill } };
+
+  let supers: Record<string, HoneySuper> | undefined;
+  for (const stationState of Object.values(state.stations)) {
+    if (stationState.type !== 'hive' || stationState.superId === null) {
+      continue;
+    }
+    const honeySuper = state.supers[stationState.superId];
+    if (honeySuper?.contents.stage !== 'filling' || honeySuper.contents.fill >= 1) {
+      continue;
+    }
+    const fill = Math.min(1, honeySuper.contents.fill + seconds / config.hive.superFillSeconds);
+    supers ??= { ...state.supers };
+    supers[honeySuper.id] = { id: honeySuper.id, contents: { stage: 'filling', fill } };
+  }
+  // Unchanged state keeps its identity, so callers can cheaply tell nothing filled.
+  return supers ? { ...state, supers } : state;
 }

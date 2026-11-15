@@ -1,5 +1,5 @@
 import type { Position } from '../sim/Position';
-import type { StationId } from '../sim/StationId';
+import type { Station } from '../sim/stations/Station';
 
 /**
  * Shape of the central tuning / balance config (ROADMAP §3.9).
@@ -66,6 +66,7 @@ export interface GameConfig {
   /** Layout of the backyard scene. Distances set walk times, so they are balance values too. */
   readonly backyard: {
     readonly beekeeperStart: Position;
-    readonly stations: Readonly<Record<StationId, Position>>;
+    /** Station ids must be unique across the whole game. */
+    readonly stations: readonly Station[];
   };
 }

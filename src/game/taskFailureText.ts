@@ -4,7 +4,9 @@ import type { TaskFailure } from '../sim/production/TaskFailure';
 export const taskFailureText: Readonly<Record<TaskFailure, string>> = {
   handsFull: 'Hands are full: set the super down first',
   noSuperOnHive: 'No super on the hive',
+  hiveHasSuper: 'This hive already has a super',
   noSuperOnTable: 'No super on the uncapping table',
+  tableOccupied: 'The uncapping table is in use',
   nothingToUncap: 'Nothing left to uncap',
   nothingToExtract: 'No uncapped frames to extract',
   bucketFull: 'The bucket is too full: pour it first',

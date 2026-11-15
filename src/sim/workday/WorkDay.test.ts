@@ -13,7 +13,7 @@ describe('WorkDay', () => {
   it('runs tasks in queue order, each taking walk time plus work time', () => {
     const day = new WorkDay(config);
     day.enqueue('hive');
-    day.enqueue('uncappingTable');
+    day.enqueue('table');
 
     day.tick(6.5);
     expect(activeTaskId(day)).toBe(1);
@@ -41,7 +41,7 @@ describe('WorkDay', () => {
   it('cancelling a queued task removes only that task', () => {
     const day = new WorkDay(config);
     day.enqueue('hive');
-    day.enqueue('uncappingTable');
+    day.enqueue('table');
     day.enqueue('hive');
 
     expect(day.cancel(2)).toBe(true);
@@ -53,7 +53,7 @@ describe('WorkDay', () => {
   it('cancelling the active task stops the beekeeper in place and starts the next task', () => {
     const day = new WorkDay(config);
     day.enqueue('hive');
-    day.enqueue('uncappingTable');
+    day.enqueue('table');
     day.tick(2.5); // halfway to the hive
 
     expect(day.cancel(1)).toBe(true);
@@ -71,7 +71,7 @@ describe('WorkDay', () => {
     day.cancel(1);
     day.tick(10);
 
-    expect(day.state.production.honeySuper.location).toBe('hive');
+    expect(day.state.production.carriedSuperId).toBeNull();
   });
 
   it('fails a task that cannot be done on arrival, then moves on to the next', () => {
@@ -92,7 +92,7 @@ describe('WorkDay', () => {
     const day = new WorkDay(config);
     day.tick(55); // 5 s left
     day.enqueue('hive'); // takes 7 s, so it runs past the end of the day
-    day.enqueue('uncappingTable');
+    day.enqueue('table');
 
     day.tick(5);
     expect(day.state.status).toBe('windingDown');
@@ -103,13 +103,13 @@ describe('WorkDay', () => {
     day.tick(2);
     expect(day.state.status).toBe('ended');
     expect(day.state.activeTask).toBeNull();
-    expect(day.state.production.honeySuper.location).toBe('carried');
+    expect(day.state.production.carriedSuperId).toBe('super-1');
   });
 
   it('ending the day early follows the same rules and keeps the unused time', () => {
     const day = new WorkDay(config);
     day.enqueue('hive');
-    day.enqueue('uncappingTable');
+    day.enqueue('table');
     day.tick(1);
 
     day.endDayEarly();
@@ -139,8 +139,8 @@ describe('WorkDay', () => {
     function play(tickSizeSeconds: number, totalSeconds: number): WorkDayState {
       const day = new WorkDay({ ...halfFull, time: { ...config.time, workDaySeconds: 15 } });
       day.enqueue('hive');
-      day.enqueue('uncappingTable');
-      day.enqueue('uncappingTable');
+      day.enqueue('table');
+      day.enqueue('table');
       for (let t = 0; t < totalSeconds; t += tickSizeSeconds) {
         day.tick(tickSizeSeconds);
       }
@@ -159,13 +159,16 @@ describe('WorkDay', () => {
       expect(small.elapsedSeconds).toBeCloseTo(big.elapsedSeconds, 9);
       expect(small.beekeeperPosition.x).toBeCloseTo(big.beekeeperPosition.x, 9);
       expect(small.beekeeperPosition.y).toBeCloseTo(big.beekeeperPosition.y, 9);
-      const { honeySuper: smallSuper, ...smallRest } = small.production;
-      const { honeySuper: bigSuper, ...bigRest } = big.production;
+      // Fill is built from float additions, so compare it approximately and the rest exactly.
+      const { supers: smallSupers, ...smallRest } = small.production;
+      const { supers: bigSupers, ...bigRest } = big.production;
       expect(smallRest).toEqual(bigRest);
-      if (smallSuper.location === 'hive' && bigSuper.location === 'hive') {
-        expect(smallSuper.fill).toBeCloseTo(bigSuper.fill, 9);
+      const smallContents = smallSupers['super-1']?.contents;
+      const bigContents = bigSupers['super-1']?.contents;
+      if (smallContents?.stage === 'filling' && bigContents?.stage === 'filling') {
+        expect(smallContents.fill).toBeCloseTo(bigContents.fill, 9);
       } else {
-        expect(smallSuper).toEqual(bigSuper);
+        expect(smallContents).toEqual(bigContents);
       }
     }
   });

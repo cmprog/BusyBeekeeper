@@ -22,12 +22,12 @@ export const testConfig: GameConfig = {
   },
   backyard: {
     beekeeperStart: { x: 0, y: 0 },
-    stations: {
-      hive: { x: 3, y: 4 },
-      uncappingTable: { x: 0, y: 4 },
-      extractor: { x: 0, y: 8 },
-      bucket: { x: 0, y: 12 },
-      bottlingTank: { x: 0, y: 16 },
-    },
+    stations: [
+      { id: 'hive', type: 'hive', position: { x: 3, y: 4 } },
+      { id: 'table', type: 'uncappingTable', position: { x: 0, y: 4 } },
+      { id: 'extractor', type: 'extractor', position: { x: 0, y: 8 } },
+      { id: 'bucket', type: 'bucket', position: { x: 0, y: 12 } },
+      { id: 'tank', type: 'bottlingTank', position: { x: 0, y: 16 } },
+    ],
   },
 };
