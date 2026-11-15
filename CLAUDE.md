@@ -40,6 +40,10 @@ genuinely pure LittleJS utility) add it to the allowlist.
   than importing `defaultConfig`, so tests can use tuned values.
 - **Strict types.** No `any`, no non-null `!` assertions, and no lint-disable comments without a
   written reason on the same line.
+- **Centralized theme.** Colours, fonts, font sizes and common spacing for `game/` live in
+  `src/game/theme.ts`. Use its roles (`theme.colors.text`), not raw values. Lint blocks
+  `rgb`/`hsl`/`new Color` outside `theme.ts`. Sizes and spacing can't be lint-checked, so never
+  inline them: add a named entry to the theme.
 - **Exhaustive unions.** Model variants (task types, scenes) as discriminated unions and handle
   them with exhaustive `switch`.
 - **Saves are versioned.** Any change to the saved state shape bumps the save version and adds a
@@ -63,6 +67,10 @@ genuinely pure LittleJS utility) add it to the allowlist.
 ## Workflow
 
 - Work in small, reviewable steps. Don't commit unless asked.
+- **No self-run visual testing** (screenshots or headless browsers). It's token-expensive. Verify
+  logic with tests and `npm run check`. When something visual needs checking, build or extend a
+  test scene the user can open, and say exactly what feedback you need (e.g. "does the hive
+  toggle colour when tapped on a phone?").
 - When a design decision is made or changed, update `docs/ROADMAP.md`.
 
 ## Toolchain notes

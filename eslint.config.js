@@ -121,6 +121,27 @@ export default tseslint.config(
     },
   },
 
+  // game/: colours and engine-wide theme settings come only from theme.ts.
+  {
+    files: ['src/game/**/*.ts'],
+    ignores: ['src/game/theme.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'littlejsengine',
+              importNames: ['rgb', 'hsl', 'Color', 'setFontDefault', 'setCanvasClearColor'],
+              allowTypeImports: true,
+              message: 'Define colours and theme settings in src/game/theme.ts and use its roles.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // Plain JS config files aren't part of the TS project — lint them without type info.
   {
     files: ['**/*.js'],

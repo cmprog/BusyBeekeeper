@@ -8,18 +8,42 @@
     />
     <title>Busy Beekeeper</title>
     <style>
+      /* Colours mirror src/game/theme.ts: #1f1a14 = palette.bark, #f5e8c4 = palette.cream */
       html,
       body {
         margin: 0;
         height: 100%;
         overflow: hidden;
-        background: #1e1a14;
-        color: #f4e7c5;
-        font-family: system-ui, sans-serif;
+        background: #1f1a14;
+      }
+
+      /* The game is landscape-only (ROADMAP §3.8). On touch devices held in portrait,
+         cover the game with a prompt to rotate. */
+      #rotate-hint {
+        display: none;
+      }
+      @media (orientation: portrait) and (pointer: coarse) {
+        #rotate-hint {
+          display: flex;
+          position: fixed;
+          inset: 0;
+          z-index: 10;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          gap: 12px;
+          background: #1f1a14;
+          color: #f5e8c4;
+          font:
+            600 20px system-ui,
+            sans-serif;
+          text-align: center;
+        }
       }
     </style>
   </head>
   <body>
+    <div id="rotate-hint"><span style="font-size: 48px">🐝↻</span>Rotate your device to play</div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
