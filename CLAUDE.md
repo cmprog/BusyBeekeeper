@@ -52,11 +52,22 @@ genuinely pure LittleJS utility) add it to the allowlist.
   Their changing state stays plain data in `ProductionState`, keyed by station id.
 - **Exhaustive unions.** Model variants (task types, scenes) as discriminated unions and handle
   them with exhaustive `switch`.
-- **Saves are versioned.** Any change to `SaveData`'s shape (including the work day and station
-  states it holds) bumps `CURRENT_SAVE_VERSION` and adds a migration in
-  `src/sim/save/migrations.ts`, with a test that an old save still loads. Never edit a shipped
-  migration. Update the matching schema too (`saveSchema.ts` or the behaviour's `stateSchema`);
-  a field missing from a schema is a compile error.
+- **Game state vs. day state.** Anything that lasts past tonight (stock, Beebucks, deliveries,
+  upgrades) goes on `GameState` (`src/sim/week/GameState.ts`). `DayState` holds only what's
+  thrown away at night (the work day's clock, queue and stats). Day sims take the game state
+  they change as input and hand it back, rather than owning a copy.
+- **Saves are versioned, per release.** A release is a git tag `vX.Y.Z`; until a version is in
+  a release it isn't shipped. No release has happened yet.
+  - Unreleased: change `SaveData`'s shape freely, with no version bump or migration. Saves
+    from earlier dev builds just fail to load and are backed up.
+  - At a release, capture a real save of the current version as
+    `src/sim/save/fixtures/saveV<N>.json`. Keep it forever.
+  - The first shape change after a release bumps `CURRENT_SAVE_VERSION` and adds one
+    migration in `src/sim/save/migrations.ts`, tested against the released fixture. Later
+    changes before the next release extend that same migration, so there is one migration per
+    release, not per change. Never edit a released version's migration.
+  - Always update the matching schema (`saveSchema.ts` or the behaviour's `stateSchema`); a field
+    missing from a schema is a compile error.
 
 ## Conventions
 

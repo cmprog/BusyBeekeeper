@@ -1,5 +1,6 @@
 import type { Position } from '../sim/Position';
 import type { Station } from '../sim/stations/Station';
+import type { Weekday } from '../sim/week/Weekday';
 
 /**
  * Shape of the central tuning / balance config (ROADMAP §3.9).
@@ -15,6 +16,10 @@ export interface GameConfig {
     readonly workDaySeconds: number;
     /** Real-time length of Saturday's market day, tuned separately from work days. */
     readonly marketDaySeconds: number;
+  };
+  readonly calendar: {
+    /** The weekday a new game starts on (week 1). */
+    readonly startWeekday: Weekday;
   };
   readonly economy: {
     readonly startingBeebucks: number;
@@ -36,6 +41,11 @@ export interface GameConfig {
   readonly hive: {
     /** Time for the bees to fill an empty super completely. */
     readonly superFillSeconds: number;
+    /**
+     * Filling on each non-work day, in work days' worth (1 = as much as a full work day). Kept
+     * independent of the day's clock, so a longer market day doesn't mean more honey.
+     */
+    readonly offDayGrowthWorkDays: { readonly market: number; readonly supply: number };
   };
   readonly shallowSuper: {
     readonly frames: number;

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { testConfig as config } from '../testing/testConfig';
+import type { ProductionState } from '../production/ProductionState';
 import { WorkDay } from './WorkDay';
 import type { WorkDayState } from './WorkDayState';
 
@@ -71,7 +72,7 @@ describe('WorkDay', () => {
     day.cancel(1);
     day.tick(10);
 
-    expect(day.state.production.carriedSuperId).toBeNull();
+    expect(day.production.carriedSuperId).toBeNull();
   });
 
   it('fails a task that cannot be done on arrival, then moves on to the next', () => {
@@ -103,7 +104,7 @@ describe('WorkDay', () => {
     day.tick(2);
     expect(day.state.status).toBe('ended');
     expect(day.state.activeTask).toBeNull();
-    expect(day.state.production.carriedSuperId).toBe('super-1');
+    expect(day.production.carriedSuperId).toBe('super-1');
   });
 
   it('ending the day early follows the same rules and keeps the unused time', () => {
@@ -134,9 +135,12 @@ describe('WorkDay', () => {
     const halfFull = {
       ...config,
       startingKit: { ...config.startingKit, superFill: 0.5 },
-      hive: { superFillSeconds: 28 },
+      hive: { ...config.hive, superFillSeconds: 28 },
     };
-    function play(tickSizeSeconds: number, totalSeconds: number): WorkDayState {
+    function play(
+      tickSizeSeconds: number,
+      totalSeconds: number,
+    ): WorkDayState & { production: ProductionState } {
       const day = new WorkDay({ ...halfFull, time: { ...config.time, workDaySeconds: 15 } });
       day.enqueue('hive');
       day.enqueue('table');
@@ -144,7 +148,7 @@ describe('WorkDay', () => {
       for (let t = 0; t < totalSeconds; t += tickSizeSeconds) {
         day.tick(tickSizeSeconds);
       }
-      return day.state;
+      return { ...day.state, production: day.production };
     }
 
     // Sample times sit inside tasks, not on the exact moment one ends: there, float rounding can

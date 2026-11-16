@@ -1,4 +1,7 @@
 import { drawTextScreen, mousePosScreen, mouseWasPressed, vec2 } from 'littlejsengine';
+import { createSaveData, gameStateFromSave } from '../../sim/save/createSaveData';
+import { newGameState } from '../../sim/week/dayProgression';
+import { dayName, shortDayName } from '../calendarText';
 import { drawButton } from '../hud/drawButton';
 import { rectContains } from '../Rect';
 import type { Rect } from '../Rect';
@@ -54,9 +57,10 @@ export class MainMenuScene implements Scene {
       theme.colors.text,
     );
     if (this.#mode === 'confirmNewGame') {
-      const day = this.#choices.continueSave?.dayNumber ?? 1;
+      const saved = this.#choices.continueSave;
+      const day = saved ? ` (${dayName(saved.calendar)})` : '';
       drawTextScreen(
-        `Start a new game? Your saved game (day ${String(day)}) will be replaced.`,
+        `Start a new game? Your saved game${day} will be replaced.`,
         vec2(centerX, menu.promptTopPx),
         theme.font.sizePx.menuPrompt,
         theme.colors.text,
@@ -79,7 +83,10 @@ export class MainMenuScene implements Scene {
   #buttons(): readonly MenuButton[] {
     const { continueSave, confirmNewGame } = this.#choices;
     const newGame = (): void => {
-      this.#context.goTo({ kind: 'backyard', saved: undefined });
+      const game = newGameState(this.#context.config);
+      // Replace the old save now, so a reload can't bring back the game the player left.
+      this.#context.persist(createSaveData(game));
+      this.#context.goTo({ kind: 'day', game });
     };
 
     const entries: { label: string; onTap: () => void }[] = [];
@@ -87,9 +94,9 @@ export class MainMenuScene implements Scene {
       case 'choose':
         if (continueSave) {
           entries.push({
-            label: `Continue (day ${String(continueSave.dayNumber)})`,
+            label: `Continue (${shortDayName(continueSave.calendar)})`,
             onTap: () => {
-              this.#context.goTo({ kind: 'backyard', saved: continueSave });
+              this.#context.goTo({ kind: 'day', game: gameStateFromSave(continueSave) });
             },
           });
         }

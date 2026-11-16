@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { defaultConfig } from '../../config/defaultConfig';
 import { createSaveData } from '../../sim/save/createSaveData';
-import { WorkDay } from '../../sim/workday/WorkDay';
+import { newGameState } from '../../sim/week/dayProgression';
 import { mainMenuChoices } from './mainMenuChoices';
 
-const save = createSaveData(4, WorkDay.initialState(defaultConfig));
+const save = createSaveData(newGameState(defaultConfig));
 
 describe('main menu choices', () => {
   it('offers Continue and confirms before New Game overwrites a usable save', () => {

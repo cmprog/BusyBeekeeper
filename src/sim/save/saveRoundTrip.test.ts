@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { GameConfig } from '../../config/GameConfig';
 import { testConfig } from '../testing/testConfig';
+import { finishDay, newGameState } from '../week/dayProgression';
+import type { GameState } from '../week/GameState';
 import { WorkDay } from '../workday/WorkDay';
-import { createSaveData } from './createSaveData';
+import { createSaveData, gameStateFromSave } from './createSaveData';
 import { isSaveCompatible } from './isSaveCompatible';
 import { deserializeSave, serializeSave } from './saveCodec';
+import type { SaveData } from './SaveData';
 
 const config: GameConfig = { ...testConfig, queue: { maxTasks: 5 } };
 const layout = config.backyard.stations;
@@ -20,37 +23,65 @@ function midDay(): WorkDay {
   return day;
 }
 
+function midDayGame(): GameState {
+  const day = midDay();
+  return {
+    calendar: { week: 2, weekday: 'tuesday' },
+    production: day.production,
+    day: { kind: 'work', workDay: day.state },
+  };
+}
+
+function reload(game: GameState): SaveData {
+  const loaded = deserializeSave(serializeSave(createSaveData(game)));
+  if (!loaded.ok) throw new Error(loaded.message);
+  return loaded.data;
+}
+
+/** The game with any task in progress removed, which is the one thing a reload changes. */
+function withoutActiveTask({ day, ...rest }: GameState): unknown {
+  return {
+    ...rest,
+    day: day.kind === 'work' ? { ...day, workDay: { ...day.workDay, activeTask: null } } : day,
+  };
+}
+
 describe('saving and resuming', () => {
-  it('a saved mid-day game resumes with the same clock, queue, stock and stats', () => {
-    const day = midDay();
-    const loaded = deserializeSave(serializeSave(createSaveData(3, day.state)));
-    if (!loaded.ok) throw new Error(loaded.message);
+  it('a saved mid-day game resumes with the same day, clock, queue, stock and stats', () => {
+    const game = midDayGame();
 
-    const resumed = new WorkDay(config, loaded.data.workDay);
-
-    // Everything matches except the task in progress, which restarts from its walk.
-    expect({ ...resumed.state, activeTask: null }).toEqual({ ...day.state, activeTask: null });
-    expect(loaded.data.dayNumber).toBe(3);
+    expect(withoutActiveTask(gameStateFromSave(reload(game)))).toEqual(withoutActiveTask(game));
   });
 
   it('a task in progress is saved as restarting from its walk', () => {
-    const day = midDay();
-    expect(day.state.activeTask?.phase).toBe('working');
+    const game = midDayGame();
+    if (game.day.kind !== 'work') throw new Error('not a work day');
+    const { activeTask } = game.day.workDay;
+    expect(activeTask?.phase).toBe('working');
 
-    const saved = createSaveData(1, day.state);
+    const saved = createSaveData(game);
 
-    expect(saved.workDay.activeTask).toEqual({
+    expect(saved.day.kind === 'work' && saved.day.workDay.activeTask).toEqual({
       phase: 'walking',
-      task: day.state.activeTask?.task,
+      task: activeTask?.task,
     });
   });
 
+  it('a weekend day saves and resumes', () => {
+    let game = newGameState(config);
+    while (game.day.kind === 'work') {
+      game = finishDay(game, config);
+    }
+
+    expect(gameStateFromSave(reload(game))).toEqual(game);
+  });
+
   it('a save fits the layout it was made with', () => {
-    expect(isSaveCompatible(createSaveData(1, midDay().state), layout)).toBe(true);
+    expect(isSaveCompatible(createSaveData(midDayGame()), layout)).toBe(true);
   });
 
   it('a save made with a different station layout is not used', () => {
-    const saved = createSaveData(1, midDay().state);
+    const saved = createSaveData(midDayGame());
     const renamed = layout.map((station) =>
       station.id === 'tank' ? { ...station, id: 'big-tank' } : station,
     );

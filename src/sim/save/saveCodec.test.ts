@@ -1,16 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { defaultConfig } from '../../config/defaultConfig';
-import { WorkDay } from '../workday/WorkDay';
+import { newGameState } from '../week/dayProgression';
 import { createSaveData } from './createSaveData';
 import { CURRENT_SAVE_VERSION } from './SaveData';
 import type { SaveData } from './SaveData';
 import { deserializeSave, serializeSave } from './saveCodec';
 
-const save: SaveData = createSaveData(1, WorkDay.initialState(defaultConfig));
+const save: SaveData = createSaveData(newGameState(defaultConfig));
 
 /** The save as plain JSON-shaped data, for building broken variants. */
 function saveJson(): Record<string, unknown> {
   return JSON.parse(serializeSave(save)) as Record<string, unknown>;
+}
+
+/** The station states inside a save's JSON. */
+function stationsOf(json: Record<string, unknown>): Record<string, unknown> {
+  const production = json['production'] as { stations: Record<string, unknown> };
+  return production.stations;
 }
 
 describe('save codec', () => {
@@ -33,15 +39,14 @@ describe('save codec', () => {
 
   it.each([
     ['no version', () => ({ ...saveJson(), version: undefined })],
-    ['wrong field type', () => ({ ...saveJson(), dayNumber: '1' })],
-    ['missing field', () => ({ ...saveJson(), workDay: undefined })],
+    ['wrong field type', () => ({ ...saveJson(), calendar: { week: '1', weekday: 'thursday' } })],
+    ['missing field', () => ({ ...saveJson(), day: undefined })],
     ['not an object', () => [saveJson()]],
     [
       'invalid nested station state',
       () => {
         const json = saveJson();
-        const workDay = json['workDay'] as { production: { stations: Record<string, unknown> } };
-        workDay.production.stations['bucket'] = { type: 'bucket', honeyOz: -5 };
+        stationsOf(json)['bucket'] = { type: 'bucket', honeyOz: -5 };
         return json;
       },
     ],
@@ -49,8 +54,7 @@ describe('save codec', () => {
       'unknown station type',
       () => {
         const json = saveJson();
-        const workDay = json['workDay'] as { production: { stations: Record<string, unknown> } };
-        workDay.production.stations['bucket'] = { type: 'teleporter' };
+        stationsOf(json)['bucket'] = { type: 'teleporter' };
         return json;
       },
     ],

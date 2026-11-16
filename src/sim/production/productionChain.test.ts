@@ -72,14 +72,14 @@ describe('production chain', () => {
 
     for (const stationId of steps) {
       expect(perform(day, stationId)?.type).toBe('taskCompleted');
-      expect(totalHoneyOz(day.state.production)).toBe(256);
+      expect(totalHoneyOz(day.production)).toBe(256);
     }
 
     expect(perform(day, 'tank')).toMatchObject({ reason: 'notEnoughHoney' });
     expect(perform(day, 'table')).toMatchObject({ action: { kind: 'pickUpSuper' } });
     expect(perform(day, 'hive')).toMatchObject({ action: { kind: 'placeSuper' } });
 
-    const production = day.state.production;
+    const production = day.production;
     expect(production.inventory).toEqual({ emptyBears: 3, labels: 3, filledBears: 21 });
     expect(stationStateOf(production, 'tank', 'bottlingTank').honeyOz).toBe(4);
     expect(stationStateOf(production, 'bucket', 'bucket').honeyOz).toBe(0);
@@ -118,9 +118,9 @@ describe('production chain', () => {
     expect(contentsAfter(5)).toEqual({ stage: 'filling', fill: 0.25 });
     expect(contentsAfter(500)).toEqual({ stage: 'filling', fill: 1 });
 
-    const day = new WorkDay(config, WorkDay.initialState(config, empty));
+    const day = new WorkDay(config, empty);
     perform(day, 'hive'); // pull
-    const pulled = day.state.production;
+    const pulled = day.production;
     expect(fillHive(pulled, 5, config)).toBe(pulled);
   });
 
@@ -128,9 +128,9 @@ describe('production chain', () => {
     const day = new WorkDay(config);
     perform(day, 'hive');
 
-    const nextDay = new WorkDay(config, WorkDay.initialState(config, day.state.production));
+    const nextDay = new WorkDay(config, day.production);
 
-    expect(nextDay.state.production.carriedSuperId).toBe(STARTING_SUPER_ID);
+    expect(nextDay.production.carriedSuperId).toBe(STARTING_SUPER_ID);
     expect(nextDay.state.elapsedSeconds).toBe(0);
   });
 });

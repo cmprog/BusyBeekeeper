@@ -1,7 +1,10 @@
-import type { SaveData } from '../../sim/save/SaveData';
+import type { CalendarDay } from '../../sim/week/CalendarDay';
+import type { GameState } from '../../sim/week/GameState';
 
 /** A scene to switch to, with what it needs to start. */
 export type SceneRequest =
   | { readonly kind: 'mainMenu' }
-  /** `saved` is the game to resume, or undefined for a new game. */
-  | { readonly kind: 'backyard'; readonly saved: SaveData | undefined };
+  /** Play a day: the scene depends on the kind of day (work, market, supply). */
+  | { readonly kind: 'day'; readonly game: GameState }
+  /** The night after `night`, then on to `next` (already saved). */
+  | { readonly kind: 'sleep'; readonly night: CalendarDay; readonly next: GameState };

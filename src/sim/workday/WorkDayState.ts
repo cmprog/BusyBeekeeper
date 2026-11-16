@@ -1,5 +1,4 @@
 import type { Position } from '../Position';
-import type { ProductionState } from '../production/ProductionState';
 import type { PlannedAction } from '../stations/StationAction';
 import type { DayStats } from './DayStats';
 import type { Task } from './Task';
@@ -23,7 +22,10 @@ export type ActiveTask =
       readonly workRemainingSeconds: number;
     };
 
-/** Complete state of one work day. Plain readonly data, so it can go straight into a save. */
+/**
+ * Complete state of one work day: what resets each morning. Production lives on `GameState`,
+ * because it carries over. Plain readonly data, so it can go straight into a save.
+ */
 export interface WorkDayState {
   readonly status: DayStatus;
   /**
@@ -36,7 +38,5 @@ export interface WorkDayState {
   /** Waiting tasks in run order, not including the active task. */
   readonly queuedTasks: readonly Task[];
   readonly nextTaskId: number;
-  /** Carries over from day to day; a work day only borrows it. */
-  readonly production: ProductionState;
   readonly stats: DayStats;
 }

@@ -241,7 +241,9 @@ or debug mode for fast-forwarding.
 - **Language:** **TypeScript** (strict mode)
 - **Build / dev server:** **Vite** (output is still static files for GitHub Pages)
 - **Tests:** **Vitest** unit tests for critical paths only (see §3.11)
-- **Saves:** `localStorage`, holding one **versioned JSON** save. Export/import isn't
+- **Saves:** `localStorage`, holding one **versioned JSON** save. The version only advances
+  with **releases**: one migration per release, each tested against a captured save from the
+  previous release. Before the first release, save shapes change freely (dev saves may reset). Export/import isn't
   needed at first (easy to add later because the save is a single JSON string).
   - Saved when a day ends, when the next day starts, and **whenever the page is hidden** (phones
     kill backgrounded apps), so a reload **resumes mid-day**: clock, queue, stock and stats.
@@ -333,6 +335,10 @@ volume** (bucket/tank) → **containers** (products).
   - **Yard characteristics**: local forage/pollen yield
   - **Season**
   - **Colony strength** (queen)
+- **When bees fill:** during a work day's clock, never overnight (bees sleep at night).
+  On non-work days they fill a configured amount, measured in **work days' worth** so it doesn't
+  depend on that day's clock: **Saturday = one work day, Sunday = none** for now (Sunday is a
+  setting, not final).
 - **The player's job in the yard:**
   - Keep **empty supers** on hives so the bees have room to store honey
   - **Inspect** hives for colony health and dangers (mites and other natural problems)
@@ -492,7 +498,9 @@ Automated machines still need **maintenance**, so there's always some action req
 - [ ] Does vehicle cargo apply only to supers, or also to supplies hauled out to yards (empty
       supers, feed, treatments)?
 - [ ] How does the beekeeper get to the market on Saturday: automatically, or by choice?
-- [ ] What does the Sleep scene show: a day summary, saving, upcoming events (weather)?
+- [x] ~~What does the Sleep scene show?~~ → A short, cute scene: the beekeeper walks home, the
+      lights go out, Zs float up, and the next day is named. Tap to skip. Tomorrow is saved as it
+      starts. The day summary stays on the work day's end screen. Upcoming events (weather) later.
 - [ ] How are new bee yards acquired, and do they differ in gameplay (forage type → honey
       varieties, size, risks) or only in looks?
 
@@ -622,13 +630,17 @@ Phases are rough and will shift as open questions are answered.
 
 ### Phase 2 — The Week
 
-- Day/week cycle (Mon–Fri work, Sat market, Sun supply) with the **Sleep** transition
+- Day/week cycle (Mon–Fri work, Sat market, Sun supply) with the **Sleep** transition. New
+  games start on Thursday; Saturday and Sunday are placeholder screens until the market and shop
+  are built
 - **Market** scene: customers with multi-item orders and patience timers
 - **Shop** menu: untimed Sunday purchasing, with **next-Saturday delivery** shown clearly on screen
 - Onboarding gifts after the first and second orders
 - Inventory carry-over + storage limits
 - Limited supplies, so running out mid-week is possible
 - First upgrades (queue length, task speed, walk speed, patience, storage)
+- **Before the first release:** deploy only on release tags (`v*`), with a check-only workflow
+  for pushes to `main` and PRs, so players only ever get released builds (and save versions)
 
 ### Phase 3 — Incremental Layer
 

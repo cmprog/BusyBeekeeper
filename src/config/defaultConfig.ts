@@ -6,6 +6,10 @@ export const defaultConfig: GameConfig = {
     workDaySeconds: 120,
     marketDaySeconds: 120,
   },
+  calendar: {
+    // Two work days before the first market, so the market and shop arrive quickly.
+    startWeekday: 'thursday',
+  },
   economy: {
     startingBeebucks: 100,
   },
@@ -22,6 +26,7 @@ export const defaultConfig: GameConfig = {
   },
   hive: {
     superFillSeconds: 90,
+    offDayGrowthWorkDays: { market: 1, supply: 0 },
   },
   shallowSuper: {
     frames: 8,

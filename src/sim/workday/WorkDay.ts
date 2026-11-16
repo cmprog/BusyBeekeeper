@@ -28,6 +28,8 @@ interface TaskProgress {
 
 /**
  * One work day in a scene: the day clock plus the beekeeper's task queue (ROADMAP §3.1, §3.4).
+ * Production belongs to the whole game, not the day: the work day takes it in, changes it as
+ * tasks complete and the bees fill supers, and hands it back through `production`.
  *
  * Time only moves through `tick(dt)`. One large `dt` gives the same result as many small ones,
  * so banked time and offline catch-up can be fed in as a single big step.
@@ -35,17 +37,20 @@ interface TaskProgress {
 export class WorkDay {
   readonly #config: GameConfig;
   #state: WorkDayState;
+  #production: ProductionState;
 
-  constructor(config: GameConfig, state: WorkDayState = WorkDay.initialState(config)) {
+  constructor(
+    config: GameConfig,
+    production: ProductionState = initialProductionState(config),
+    state: WorkDayState = WorkDay.initialState(config),
+  ) {
     this.#config = config;
+    this.#production = production;
     this.#state = state;
   }
 
-  /** A fresh day. Pass the previous day's production so stock carries over. */
-  static initialState(
-    config: GameConfig,
-    production: ProductionState = initialProductionState(config),
-  ): WorkDayState {
+  /** A fresh day: the clock at zero, the beekeeper at the start, nothing queued. */
+  static initialState(config: GameConfig): WorkDayState {
     return {
       status: 'running',
       elapsedSeconds: 0,
@@ -53,7 +58,6 @@ export class WorkDay {
       activeTask: null,
       queuedTasks: [],
       nextTaskId: 1,
-      production,
       stats: emptyDayStats,
     };
   }
@@ -61,6 +65,11 @@ export class WorkDay {
   /** Read-only snapshot. Safe to save or render; changes go through the methods below. */
   get state(): WorkDayState {
     return this.#state;
+  }
+
+  /** Read-only snapshot of production as this day has left it so far. */
+  get production(): ProductionState {
+    return this.#production;
   }
 
   get remainingSeconds(): number {
@@ -146,14 +155,11 @@ export class WorkDay {
       this.#state = {
         ...this.#state,
         elapsedSeconds: running ? this.#state.elapsedSeconds + used : this.#state.elapsedSeconds,
-        production: fillHive(this.#state.production, used, this.#config),
       };
+      this.#production = fillHive(this.#production, used, this.#config);
       if (progress.completed) {
         const { planned, station } = progress.completed;
-        this.#state = {
-          ...this.#state,
-          production: applyPlannedAction(planned, this.#context(station)),
-        };
+        this.#production = applyPlannedAction(planned, this.#context(station));
       }
       if (progress.outcome) {
         this.#count(progress.outcome);
@@ -251,7 +257,7 @@ export class WorkDay {
   #context(station: Station): StationContext {
     return {
       station,
-      state: this.#state.production,
+      state: this.#production,
       layout: this.#config.backyard.stations,
       config: this.#config,
     };

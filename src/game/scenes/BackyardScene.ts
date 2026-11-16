@@ -12,14 +12,16 @@ import {
 import type { GameConfig } from '../../config/GameConfig';
 import type { ProductionState } from '../../sim/production/ProductionState';
 import { createSaveData } from '../../sim/save/createSaveData';
-import type { SaveData } from '../../sim/save/SaveData';
+import type { CalendarDay } from '../../sim/week/CalendarDay';
+import type { GameState } from '../../sim/week/GameState';
 import type { Station, StationId } from '../../sim/stations/Station';
 import type { StationAction } from '../../sim/stations/StationAction';
 import type { Task } from '../../sim/workday/Task';
 import { WorkDay } from '../../sim/workday/WorkDay';
 import type { EnqueueRefusal } from '../../sim/workday/WorkDay';
-import type { ActiveTask, DayStatus } from '../../sim/workday/WorkDayState';
+import type { ActiveTask, DayStatus, WorkDayState } from '../../sim/workday/WorkDayState';
 import { actionVerbs } from '../actionVerbs';
+import { shortDayName, weekdayName } from '../calendarText';
 import { drawFilledRect, drawProgressBar } from '../draw';
 import { drawButton } from '../hud/drawButton';
 import { drawInventoryPanel } from '../hud/drawInventoryPanel';
@@ -57,9 +59,9 @@ function backyardInventory(production: ProductionState): readonly InventoryHudIt
 
 /**
  * Phase 1 test scene: the backyard, with the Bee Yard and the Honey House. Tap a station to
- * queue its task, tap a queue slot to cancel it, and end the day early or start a new one
- * (stock carries over) with the button. Menu saves and returns to the main menu. Saves when a
- * new game starts, when a day ends, when the next day starts, and whenever the page is hidden.
+ * queue its task, tap a queue slot to cancel it, and end the day early, then Sleep (stock
+ * carries over) with the button. Menu saves and returns to the main menu. Saves when the day
+ * ends and whenever the page is hidden (Sleep saves tomorrow).
  *
  * Owns no game rules: it forwards input to the sim's `WorkDay` and draws its state.
  * The HUD is drawn with `useWebGL = false` so it lands on the 2D layer above the scene.
@@ -67,28 +69,36 @@ function backyardInventory(production: ProductionState): readonly InventoryHudIt
 export class BackyardScene implements Scene {
   readonly #context: SceneContext;
   readonly #config: GameConfig;
-  #dayNumber: number;
-  #day: WorkDay;
+  readonly #calendar: CalendarDay;
+  readonly #day: WorkDay;
   #saveFailureShown = false;
   readonly #flashTimer = new Timer();
   #flashedStation: StationId | undefined;
   readonly #warningTimer = new Timer();
   #warningText = '';
 
-  /** `saved` is the game to resume, or undefined to start a new one (saved straight away). */
-  constructor(context: SceneContext, saved: SaveData | undefined) {
+  constructor(
+    context: SceneContext,
+    calendar: CalendarDay,
+    production: ProductionState,
+    workDay: WorkDayState,
+  ) {
     this.#context = context;
     this.#config = context.config;
-    this.#dayNumber = saved?.dayNumber ?? 1;
-    this.#day = new WorkDay(this.#config, saved?.workDay);
-    if (!saved) {
-      // Replace any old save now, so a reload can't bring back the game the player left.
-      this.#saveNow();
-    }
+    this.#calendar = calendar;
+    this.#day = new WorkDay(this.#config, production, workDay);
   }
 
   onPageHidden(): void {
     this.#saveNow();
+  }
+
+  get #game(): GameState {
+    return {
+      calendar: this.#calendar,
+      production: this.#day.production,
+      day: { kind: 'work', workDay: this.#day.state },
+    };
   }
 
   get #layout(): readonly Station[] {
@@ -126,7 +136,7 @@ export class BackyardScene implements Scene {
     const centerX = viewport.canvasWidthPx / 2;
 
     drawTextScreen(
-      `Day ${String(this.#dayNumber)}`,
+      shortDayName(this.#calendar),
       vec2(theme.hud.edgePx, theme.hud.clockTopPx),
       theme.font.sizePx.day,
       theme.colors.text,
@@ -155,7 +165,7 @@ export class BackyardScene implements Scene {
       );
     }
 
-    drawInventoryPanel(backyardInventory(this.#day.state.production));
+    drawInventoryPanel(backyardInventory(this.#day.production));
     this.#renderQueue();
     this.#renderButtons(status);
     if (status === 'ended') {
@@ -182,7 +192,7 @@ export class BackyardScene implements Scene {
 
     if (rectContains(this.#buttonRect(), mousePosScreen)) {
       if (this.#day.state.status === 'ended') {
-        this.#startNextDay();
+        this.#context.endDay(this.#game);
       } else {
         this.#day.endDayEarly();
       }
@@ -202,16 +212,9 @@ export class BackyardScene implements Scene {
     }
   }
 
-  #startNextDay(): void {
-    const production = this.#day.state.production;
-    this.#dayNumber += 1;
-    this.#day = new WorkDay(this.#config, WorkDay.initialState(this.#config, production));
-    this.#saveNow();
-  }
-
   /** Saves the game now. Shows a notice the first time saving fails. */
   #saveNow(): void {
-    const saved = this.#context.persist(createSaveData(this.#dayNumber, this.#day.state));
+    const saved = this.#context.persist(createSaveData(this.#game));
     if (!saved && !this.#saveFailureShown) {
       this.#saveFailureShown = true;
       this.#warn(
@@ -249,7 +252,7 @@ export class BackyardScene implements Scene {
     const lineY = (index: number): number =>
       top + summaryPaddingPx + summaryLineHeightPx * (index + 0.5);
     drawTextScreen(
-      `Day ${String(this.#dayNumber)} complete`,
+      `${weekdayName(this.#calendar.weekday)} complete`,
       vec2(centerX, lineY(0)),
       theme.font.sizePx.summaryTitle,
       theme.colors.text,
@@ -282,7 +285,7 @@ export class BackyardScene implements Scene {
     const context = {
       station,
       rect,
-      production: this.#day.state.production,
+      production: this.#day.production,
       config: this.#config,
       activeAction: this.#activeActionAt(station.id),
     };
@@ -311,7 +314,8 @@ export class BackyardScene implements Scene {
   }
 
   #renderBeekeeper(): void {
-    const { beekeeperPosition, activeTask, production } = this.#day.state;
+    const { beekeeperPosition, activeTask } = this.#day.state;
+    const { production } = this.#day;
     const pos = vec2(beekeeperPosition.x, beekeeperPosition.y);
 
     drawCircle(pos, theme.world.beekeeperSize, theme.colors.beekeeper);
@@ -470,7 +474,7 @@ function buttonLabel(status: DayStatus): string {
     case 'windingDown':
       return 'Ending…';
     case 'ended':
-      return 'Next day';
+      return 'Sleep';
   }
 }
 

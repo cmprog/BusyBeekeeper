@@ -1,14 +1,19 @@
 import { engineInit, setCameraPos, setCameraScale, setCanvasFixedSize, vec2 } from 'littlejsengine';
 import type { GameConfig } from '../config/GameConfig';
+import { createSaveData } from '../sim/save/createSaveData';
 import { isSaveCompatible } from '../sim/save/isSaveCompatible';
+import { finishDay } from '../sim/week/dayProgression';
+import type { GameState } from '../sim/week/GameState';
 import { SaveStore } from './SaveStore';
 import type { LoadOutcome } from './SaveStore';
 import { BackyardScene } from './scenes/BackyardScene';
 import { MainMenuScene } from './scenes/MainMenuScene';
+import { PlaceholderDayScene } from './scenes/PlaceholderDayScene';
 import type { Scene } from './scenes/Scene';
 import type { SceneContext } from './scenes/SceneContext';
 import { SceneManager } from './scenes/SceneManager';
 import type { SceneRequest } from './scenes/SceneRequest';
+import { SleepScene } from './scenes/SleepScene';
 import { applyTheme } from './theme';
 import { cameraScale, viewport } from './viewport';
 
@@ -24,6 +29,11 @@ export function startGame(config: GameConfig): Promise<void> {
     persist: (data) => store?.save(data) ?? false,
     goTo: (request) => {
       scenes.goTo(request);
+    },
+    endDay: (game) => {
+      const next = finishDay(game, config);
+      context.persist(createSaveData(next));
+      scenes.goTo({ kind: 'sleep', night: game.calendar, next });
     },
   };
   const scenes = new SceneManager((request) => createScene(request, context));
@@ -63,8 +73,21 @@ function createScene(request: SceneRequest, context: SceneContext): Scene {
   switch (request.kind) {
     case 'mainMenu':
       return new MainMenuScene(context);
-    case 'backyard':
-      return new BackyardScene(context, request.saved);
+    case 'day':
+      return dayScene(request.game, context);
+    case 'sleep':
+      return new SleepScene(context, request.night, request.next);
+  }
+}
+
+function dayScene(game: GameState, context: SceneContext): Scene {
+  const { calendar, day } = game;
+  switch (day.kind) {
+    case 'work':
+      return new BackyardScene(context, calendar, game.production, day.workDay);
+    case 'market':
+    case 'supply':
+      return new PlaceholderDayScene(context, game, day.kind);
   }
 }
 

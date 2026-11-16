@@ -64,6 +64,10 @@ export const theme = {
     hudSlotEmpty: color(0.12, 0.1, 0.08, 0.35),
     button: palette.honey,
     warning: palette.red,
+    night: color(0.08, 0.1, 0.22),
+    nightGround: color(0.1, 0.2, 0.12),
+    /** Faded in over the night scene when the lights go out (alpha scaled from 0 to 1). */
+    lightsOut: color(0, 0, 0, 0.45),
   },
   font: {
     family: 'system-ui, sans-serif',
@@ -157,6 +161,40 @@ export const theme = {
     carriedSuperHeight: 0.45,
     /** Offset of the carried super from the beekeeper's centre. */
     carriedSuperOffsetX: 0.9,
+  },
+  /** The sleep scene between days, in canvas pixels and seconds. */
+  sleep: {
+    totalSeconds: 4,
+    walkSeconds: 1.4,
+    lightsOutSeconds: 0.8,
+    groundHeightPx: 200,
+    houseYPx: 430,
+    houseSizePx: 200,
+    beekeeperStartXPx: 160,
+    beekeeperYPx: 500,
+    beekeeperSizePx: 72,
+    moonXPx: 1040,
+    moonYPx: 170,
+    moonSizePx: 96,
+    moonRisePx: 30,
+    starSizePx: 28,
+    stars: [
+      { xPx: 180, yPx: 120 },
+      { xPx: 420, yPx: 70 },
+      { xPx: 760, yPx: 140 },
+      { xPx: 1180, yPx: 300 },
+      { xPx: 300, yPx: 260 },
+    ],
+    zCount: 3,
+    zCycleSeconds: 1.8,
+    zSizePx: 40,
+    /** Where the Zs start (just above the roof), how far they rise, and how far they drift right. */
+    zStartYPx: 320,
+    zRisePx: 140,
+    zDriftPx: 60,
+    captionTopPx: 40,
+    nextTopPx: 650,
+    skipTopPx: 695,
   },
   motion: {
     extractorSpinRadiansPerSecond: 8,

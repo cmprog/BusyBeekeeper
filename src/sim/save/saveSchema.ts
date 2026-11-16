@@ -1,6 +1,7 @@
 import * as v from 'valibot';
 import { stationBehaviors } from '../stations/stationBehaviors';
 import { stationTypes } from '../stations/StationType';
+import { weekdays } from '../week/Weekday';
 import { CURRENT_SAVE_VERSION } from './SaveData';
 import type { SaveData } from './SaveData';
 import { countSchema, finiteSchema, fractionSchema, nonNegativeSchema } from './schemaParts';
@@ -39,7 +40,6 @@ const workDaySchema = v.object({
   activeTask: v.nullable(v.object({ phase: v.literal('walking'), task: taskSchema })),
   queuedTasks: v.array(taskSchema),
   nextTaskId: countSchema,
-  production: productionSchema,
   stats: v.object({
     tasksCompleted: countSchema,
     tasksFailed: countSchema,
@@ -49,10 +49,17 @@ const workDaySchema = v.object({
   }),
 });
 
+const daySchema = v.variant('kind', [
+  v.object({ kind: v.literal('work'), workDay: workDaySchema }),
+  v.object({ kind: v.literal('market') }),
+  v.object({ kind: v.literal('supply') }),
+]);
+
 const saveDataSchema = v.object({
   version: v.literal(CURRENT_SAVE_VERSION),
-  dayNumber: v.pipe(countSchema, v.minValue(1)),
-  workDay: workDaySchema,
+  calendar: v.object({ week: v.pipe(countSchema, v.minValue(1)), weekday: v.picklist(weekdays) }),
+  production: productionSchema,
+  day: daySchema,
 });
 
 export type SaveValidation =

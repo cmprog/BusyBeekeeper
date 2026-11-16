@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { defaultConfig } from '../config/defaultConfig';
 import { createSaveData } from '../sim/save/createSaveData';
-import { WorkDay } from '../sim/workday/WorkDay';
+import { newGameState } from '../sim/week/dayProgression';
 import { SaveStore, saveKeys } from './SaveStore';
 import type { KeyValueStorage } from './SaveStore';
 
@@ -17,7 +17,7 @@ class MemoryStorage implements KeyValueStorage {
   }
 }
 
-const save = createSaveData(1, WorkDay.initialState(defaultConfig));
+const save = createSaveData(newGameState(defaultConfig));
 
 describe('SaveStore', () => {
   beforeEach(() => {

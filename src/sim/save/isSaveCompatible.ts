@@ -8,7 +8,7 @@ import type { SaveData } from './SaveData';
  * to a new layout; this is the safety net.)
  */
 export function isSaveCompatible(data: SaveData, layout: readonly Station[]): boolean {
-  const { production, activeTask, queuedTasks } = data.workDay;
+  const { production } = data;
   const stationStates = production.stations;
 
   const layoutMatches =
@@ -16,7 +16,13 @@ export function isSaveCompatible(data: SaveData, layout: readonly Station[]): bo
     layout.every((station) => stationStates[station.id]?.type === station.type);
 
   const layoutIds = new Set(layout.map((station) => station.id));
-  const tasks = activeTask ? [activeTask.task, ...queuedTasks] : queuedTasks;
+  const tasks =
+    data.day.kind === 'work'
+      ? [
+          ...(data.day.workDay.activeTask ? [data.day.workDay.activeTask.task] : []),
+          ...data.day.workDay.queuedTasks,
+        ]
+      : [];
   const tasksMatch = tasks.every((task) => layoutIds.has(task.stationId));
 
   const referencedSupers = [
